@@ -37,6 +37,12 @@ class CalculatorScreen extends StatefulWidget {
 class _CalculatorScreenState extends State<CalculatorScreen> {
   bool isProUser = true;
 
+  // Воспроизведение короткого системного звука щелчка и тактильного отклика
+  void _playClickSound() {
+    SystemSound.play(SystemSoundType.click);
+    HapticFeedback.selectionClick();
+  }
+
   // 1. Периоды окладов и коэффициенты индексации
   final Map<String, double> salaryPeriods = {
     'Оклады с 01.10.2025 г.': 1.0,
@@ -316,6 +322,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           IconButton(
             icon: Icon(isProUser ? Icons.star : Icons.star_border, color: Colors.amber),
             onPressed: () {
+              _playClickSound();
               setState(() => isProUser = !isProUser);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(isProUser ? 'PRO-режим включен' : 'PRO-режим отключен')),
@@ -354,21 +361,30 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   'Воинское звание: ${ovz.toStringAsFixed(0)} руб.',
                   selectedRank,
                   baseRanks.keys.toList(),
-                  (val) => setState(() => selectedRank = val!),
+                  (val) {
+                    _playClickSound();
+                    setState(() => selectedRank = val!);
+                  },
                 ),
 
                 _buildDropdownItem(
                   'Тарифный разряд: ${ovd.toStringAsFixed(0)} руб.',
                   selectedTariff,
                   baseTariffRanks.keys.toList(),
-                  (val) => setState(() => selectedTariff = val!),
+                  (val) {
+                    _playClickSound();
+                    setState(() => selectedTariff = val!);
+                  },
                 ),
 
                 _buildDropdownItem(
                   'Надбавка за летный состав: ${flightAmount > 0 ? "+${flightAmount.toStringAsFixed(1)} руб." : "0.0 руб."}',
                   selectedFlight,
                   ['нет', '40% - 3 класс', '50% - 2 класс', '60% - 1 класс', '70% - снайпер'],
-                  (val) => setState(() => selectedFlight = val!),
+                  (val) {
+                    _playClickSound();
+                    setState(() => selectedFlight = val!);
+                  },
                 ),
 
                 _buildDropdownItem(
@@ -383,35 +399,50 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     'от 20 до 25 лет – 30%',
                     '25 лет и более – 40%'
                   ],
-                  (val) => setState(() => selectedNvl = val!),
+                  (val) {
+                    _playClickSound();
+                    setState(() => selectedNvl = val!);
+                  },
                 ),
 
                 _buildDropdownItem(
                   'Надбавка за допуск к сведениям, составляющим гос. тайну:',
                   selectedSecrecy,
                   ['нет - 0%', 'секретно - 10%', 'сов. секретно - 20%', 'особая важность - 25%'],
-                  (val) => setState(() => selectedSecrecy = val!),
+                  (val) {
+                    _playClickSound();
+                    setState(() => selectedSecrecy = val!);
+                  },
                 ),
 
                 _buildDropdownItem(
                   'Надбавка за особые условия службы: +${ouvsAmount.toStringAsFixed(1)} руб.',
                   selectedOuvs,
                   ['0%', '10%', '20%', '30%', '50%', '70%', '100%'],
-                  (val) => setState(() => selectedOuvs = val!),
+                  (val) {
+                    _playClickSound();
+                    setState(() => selectedOuvs = val!);
+                  },
                 ),
 
                 _buildDropdownItem(
                   'Надбавка за классную квалификацию: +${classAmount.toStringAsFixed(1)} руб.',
                   selectedClass,
                   ['без класса - 0%', '3 класс - 5%', '2 класс - 10%', '1 класс - 20%', 'мастер - 30%'],
-                  (val) => setState(() => selectedClass = val!),
+                  (val) {
+                    _playClickSound();
+                    setState(() => selectedClass = val!);
+                  },
                 ),
 
                 _buildDropdownItem(
                   'Районный коэффициент: ${rkAmount > 0 ? "+${rkAmount.toStringAsFixed(1)} руб." : "0.0 руб."}',
                   selectedDistrict,
                   ['1.0', '1.15', '1.2', '1.25', '1.3', '1.4', '1.5', '1.6', '2.0'],
-                  (val) => setState(() => districtCoeff = double.parse(val!)),
+                  (val) {
+                    _playClickSound();
+                    setState(() => districtCoeff = double.parse(val!));
+                  },
                 ),
 
                 _buildDropdownItem(
@@ -424,21 +455,30 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     '80% - II группа территорий',
                     '100% - I группа территорий'
                   ],
-                  (val) => setState(() => selectedNorthern = val!),
+                  (val) {
+                    _playClickSound();
+                    setState(() => selectedNorthern = val!);
+                  },
                 ),
 
                 _buildDropdownItem(
                   'Ежемесячная премия: ${premiumAmount > 0 ? "+${premiumAmount.toStringAsFixed(1)} руб." : "0.0 руб."}',
                   selectedPremium,
                   List.generate(26, (i) => '$i%'),
-                  (val) => setState(() => selectedPremium = val!),
+                  (val) {
+                    _playClickSound();
+                    setState(() => selectedPremium = val!);
+                  },
                 ),
 
                 _buildDropdownItem(
                   'Надбавка подразделениям (ВКС, ВМФ, РВСН, ГУ ГШ): ${specialUnitsAmount > 0 ? "+${specialUnitsAmount.toStringAsFixed(1)} руб." : "0.0 руб."}',
                   selectedSpecialUnits,
                   ['нет (0%)', '100% от ОВД', '110% от ОВД', '120% от ОВД'],
-                  (val) => setState(() => selectedSpecialUnits = val!),
+                  (val) {
+                    _playClickSound();
+                    setState(() => selectedSpecialUnits = val!);
+                  },
                 ),
 
                 Container(
@@ -480,19 +520,28 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     '90% - КМС по ВПВС',
                     '100% - МС по ВПВС',
                   ],
-                  (val) => setState(() => selectedOtherAchievements = val!),
+                  (val) {
+                    _playClickSound();
+                    setState(() => selectedOtherAchievements = val!);
+                  },
                 ),
 
                 _buildCheckboxTile(
                   'Надбавка за особые достижения (- контракт 1-4 т.р.): ${(ovd * 0.50).toStringAsFixed(1)} рублей',
                   hasContractBonus,
-                  (val) => setState(() => hasContractBonus = val ?? false),
+                  (val) {
+                    _playClickSound();
+                    setState(() => hasContractBonus = val ?? false);
+                  },
                 ),
 
                 _buildCheckboxTile(
                   'На должности водителя (30% от ОВД): ${(ovd * 0.30).toStringAsFixed(1)} рублей',
                   isDriver,
-                  (val) => setState(() => isDriver = val ?? false),
+                  (val) {
+                    _playClickSound();
+                    setState(() => isDriver = val ?? false);
+                  },
                 ),
 
                 _buildDropdownItem(
@@ -504,14 +553,20 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     '20% - "За разминирование", "За воинскую доблесть" I ст.',
                     '30% - "За боевые отличия"'
                   ],
-                  (val) => setState(() => selectedMedals = val!),
+                  (val) {
+                    _playClickSound();
+                    setState(() => selectedMedals = val!);
+                  },
                 ),
 
                 _buildDropdownItem(
                   'Надбавка за работу в структурных подразделениях по ЗГТ:',
                   selectedZgt,
                   ['0%', '10% - от 1 до 5 лет', '15% - от 5 до 10 лет', '20% - от 10 лет и выше'],
-                  (val) => setState(() => selectedZgt = val!),
+                  (val) {
+                    _playClickSound();
+                    setState(() => selectedZgt = val!);
+                  },
                 ),
 
                 _buildDropdownItem(
@@ -526,26 +581,38 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     '20% - от 6 и более (2 класс)',
                     '30% - от 6 и более (1 класс)'
                   ],
-                  (val) => setState(() => selectedCipher = val!),
+                  (val) {
+                    _playClickSound();
+                    setState(() => selectedCipher = val!);
+                  },
                 ),
 
                 _buildDropdownItem(
                   'Алименты:',
                   selectedAlimony,
                   ['0%', '25% - на одного ребенка', '33% - на двух детей', '50% - на трех и более'],
-                  (val) => setState(() => selectedAlimony = val!),
+                  (val) {
+                    _playClickSound();
+                    setState(() => selectedAlimony = val!);
+                  },
                 ),
 
                 _buildCheckboxTile(
                   'Материальная помощь: ${ods.toStringAsFixed(1)} рублей',
                   hasMatHelp,
-                  (val) => setState(() => hasMatHelp = val ?? false),
+                  (val) {
+                    _playClickSound();
+                    setState(() => hasMatHelp = val ?? false);
+                  },
                 ),
 
                 _buildCheckboxTile(
                   'Ветеран боевых действий (ст.218 п.1. пп.2 – 500 рублей)',
                   isVbd,
-                  (val) => setState(() => isVbd = val ?? false),
+                  (val) {
+                    _playClickSound();
+                    setState(() => isVbd = val ?? false);
+                  },
                 ),
 
                 _buildDropdownItem(
@@ -558,7 +625,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     '3 ребенка - 5800 руб.',
                     '4 ребенка - 8800 руб.'
                   ],
-                  (val) => setState(() => selectedChildDeduction = val!),
+                  (val) {
+                    _playClickSound();
+                    setState(() => selectedChildDeduction = val!);
+                  },
                 ),
 
                 const SizedBox(height: 14),
@@ -677,6 +747,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 13),
           items: salaryPeriods.keys.map((p) => DropdownMenuItem(value: p, child: Text(p))).toList(),
           onChanged: (val) {
+            _playClickSound();
             setState(() {
               selectedPeriod = val!;
             });
