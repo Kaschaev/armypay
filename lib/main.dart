@@ -37,8 +37,15 @@ class CalculatorScreen extends StatefulWidget {
 class _CalculatorScreenState extends State<CalculatorScreen> {
   bool isProUser = true;
 
-  // 1. Полная сетка окладов по воинским званиям (ОВЗ)
-  final Map<String, double> ranks = {
+  // 1. Периоды окладов и коэффициенты индексации
+  final Map<String, double> salaryPeriods = {
+    'Оклады с 01.10.2025 г.': 1.0,
+    'Оклады с 01.10.2026 г. (+4.0%)': 1.04,
+  };
+  String selectedPeriod = 'Оклады с 01.10.2025 г.';
+
+  // 2. Базовая сетка окладов по воинским званиям (ОВЗ) на 01.10.2025 г.
+  final Map<String, double> baseRanks = {
     'Рядовой, матрос': 7166.0,
     'Ефрейтор, старший матрос': 7881.0,
     'Младший сержант, старшина 2 статьи': 8601.0,
@@ -61,8 +68,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     'Маршал Российской Федерации': 42983.0,
   };
 
-  // 2. Полная сетка по 50 тарифным разрядам
-  final Map<String, double> tariffRanks = {
+  // 3. Базовая сетка окладов по 50 тарифным разрядам на 01.10.2025 г.
+  final Map<String, double> baseTariffRanks = {
     '1 т.р.': 14331.0,
     '2 т.р.': 15761.0,
     '3 т.р.': 17196.0,
@@ -127,15 +134,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   String selectedNorthern = '80% - II группа территорий';
   String selectedPremium = '25%';
 
-  // Надбавка 100% / 110% / 120%
   String selectedSpecialUnits = 'нет (0%)';
-
-  // Прочие достижения
   String selectedOtherAchievements = '0%';
 
   // Чекбоксы
   bool hasContractBonus = true; // Особые достижения (1-4 т.р., 50%)
-  bool isDriver = false; // На должности водителя (30% от ОВД)
+  bool isDriver = false; // Водитель (30% от ОВД)
   bool hasMatHelp = false;
   bool isVbd = false;
 
@@ -161,9 +165,16 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 1. Оклады
-    double ovz = ranks[selectedRank] ?? 7881.0;
-    double ovd = tariffRanks[selectedTariff] ?? 18629.0;
+    // Коэффициент индексации выбранного периода
+    double indexCoeff = salaryPeriods[selectedPeriod] ?? 1.0;
+
+    // 1. Оклады: при индексации округление строго вверх до целого рубля (.ceilToDouble)
+    double rawOvz = (baseRanks[selectedRank] ?? 7881.0) * indexCoeff;
+    double ovz = indexCoeff == 1.0 ? rawOvz : rawOvz.ceilToDouble();
+
+    double rawOvd = (baseTariffRanks[selectedTariff] ?? 18629.0) * indexCoeff;
+    double ovd = indexCoeff == 1.0 ? rawOvd : rawOvd.ceilToDouble();
+
     double ods = ovz + ovd;
 
     // 2. Парсинг процентов
@@ -204,7 +215,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
     double premiumPercent = double.parse(selectedPremium.replaceAll('%', '')) / 100.0;
 
-    // Надбавка 100% / 110% / 120% от ОВД
+    // Надбавка подразделениям (100% / 110% / 120% от ОВД)
     double specialUnitsPercent = 0.0;
     if (selectedSpecialUnits.contains('100%')) specialUnitsPercent = 1.0;
     if (selectedSpecialUnits.contains('110%')) specialUnitsPercent = 1.10;
@@ -326,7 +337,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       ),
       body: Column(
         children: [
-          // Шапка
+          // Шапка с результатами
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
@@ -348,21 +359,22 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               children: [
-                _buildInfoBadge('оклады на 2026 г.'),
+                // ИНТЕРАКТИВНАЯ ПЛАШКА: Выбор периода окладов
+                _buildPeriodSelector(),
 
-                // Воинское звание
+                // Воинское звание (округленный оклад в целых рублях)
                 _buildDropdownItem(
-                  'Воинское звание: ${ovz.toStringAsFixed(1)} руб.',
+                  'Воинское звание: ${ovz.toStringAsFixed(0)} руб.',
                   selectedRank,
-                  ranks.keys.toList(),
+                  baseRanks.keys.toList(),
                   (val) => setState(() => selectedRank = val!),
                 ),
 
-                // Тарифный разряд
+                // Тарифный разряд (округленный оклад в целых рублях)
                 _buildDropdownItem(
-                  'Тарифный разряд: ${ovd.toStringAsFixed(1)} руб.',
+                  'Тарифный разряд: ${ovd.toStringAsFixed(0)} руб.',
                   selectedTariff,
-                  tariffRanks.keys.toList(),
+                  baseTariffRanks.keys.toList(),
                   (val) => setState(() => selectedTariff = val!),
                 ),
 
@@ -444,7 +456,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   (val) => setState(() => selectedPremium = val!),
                 ),
 
-                // Надбавка: 100% / 110% / 120% от ОВД
+                // Надбавка подразделениям (100% / 110% / 120%)
                 _buildDropdownItem(
                   'Надбавка подразделениям (ВКС, ВМФ, РВСН, ГУ ГШ): ${specialUnitsAmount > 0 ? "+${specialUnitsAmount.toStringAsFixed(1)} руб." : "0.0 руб."}',
                   selectedSpecialUnits,
@@ -477,7 +489,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   ),
                 ),
 
-                // Новая строка: Прочие достижения
+                // Прочие достижения
                 _buildDropdownItem(
                   'Прочие достижения: ${otherAchievementsAmount > 0 ? "+${otherAchievementsAmount.toStringAsFixed(1)} руб." : "0.0 руб."}',
                   selectedOtherAchievements,
@@ -683,18 +695,29 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     );
   }
 
-  Widget _buildInfoBadge(String text) {
+  Widget _buildPeriodSelector() {
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
       decoration: BoxDecoration(
         color: const Color(0xFFD6DBE4),
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: Colors.grey.shade400),
+        border: Border.all(color: Colors.grey.shade500),
       ),
-      child: Center(
-        child: Text(text, style: const TextStyle(fontWeight: FontWeight.w500)),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: selectedPeriod,
+          isExpanded: true,
+          icon: const Icon(Icons.arrow_drop_down, color: Colors.black87),
+          style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 13),
+          items: salaryPeriods.keys.map((p) => DropdownMenuItem(value: p, child: Text(p))).toList(),
+          onChanged: (val) {
+            setState(() {
+              selectedPeriod = val!;
+            });
+          },
+        ),
       ),
     );
   }
