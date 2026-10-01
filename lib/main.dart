@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const MilPayCalculatorApp());
@@ -139,8 +138,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   String selectedOtherAchievements = '0%';
 
   // Чекбоксы
-  bool hasContractBonus = true; // Особые достижения (1-4 т.р., 50%)
-  bool isDriver = false; // Водитель (30% от ОВД)
+  bool hasContractBonus = true;
+  bool isDriver = false;
   bool hasMatHelp = false;
   bool isVbd = false;
 
@@ -156,66 +155,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   int days844 = 0;
   int riskDays = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadPreferences();
-  }
-
-  // Загрузка сохраненных параметров из памяти устройства
-  Future<void> _loadPreferences() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      selectedPeriod = prefs.getString('selectedPeriod') ?? selectedPeriod;
-      selectedRank = prefs.getString('selectedRank') ?? selectedRank;
-      selectedTariff = prefs.getString('selectedTariff') ?? selectedTariff;
-      selectedFlight = prefs.getString('selectedFlight') ?? selectedFlight;
-      selectedNvl = prefs.getString('selectedNvl') ?? selectedNvl;
-      selectedSecrecy = prefs.getString('selectedSecrecy') ?? selectedSecrecy;
-      selectedOuvs = prefs.getString('selectedOuvs') ?? selectedOuvs;
-      selectedClass = prefs.getString('selectedClass') ?? selectedClass;
-      selectedDistrict = prefs.getString('selectedDistrict') ?? selectedDistrict;
-      selectedNorthern = prefs.getString('selectedNorthern') ?? selectedNorthern;
-      selectedPremium = prefs.getString('selectedPremium') ?? selectedPremium;
-      selectedSpecialUnits = prefs.getString('selectedSpecialUnits') ?? selectedSpecialUnits;
-      selectedOtherAchievements = prefs.getString('selectedOtherAchievements') ?? selectedOtherAchievements;
-      selectedMedals = prefs.getString('selectedMedals') ?? selectedMedals;
-      selectedZgt = prefs.getString('selectedZgt') ?? selectedZgt;
-      selectedCipher = prefs.getString('selectedCipher') ?? selectedCipher;
-      selectedAlimony = prefs.getString('selectedAlimony') ?? selectedAlimony;
-      selectedChildDeduction = prefs.getString('selectedChildDeduction') ?? selectedChildDeduction;
-
-      hasContractBonus = prefs.getBool('hasContractBonus') ?? hasContractBonus;
-      isDriver = prefs.getBool('isDriver') ?? isDriver;
-      hasMatHelp = prefs.getBool('hasMatHelp') ?? hasMatHelp;
-      isVbd = prefs.getBool('isVbd') ?? isVbd;
-
-      days844 = prefs.getInt('days844') ?? 0;
-      if (days844 > 0) _days844Controller.text = days844.toString();
-
-      riskDays = prefs.getInt('riskDays') ?? 0;
-      if (riskDays > 0) _riskDaysController.text = riskDays.toString();
-    });
-  }
-
-  // Универсальное сохранение строкового значения
-  Future<void> _saveString(String key, String value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(key, value);
-  }
-
-  // Универсальное сохранение булевого значения
-  Future<void> _saveBool(String key, bool value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(key, value);
-  }
-
-  // Универсальное сохранение числа
-  Future<void> _saveInt(String key, int value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(key, value);
-  }
 
   @override
   void dispose() {
@@ -388,7 +327,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       ),
       body: Column(
         children: [
-          // Шапка с результатами
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
@@ -412,40 +350,27 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               children: [
                 _buildPeriodSelector(),
 
-                // Воинское звание
                 _buildDropdownItem(
                   'Воинское звание: ${ovz.toStringAsFixed(0)} руб.',
                   selectedRank,
                   baseRanks.keys.toList(),
-                  (val) {
-                    setState(() => selectedRank = val!);
-                    _saveString('selectedRank', selectedRank);
-                  },
+                  (val) => setState(() => selectedRank = val!),
                 ),
 
-                // Тарифный разряд
                 _buildDropdownItem(
                   'Тарифный разряд: ${ovd.toStringAsFixed(0)} руб.',
                   selectedTariff,
                   baseTariffRanks.keys.toList(),
-                  (val) {
-                    setState(() => selectedTariff = val!);
-                    _saveString('selectedTariff', selectedTariff);
-                  },
+                  (val) => setState(() => selectedTariff = val!),
                 ),
 
-                // Летный состав
                 _buildDropdownItem(
                   'Надбавка за летный состав: ${flightAmount > 0 ? "+${flightAmount.toStringAsFixed(1)} руб." : "0.0 руб."}',
                   selectedFlight,
                   ['нет', '40% - 3 класс', '50% - 2 класс', '60% - 1 класс', '70% - снайпер'],
-                  (val) {
-                    setState(() => selectedFlight = val!);
-                    _saveString('selectedFlight', selectedFlight);
-                  },
+                  (val) => setState(() => selectedFlight = val!),
                 ),
 
-                // Выслуга лет
                 _buildDropdownItem(
                   'Выслуга лет: +${nvlAmount.toStringAsFixed(1)} руб.',
                   selectedNvl,
@@ -458,57 +383,37 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     'от 20 до 25 лет – 30%',
                     '25 лет и более – 40%'
                   ],
-                  (val) {
-                    setState(() => selectedNvl = val!);
-                    _saveString('selectedNvl', selectedNvl);
-                  },
+                  (val) => setState(() => selectedNvl = val!),
                 ),
 
-                // Гостайна
                 _buildDropdownItem(
                   'Надбавка за допуск к сведениям, составляющим гос. тайну:',
                   selectedSecrecy,
                   ['нет - 0%', 'секретно - 10%', 'сов. секретно - 20%', 'особая важность - 25%'],
-                  (val) {
-                    setState(() => selectedSecrecy = val!);
-                    _saveString('selectedSecrecy', selectedSecrecy);
-                  },
+                  (val) => setState(() => selectedSecrecy = val!),
                 ),
 
-                // ОУВС
                 _buildDropdownItem(
                   'Надбавка за особые условия службы: +${ouvsAmount.toStringAsFixed(1)} руб.',
                   selectedOuvs,
                   ['0%', '10%', '20%', '30%', '50%', '70%', '100%'],
-                  (val) {
-                    setState(() => selectedOuvs = val!);
-                    _saveString('selectedOuvs', selectedOuvs);
-                  },
+                  (val) => setState(() => selectedOuvs = val!),
                 ),
 
-                // Классная квалификация
                 _buildDropdownItem(
                   'Надбавка за классную квалификацию: +${classAmount.toStringAsFixed(1)} руб.',
                   selectedClass,
                   ['без класса - 0%', '3 класс - 5%', '2 класс - 10%', '1 класс - 20%', 'мастер - 30%'],
-                  (val) {
-                    setState(() => selectedClass = val!);
-                    _saveString('selectedClass', selectedClass);
-                  },
+                  (val) => setState(() => selectedClass = val!),
                 ),
 
-                // Районный коэффициент
                 _buildDropdownItem(
                   'Районный коэффициент: ${rkAmount > 0 ? "+${rkAmount.toStringAsFixed(1)} руб." : "0.0 руб."}',
                   selectedDistrict,
                   ['1.0', '1.15', '1.2', '1.25', '1.3', '1.4', '1.5', '1.6', '2.0'],
-                  (val) {
-                    setState(() => districtCoeff = double.parse(val!));
-                    _saveString('selectedDistrict', selectedDistrict);
-                  },
+                  (val) => setState(() => districtCoeff = double.parse(val!)),
                 ),
 
-                // Северная надбавка
                 _buildDropdownItem(
                   'Северная надбавка: ${northernAmount > 0 ? "+${northernAmount.toStringAsFixed(1)} руб." : "0.0 руб."}',
                   selectedNorthern,
@@ -519,35 +424,23 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     '80% - II группа территорий',
                     '100% - I группа территорий'
                   ],
-                  (val) {
-                    setState(() => selectedNorthern = val!);
-                    _saveString('selectedNorthern', selectedNorthern);
-                  },
+                  (val) => setState(() => selectedNorthern = val!),
                 ),
 
-                // Премия
                 _buildDropdownItem(
                   'Ежемесячная премия: ${premiumAmount > 0 ? "+${premiumAmount.toStringAsFixed(1)} руб." : "0.0 руб."}',
                   selectedPremium,
                   List.generate(26, (i) => '$i%'),
-                  (val) {
-                    setState(() => selectedPremium = val!);
-                    _saveString('selectedPremium', selectedPremium);
-                  },
+                  (val) => setState(() => selectedPremium = val!),
                 ),
 
-                // Надбавка подразделениям
                 _buildDropdownItem(
                   'Надбавка подразделениям (ВКС, ВМФ, РВСН, ГУ ГШ): ${specialUnitsAmount > 0 ? "+${specialUnitsAmount.toStringAsFixed(1)} руб." : "0.0 руб."}',
                   selectedSpecialUnits,
                   ['нет (0%)', '100% от ОВД', '110% от ОВД', '120% от ОВД'],
-                  (val) {
-                    setState(() => selectedSpecialUnits = val!);
-                    _saveString('selectedSpecialUnits', selectedSpecialUnits);
-                  },
+                  (val) => setState(() => selectedSpecialUnits = val!),
                 ),
 
-                // Информационная подсказка
                 Container(
                   margin: const EdgeInsets.only(bottom: 8),
                   padding: const EdgeInsets.all(10),
@@ -572,7 +465,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   ),
                 ),
 
-                // Прочие достижения
                 _buildDropdownItem(
                   'Прочие достижения: ${otherAchievementsAmount > 0 ? "+${otherAchievementsAmount.toStringAsFixed(1)} руб." : "0.0 руб."}',
                   selectedOtherAchievements,
@@ -588,33 +480,21 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     '90% - КМС по ВПВС',
                     '100% - МС по ВПВС',
                   ],
-                  (val) {
-                    setState(() => selectedOtherAchievements = val!);
-                    _saveString('selectedOtherAchievements', selectedOtherAchievements);
-                  },
+                  (val) => setState(() => selectedOtherAchievements = val!),
                 ),
 
-                // Чекбокс: Особые достижения (- контракт 1-4 т.р.)
                 _buildCheckboxTile(
                   'Надбавка за особые достижения (- контракт 1-4 т.р.): ${(ovd * 0.50).toStringAsFixed(1)} рублей',
                   hasContractBonus,
-                  (val) {
-                    setState(() => hasContractBonus = val ?? false);
-                    _saveBool('hasContractBonus', hasContractBonus);
-                  },
+                  (val) => setState(() => hasContractBonus = val ?? false),
                 ),
 
-                // Чекбокс: На должности водителя
                 _buildCheckboxTile(
                   'На должности водителя (30% от ОВД): ${(ovd * 0.30).toStringAsFixed(1)} рублей',
                   isDriver,
-                  (val) {
-                    setState(() => isDriver = val ?? false);
-                    _saveBool('isDriver', isDriver);
-                  },
+                  (val) => setState(() => isDriver = val ?? false),
                 ),
 
-                // Знаки отличия МО РФ
                 _buildDropdownItem(
                   'Ежемесячная надбавка при награждении знаками отличия МО РФ:',
                   selectedMedals,
@@ -624,24 +504,16 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     '20% - "За разминирование", "За воинскую доблесть" I ст.',
                     '30% - "За боевые отличия"'
                   ],
-                  (val) {
-                    setState(() => selectedMedals = val!);
-                    _saveString('selectedMedals', selectedMedals);
-                  },
+                  (val) => setState(() => selectedMedals = val!),
                 ),
 
-                // Подразделения по ЗГТ
                 _buildDropdownItem(
                   'Надбавка за работу в структурных подразделениях по ЗГТ:',
                   selectedZgt,
                   ['0%', '10% - от 1 до 5 лет', '15% - от 5 до 10 лет', '20% - от 10 лет и выше'],
-                  (val) {
-                    setState(() => selectedZgt = val!);
-                    _saveString('selectedZgt', selectedZgt);
-                  },
+                  (val) => setState(() => selectedZgt = val!),
                 ),
 
-                // Работа с шифрами
                 _buildDropdownItem(
                   'Надбавка за работу с шифрами:',
                   selectedCipher,
@@ -654,44 +526,28 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     '20% - от 6 и более (2 класс)',
                     '30% - от 6 и более (1 класс)'
                   ],
-                  (val) {
-                    setState(() => selectedCipher = val!);
-                    _saveString('selectedCipher', selectedCipher);
-                  },
+                  (val) => setState(() => selectedCipher = val!),
                 ),
 
-                // Алименты
                 _buildDropdownItem(
                   'Алименты:',
                   selectedAlimony,
                   ['0%', '25% - на одного ребенка', '33% - на двух детей', '50% - на трех и более'],
-                  (val) {
-                    setState(() => selectedAlimony = val!);
-                    _saveString('selectedAlimony', selectedAlimony);
-                  },
+                  (val) => setState(() => selectedAlimony = val!),
                 ),
 
-                // Материальная помощь
                 _buildCheckboxTile(
                   'Материальная помощь: ${ods.toStringAsFixed(1)} рублей',
                   hasMatHelp,
-                  (val) {
-                    setState(() => hasMatHelp = val ?? false);
-                    _saveBool('hasMatHelp', hasMatHelp);
-                  },
+                  (val) => setState(() => hasMatHelp = val ?? false),
                 ),
 
-                // Ветеран боевых действий
                 _buildCheckboxTile(
                   'Ветеран боевых действий (ст.218 п.1. пп.2 – 500 рублей)',
                   isVbd,
-                  (val) {
-                    setState(() => isVbd = val ?? false);
-                    _saveBool('isVbd', isVbd);
-                  },
+                  (val) => setState(() => isVbd = val ?? false),
                 ),
 
-                // Налоговый вычет на детей
                 _buildDropdownItem(
                   'Налоговый вычет на несовершеннолетних детей (ст. 218 п.1 пп. 4):',
                   selectedChildDeduction,
@@ -702,10 +558,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     '3 ребенка - 5800 руб.',
                     '4 ребенка - 8800 руб.'
                   ],
-                  (val) {
-                    setState(() => selectedChildDeduction = val!);
-                    _saveString('selectedChildDeduction', selectedChildDeduction);
-                  },
+                  (val) => setState(() => selectedChildDeduction = val!),
                 ),
 
                 const SizedBox(height: 14),
@@ -715,7 +568,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 ),
                 const SizedBox(height: 8),
 
-                // PRO Блок 1: Приказ 844
                 _buildProCard(
                   title: 'Приказ МО РФ № 844 (дополнительные сутки отдыха)',
                   child: Column(
@@ -744,7 +596,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                 setState(() {
                                   days844 = int.tryParse(val) ?? 0;
                                 });
-                                _saveInt('days844', days844);
                               },
                             ),
                           ),
@@ -759,7 +610,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   ),
                 ),
 
-                // PRO Блок 2: Риск для жизни
                 _buildProCard(
                   title: 'Риск для жизни (Приказ МО РФ № 727, 2% в день, макс 60%)',
                   child: Column(
@@ -787,7 +637,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                 setState(() {
                                   riskDays = int.tryParse(val) ?? 0;
                                 });
-                                _saveInt('riskDays', riskDays);
                               },
                             ),
                           ),
@@ -831,7 +680,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             setState(() {
               selectedPeriod = val!;
             });
-            _saveString('selectedPeriod', selectedPeriod);
           },
         ),
       ),
