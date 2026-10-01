@@ -37,10 +37,9 @@ class CalculatorScreen extends StatefulWidget {
 class _CalculatorScreenState extends State<CalculatorScreen> {
   bool isProUser = true;
 
-  // Воспроизведение короткого системного звука щелчка и тактильного отклика
-  void _playClickSound() {
-    SystemSound.play(SystemSoundType.click);
-    HapticFeedback.selectionClick();
+  // Четкий тактильный микро-щелчок (виброотклик тумблера)
+  void _playClickFeedback() {
+    HapticFeedback.mediumImpact();
   }
 
   // 1. Периоды окладов и коэффициенты индексации
@@ -322,7 +321,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           IconButton(
             icon: Icon(isProUser ? Icons.star : Icons.star_border, color: Colors.amber),
             onPressed: () {
-              _playClickSound();
+              _playClickFeedback();
               setState(() => isProUser = !isProUser);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(isProUser ? 'PRO-режим включен' : 'PRO-режим отключен')),
@@ -362,7 +361,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   selectedRank,
                   baseRanks.keys.toList(),
                   (val) {
-                    _playClickSound();
+                    _playClickFeedback();
                     setState(() => selectedRank = val!);
                   },
                 ),
@@ -372,7 +371,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   selectedTariff,
                   baseTariffRanks.keys.toList(),
                   (val) {
-                    _playClickSound();
+                    _playClickFeedback();
                     setState(() => selectedTariff = val!);
                   },
                 ),
@@ -382,7 +381,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   selectedFlight,
                   ['нет', '40% - 3 класс', '50% - 2 класс', '60% - 1 класс', '70% - снайпер'],
                   (val) {
-                    _playClickSound();
+                    _playClickFeedback();
                     setState(() => selectedFlight = val!);
                   },
                 ),
@@ -400,7 +399,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     '25 лет и более – 40%'
                   ],
                   (val) {
-                    _playClickSound();
+                    _playClickFeedback();
                     setState(() => selectedNvl = val!);
                   },
                 ),
@@ -410,7 +409,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   selectedSecrecy,
                   ['нет - 0%', 'секретно - 10%', 'сов. секретно - 20%', 'особая важность - 25%'],
                   (val) {
-                    _playClickSound();
+                    _playClickFeedback();
                     setState(() => selectedSecrecy = val!);
                   },
                 ),
@@ -420,7 +419,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   selectedOuvs,
                   ['0%', '10%', '20%', '30%', '50%', '70%', '100%'],
                   (val) {
-                    _playClickSound();
+                    _playClickFeedback();
                     setState(() => selectedOuvs = val!);
                   },
                 ),
@@ -430,7 +429,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   selectedClass,
                   ['без класса - 0%', '3 класс - 5%', '2 класс - 10%', '1 класс - 20%', 'мастер - 30%'],
                   (val) {
-                    _playClickSound();
+                    _playClickFeedback();
                     setState(() => selectedClass = val!);
                   },
                 ),
@@ -440,7 +439,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   selectedDistrict,
                   ['1.0', '1.15', '1.2', '1.25', '1.3', '1.4', '1.5', '1.6', '2.0'],
                   (val) {
-                    _playClickSound();
+                    _playClickFeedback();
                     setState(() => districtCoeff = double.parse(val!));
                   },
                 ),
@@ -456,7 +455,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     '100% - I группа территорий'
                   ],
                   (val) {
-                    _playClickSound();
+                    _playClickFeedback();
                     setState(() => selectedNorthern = val!);
                   },
                 ),
@@ -466,7 +465,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   selectedPremium,
                   List.generate(26, (i) => '$i%'),
                   (val) {
-                    _playClickSound();
+                    _playClickFeedback();
                     setState(() => selectedPremium = val!);
                   },
                 ),
@@ -476,7 +475,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   selectedSpecialUnits,
                   ['нет (0%)', '100% от ОВД', '110% от ОВД', '120% от ОВД'],
                   (val) {
-                    _playClickSound();
+                    _playClickFeedback();
                     setState(() => selectedSpecialUnits = val!);
                   },
                 ),
@@ -521,7 +520,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     '100% - МС по ВПВС',
                   ],
                   (val) {
-                    _playClickSound();
+                    _playClickFeedback();
                     setState(() => selectedOtherAchievements = val!);
                   },
                 ),
@@ -530,7 +529,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   'Надбавка за особые достижения (- контракт 1-4 т.р.): ${(ovd * 0.50).toStringAsFixed(1)} рублей',
                   hasContractBonus,
                   (val) {
-                    _playClickSound();
+                    _playClickFeedback();
                     setState(() => hasContractBonus = val ?? false);
                   },
                 ),
@@ -539,7 +538,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   'На должности водителя (30% от ОВД): ${(ovd * 0.30).toStringAsFixed(1)} рублей',
                   isDriver,
                   (val) {
-                    _playClickSound();
+                    _playClickFeedback();
                     setState(() => isDriver = val ?? false);
                   },
                 ),
@@ -554,7 +553,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     '30% - "За боевые отличия"'
                   ],
                   (val) {
-                    _playClickSound();
+                    _playClickFeedback();
                     setState(() => selectedMedals = val!);
                   },
                 ),
@@ -564,7 +563,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   selectedZgt,
                   ['0%', '10% - от 1 до 5 лет', '15% - от 5 до 10 лет', '20% - от 10 лет и выше'],
                   (val) {
-                    _playClickSound();
+                    _playClickFeedback();
                     setState(() => selectedZgt = val!);
                   },
                 ),
@@ -582,7 +581,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     '30% - от 6 и более (1 класс)'
                   ],
                   (val) {
-                    _playClickSound();
+                    _playClickFeedback();
                     setState(() => selectedCipher = val!);
                   },
                 ),
@@ -592,7 +591,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   selectedAlimony,
                   ['0%', '25% - на одного ребенка', '33% - на двух детей', '50% - на трех и более'],
                   (val) {
-                    _playClickSound();
+                    _playClickFeedback();
                     setState(() => selectedAlimony = val!);
                   },
                 ),
@@ -601,7 +600,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   'Материальная помощь: ${ods.toStringAsFixed(1)} рублей',
                   hasMatHelp,
                   (val) {
-                    _playClickSound();
+                    _playClickFeedback();
                     setState(() => hasMatHelp = val ?? false);
                   },
                 ),
@@ -610,7 +609,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   'Ветеран боевых действий (ст.218 п.1. пп.2 – 500 рублей)',
                   isVbd,
                   (val) {
-                    _playClickSound();
+                    _playClickFeedback();
                     setState(() => isVbd = val ?? false);
                   },
                 ),
@@ -626,7 +625,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     '4 ребенка - 8800 руб.'
                   ],
                   (val) {
-                    _playClickSound();
+                    _playClickFeedback();
                     setState(() => selectedChildDeduction = val!);
                   },
                 ),
@@ -747,7 +746,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 13),
           items: salaryPeriods.keys.map((p) => DropdownMenuItem(value: p, child: Text(p))).toList(),
           onChanged: (val) {
-            _playClickSound();
+            _playClickFeedback();
             setState(() {
               selectedPeriod = val!;
             });
