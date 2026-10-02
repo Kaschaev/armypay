@@ -14,10 +14,10 @@ class MilPayCalculatorApp extends StatelessWidget {
       title: 'Денежное довольствие',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primaryColor: const Color(0xFF1A237E),
+        primaryColor: const Color(0xFF3F51B5),
         scaffoldBackgroundColor: const Color(0xFFF2F4F7),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF1A237E),
+          backgroundColor: Color(0xFF3949AB),
           foregroundColor: Colors.white,
           elevation: 2,
         ),
@@ -35,6 +35,7 @@ class CalculatorScreen extends StatefulWidget {
 }
 
 class _CalculatorScreenState extends State<CalculatorScreen> {
+  // Четкий тактильный микро-щелчок (виброотклик тумблера)
   void _playClickFeedback() {
     HapticFeedback.mediumImpact();
   }
@@ -139,6 +140,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   String selectedSpecialUnits = 'нет (0%)';
   String selectedOtherAchievements = '0%';
 
+  // Чекбоксы
   bool hasContractBonus = true;
   bool isDriver = false;
   bool hasMatHelp = false;
@@ -150,6 +152,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   String selectedAlimony = '0%';
   String selectedChildDeduction = 'нет детей';
 
+  // Контроллеры ввода
   final TextEditingController _days844Controller = TextEditingController();
   final TextEditingController _riskDaysController = TextEditingController();
 
@@ -176,7 +179,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
     double ods = ovz + ovd;
 
-    // Проценты надбавок
+    // Парсинг процентов
     double flightBonusPercent = 0.0;
     if (selectedFlight.startsWith('40%')) flightBonusPercent = 0.40;
     if (selectedFlight.startsWith('50%')) flightBonusPercent = 0.50;
@@ -282,6 +285,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     int extraRestDays = (days844 ~/ 3) * 2;
     double comp844Amount = (ods / 30.0) * extraRestDays;
 
+    // Риск для жизни: 2% за день, максимум 100%
     double riskPercent = (riskDays * 0.02).clamp(0.0, 1.0);
     double riskAmount = ovd * riskPercent;
 
@@ -311,20 +315,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        titleSpacing: 12,
-        title: Row(
-          children: [
-            _buildRussianFlag(),
-            const SizedBox(width: 10),
-            const Expanded(
-              child: Text(
-                'Калькулятор ДД',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
+        title: const Text('Денежное довольствие'),
         actions: [
           IconButton(
             icon: const Icon(Icons.info_outline),
@@ -359,9 +350,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               ],
             ),
           ),
-
-          // Георгиевская ленточка (тонкая, аккуратная, из 5 классических полосок)
-          _buildStGeorgeRibbon(),
+          const Divider(height: 1),
 
           Expanded(
             child: ListView(
@@ -733,56 +722,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  // Виджет: Флаг России (белый - синий - красный)
-  Widget _buildRussianFlag() {
-    return Container(
-      width: 28,
-      height: 19,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(2),
-        border: Border.all(color: Colors.white70, width: 0.8),
-        boxShadow: const [
-          BoxShadow(color: Colors.black26, blurRadius: 2, offset: Offset(0, 1)),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(1.5),
-        child: Column(
-          children: [
-            Expanded(child: Container(color: Colors.white)),
-            Expanded(child: Container(color: const Color(0xFF0039A6))),
-            Expanded(child: Container(color: const Color(0xFFD52B1E))),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Виджет: Георгиевская лента (тонкая линия 4px, 5 классических полос во всю ширину)
-  Widget _buildStGeorgeRibbon() {
-    const Color orange = Color(0xFFFF6600);
-    const Color black = Color(0xFF1A1A1A);
-
-    return Container(
-      height: 4,
-      width: double.infinity,
-      decoration: const BoxDecoration(
-        boxShadow: [
-          BoxShadow(color: Colors.black26, blurRadius: 2, offset: Offset(0, 1)),
-        ],
-      ),
-      child: const Row(
-        children: [
-          Expanded(flex: 2, child: ColoredBox(color: black)),
-          Expanded(flex: 2, child: ColoredBox(color: orange)),
-          Expanded(flex: 2, child: ColoredBox(color: black)),
-          Expanded(flex: 2, child: ColoredBox(color: orange)),
-          Expanded(flex: 2, child: ColoredBox(color: black)),
         ],
       ),
     );
