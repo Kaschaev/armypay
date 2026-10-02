@@ -14,10 +14,10 @@ class MilPayCalculatorApp extends StatelessWidget {
       title: 'Денежное довольствие',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primaryColor: const Color(0xFF3F51B5),
+        primaryColor: const Color(0xFF1A237E),
         scaffoldBackgroundColor: const Color(0xFFF2F4F7),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF3949AB),
+          backgroundColor: Color(0xFF1A237E),
           foregroundColor: Colors.white,
           elevation: 2,
         ),
@@ -35,9 +35,6 @@ class CalculatorScreen extends StatefulWidget {
 }
 
 class _CalculatorScreenState extends State<CalculatorScreen> {
-  bool isProUser = true;
-
-  // Четкий тактильный микро-щелчок (виброотклик тумблера)
   void _playClickFeedback() {
     HapticFeedback.mediumImpact();
   }
@@ -142,7 +139,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   String selectedSpecialUnits = 'нет (0%)';
   String selectedOtherAchievements = '0%';
 
-  // Чекбоксы
   bool hasContractBonus = true;
   bool isDriver = false;
   bool hasMatHelp = false;
@@ -154,7 +150,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   String selectedAlimony = '0%';
   String selectedChildDeduction = 'нет детей';
 
-  // PRO: Контроллеры ввода
   final TextEditingController _days844Controller = TextEditingController();
   final TextEditingController _riskDaysController = TextEditingController();
 
@@ -181,7 +176,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
     double ods = ovz + ovd;
 
-    // Парсинг процентов
+    // Проценты
     double flightBonusPercent = 0.0;
     if (selectedFlight.startsWith('40%')) flightBonusPercent = 0.40;
     if (selectedFlight.startsWith('50%')) flightBonusPercent = 0.50;
@@ -287,7 +282,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     int extraRestDays = (days844 ~/ 3) * 2;
     double comp844Amount = (ods / 30.0) * extraRestDays;
 
-    double riskPercent = (riskDays * 0.02).clamp(0.0, 0.60);
+    double riskPercent = (riskDays * 0.02).clamp(0.0, 1.0);
     double riskAmount = ovd * riskPercent;
 
     double totalGross = baseRkSn +
@@ -316,23 +311,40 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Денежное довольствие...'),
+        titleSpacing: 12,
+        title: Row(
+          children: [
+            // Флаг России (аккуратный миниатюрный триколор)
+            _buildRussianFlag(),
+            const SizedBox(width: 10),
+            const Expanded(
+              child: Text(
+                'Калькулятор ДД',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
         actions: [
           IconButton(
-            icon: Icon(isProUser ? Icons.star : Icons.star_border, color: Colors.amber),
+            icon: const Icon(Icons.info_outline),
+            tooltip: 'О приложении',
             onPressed: () {
               _playClickFeedback();
-              setState(() => isProUser = !isProUser);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(isProUser ? 'PRO-режим включен' : 'PRO-режим отключен')),
+              showAboutDialog(
+                context: context,
+                applicationName: 'Калькулятор ДД',
+                applicationVersion: '1.0.0',
+                applicationLegalese: 'Расчет денежного довольствия военнослужащих ВС РФ (ФЗ № 306-ФЗ).',
               );
             },
           ),
-          IconButton(icon: const Icon(Icons.more_vert), onPressed: () {}),
         ],
       ),
       body: Column(
         children: [
+          // Шапка с результатами
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
@@ -348,7 +360,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               ],
             ),
           ),
-          const Divider(height: 1),
+
+          // Георгиевская ленточка (элегантный разделитель, не перекрывает текст)
+          _buildStGeorgeRibbon(),
 
           Expanded(
             child: ListView(
@@ -630,14 +644,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   },
                 ),
 
-                const SizedBox(height: 14),
-                const Center(
-                  child: Text('PRO ФУНКЦИОНАЛ (ПОДПИСКА)',
-                      style: TextStyle(color: Color(0xFF3949AB), fontWeight: FontWeight.bold, letterSpacing: 1.1)),
-                ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
 
-                _buildProCard(
+                // Блок: Приказ 844
+                _buildCardSection(
                   title: 'Приказ МО РФ № 844 (дополнительные сутки отдыха)',
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -679,8 +689,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   ),
                 ),
 
-                _buildProCard(
-                  title: 'Риск для жизни (Приказ МО РФ № 727, 2% в день, макс 60%)',
+                // Блок: Риск для жизни
+                _buildCardSection(
+                  title: 'Риск для жизни (Приказ МО РФ № 727, 2% в день, макс 100%)',
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -723,6 +734,56 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  // Виджет: Флаг России (белый - синий - красный)
+  Widget _buildRussianFlag() {
+    return Container(
+      width: 28,
+      height: 19,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(2),
+        border: Border.all(color: Colors.white70, width: 0.8),
+        boxShadow: const [
+          BoxShadow(color: Colors.black26, blurRadius: 2, offset: Offset(0, 1)),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(1.5),
+        child: Column(
+          children: [
+            Expanded(child: Container(color: Colors.white)),
+            Expanded(child: Container(color: const Color(0xFF0039A6))),
+            Expanded(child: Container(color: const Color(0xFFD52B1E))),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Виджет: Георгиевская ленточка (3 черные полосы, 2 оранжевые полосы)
+  Widget _buildStGeorgeRibbon() {
+    const Color orange = Color(0xFFFF6600);
+    const Color black = Color(0xFF1A1A1A);
+
+    return Container(
+      height: 7,
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        boxShadow: [
+          BoxShadow(color: Colors.black12, blurRadius: 2, offset: Offset(0, 1)),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(child: Container(color: black)),
+          Expanded(child: Container(color: orange)),
+          Expanded(child: Container(color: black)),
+          Expanded(child: Container(color: orange)),
+          Expanded(child: Container(color: black)),
         ],
       ),
     );
@@ -810,7 +871,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     );
   }
 
-  Widget _buildProCard({required String title, required Widget child}) {
+  Widget _buildCardSection({required String title, required Widget child}) {
     return Card(
       elevation: 1,
       margin: const EdgeInsets.only(bottom: 10),
@@ -820,17 +881,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(color: Colors.amber.shade700, borderRadius: BorderRadius.circular(4)),
-                  child: const Text('PRO', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
-                ),
-                const SizedBox(width: 8),
-                Expanded(child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
-              ],
-            ),
+            Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF1A237E))),
             const SizedBox(height: 8),
             child,
           ],
