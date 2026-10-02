@@ -126,7 +126,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     '50 т.р.': 64473.0,
   };
 
-  // Все значения по умолчанию сброшены в нейтральное (нулевое) состояние
+  // Переменные состояния
   String selectedRank = 'Не выбрано';
   String selectedTariff = 'Не выбрано';
   String selectedFlight = 'нет';
@@ -141,7 +141,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   String selectedSpecialUnits = 'нет (0%)';
   String selectedOtherAchievements = '0%';
 
-  // Все галочки сняты
   bool hasContractBonus = false;
   bool isDriver = false;
   bool hasMatHelp = false;
@@ -166,11 +165,127 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     super.dispose();
   }
 
+  // Генерация текста расчета для копирования
+  String _generateCalculationSummary({
+    required double ovz,
+    required double ovd,
+    required double ods,
+    required double nvlAmount,
+    required double secrecyAmount,
+    required double ouvsAmount,
+    required double classAmount,
+    required double flightAmount,
+    required double rkAmount,
+    required double northernAmount,
+    required double premiumAmount,
+    required double specialUnitsAmount,
+    required double otherAchievementsAmount,
+    required double contractAmount,
+    required double driverAmount,
+    required double zgtAmount,
+    required double cipherAmount,
+    required double medalsAmount,
+    required double matHelpAmount,
+    required double comp844Amount,
+    required double riskAmount,
+    required double totalGross,
+    required double ndfl,
+    required double alimonyAmount,
+    required double totalHold,
+    required double netPay,
+  }) {
+    StringBuffer sb = StringBuffer();
+    sb.writeln('📋 РАСЧЕТ ДЕНЕЖНОГО ДОВОЛЬСТВИЯ');
+    sb.writeln('Период: $selectedPeriod');
+    sb.writeln('--------------------------------');
+    sb.writeln('• Воинское звание: $selectedRank (${ovz.toStringAsFixed(0)} руб.)');
+    sb.writeln('• Тарифный разряд: $selectedTariff (${ovd.toStringAsFixed(0)} руб.)');
+    sb.writeln('• Оклад денежного содержания (ОДС): ${ods.toStringAsFixed(0)} руб.');
+
+    if (nvlAmount > 0) sb.writeln('• Выслуга лет ($selectedNvl): +${nvlAmount.toStringAsFixed(2)} руб.');
+    if (secrecyAmount > 0) sb.writeln('• Гос. тайна ($selectedSecrecy): +${secrecyAmount.toStringAsFixed(2)} руб.');
+    if (ouvsAmount > 0) sb.writeln('• ОУВС ($selectedOuvs): +${ouvsAmount.toStringAsFixed(2)} руб.');
+    if (classAmount > 0) sb.writeln('• Классная квалификация ($selectedClass): +${classAmount.toStringAsFixed(2)} руб.');
+    if (flightAmount > 0) sb.writeln('• Летный состав ($selectedFlight): +${flightAmount.toStringAsFixed(2)} руб.');
+    if (premiumAmount > 0) sb.writeln('• Премия ($selectedPremium): +${premiumAmount.toStringAsFixed(2)} руб.');
+    if (rkAmount > 0) sb.writeln('• Районный коэф. (коэф. $selectedDistrict): +${rkAmount.toStringAsFixed(2)} руб.');
+    if (northernAmount > 0) sb.writeln('• Северная надбавка ($selectedNorthern): +${northernAmount.toStringAsFixed(2)} руб.');
+    if (specialUnitsAmount > 0) sb.writeln('• Надбавка подразделениям ($selectedSpecialUnits): +${specialUnitsAmount.toStringAsFixed(2)} руб.');
+    if (otherAchievementsAmount > 0) sb.writeln('• Особые достижения ($selectedOtherAchievements): +${otherAchievementsAmount.toStringAsFixed(2)} руб.');
+    if (contractAmount > 0) sb.writeln('• Контракт 1-4 т.р. (50%): +${contractAmount.toStringAsFixed(2)} руб.');
+    if (driverAmount > 0) sb.writeln('• Должность водителя (30%): +${driverAmount.toStringAsFixed(2)} руб.');
+    if (medalsAmount > 0) sb.writeln('• Знаки отличия МО РФ ($selectedMedals): +${medalsAmount.toStringAsFixed(2)} руб.');
+    if (zgtAmount > 0) sb.writeln('• Подразделения ЗГТ ($selectedZgt): +${zgtAmount.toStringAsFixed(2)} руб.');
+    if (cipherAmount > 0) sb.writeln('• Работа с шифрами ($selectedCipher): +${cipherAmount.toStringAsFixed(2)} руб.');
+    if (matHelpAmount > 0) sb.writeln('• Материальная помощь (1 ОДС): +${matHelpAmount.toStringAsFixed(2)} руб.');
+    if (comp844Amount > 0) sb.writeln('• Компенсация по пр. № 844 ($days844 дн.): +${comp844Amount.toStringAsFixed(2)} руб.');
+    if (riskAmount > 0) sb.writeln('• Риск для жизни ($riskDays дн.): +${riskAmount.toStringAsFixed(2)} руб.');
+
+    sb.writeln('--------------------------------');
+    sb.writeln('💵 ИТОГО НАЧИСЛЕНО: ${totalGross.toStringAsFixed(2)} руб.');
+    sb.writeln('• НДФЛ (13%): -${ndfl.toStringAsFixed(2)} руб.');
+    if (alimonyAmount > 0) sb.writeln('• Алименты ($selectedAlimony): -${alimonyAmount.toStringAsFixed(2)} руб.');
+    sb.writeln('📉 ВСЕГО УДЕРЖАНО: ${totalHold.toStringAsFixed(2)} руб.');
+    sb.writeln('--------------------------------');
+    sb.writeln('💰 НА РУКИ: ${netPay.toStringAsFixed(2)} руб.');
+    sb.writeln('\nРассчитано в приложении «Калькулятор ДД»');
+    return sb.toString();
+  }
+
+  void _showShareDialog(String summary) {
+    _playClickFeedback();
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.description, color: Color(0xFF3949AB)),
+            SizedBox(width: 8),
+            Text('Итоговый расчет', style: TextStyle(fontSize: 18)),
+          ],
+        ),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: SingleChildScrollView(
+            child: SelectableText(
+              summary,
+              style: const TextStyle(fontSize: 13, height: 1.4, fontFamily: 'monospace'),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Закрыть'),
+          ),
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF3949AB),
+              foregroundColor: Colors.white,
+            ),
+            icon: const Icon(Icons.copy, size: 18),
+            label: const Text('Скопировать'),
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: summary));
+              _playClickFeedback();
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Расчет скопирован в буфер обмена! Вставьте его в мессенджер.'),
+                  duration: Duration(seconds: 3),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     double indexCoeff = salaryPeriods[selectedPeriod] ?? 1.0;
 
-    // Расчет ОВЗ и ОВД
     double baseRankVal = baseRanks[selectedRank] ?? 0.0;
     double rawOvz = baseRankVal * indexCoeff;
     double ovz = (baseRankVal == 0.0 || indexCoeff == 1.0) ? rawOvz : rawOvz.ceilToDouble();
@@ -314,10 +429,46 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     double totalHold = ndfl + alimonyAmount;
     double netPay = totalGross - totalHold;
 
+    // Сформированный текст отчета для отправки
+    String calculationSummary = _generateCalculationSummary(
+      ovz: ovz,
+      ovd: ovd,
+      ods: ods,
+      nvlAmount: nvlAmount,
+      secrecyAmount: secrecyAmount,
+      ouvsAmount: ouvsAmount,
+      classAmount: classAmount,
+      flightAmount: flightAmount,
+      rkAmount: rkAmount,
+      northernAmount: northernAmount,
+      premiumAmount: premiumAmount,
+      specialUnitsAmount: specialUnitsAmount,
+      otherAchievementsAmount: otherAchievementsAmount,
+      contractAmount: contractAmount,
+      driverAmount: driverAmount,
+      zgtAmount: zgtAmount,
+      cipherAmount: cipherAmount,
+      medalsAmount: medalsAmount,
+      matHelpAmount: matHelpAmount,
+      comp844Amount: comp844Amount,
+      riskAmount: riskAmount,
+      totalGross: totalGross,
+      ndfl: ndfl,
+      alimonyAmount: alimonyAmount,
+      totalHold: totalHold,
+      netPay: netPay,
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Денежное довольствие'),
         actions: [
+          // Кнопка: Поделиться расчетом
+          IconButton(
+            icon: const Icon(Icons.share),
+            tooltip: 'Поделиться расчетом',
+            onPressed: () => _showShareDialog(calculationSummary),
+          ),
           IconButton(
             icon: const Icon(Icons.info_outline),
             tooltip: 'О приложении',
@@ -531,7 +682,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     '40% - доцент',
                     '60% - профессор',
                     '70% - высший уровень физо',
-                    '80% - 1 разряд по Впвс',
+                    '80% - 1 разряд по ВПВС',
                     '90% - КМС по ВПВС',
                     '100% - МС по ВПВС',
                   ],
@@ -723,7 +874,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                               decoration: const InputDecoration(
                                 isDense: true,
                                 border: OutlineInputBorder(),
-                                hintText: '0',
                               ),
                               onChanged: (val) {
                                 setState(() {
