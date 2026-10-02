@@ -1,4 +1,4 @@
-name: Build Android APK and AAB
+name: Build Android APK and AAB for RuStore
 
 on:
   push:
@@ -24,38 +24,29 @@ jobs:
           flutter-version: '3.24.0'
           channel: 'stable'
 
-      - name: Generate Android scaffold, set Russian name and App Icon
+      - name: Generate Android scaffold
         run: |
           mkdir temp_app
           flutter create --org ru.milpay --project-name mil_pay_calc temp_app
           cp -r temp_app/android ./android
           rm -rf temp_app
           
-          # 1. Устанавливаем русское название на рабочем столе смартфона
+          # Устанавливаем русское название
           sed -i 's/android:label="mil_pay_calc"/android:label="Калькулятор ДД"/g' android/app/src/main/AndroidManifest.xml
-
-          # 2. Создаем красивую армейскую иконку (золотая звезда на темно-синем фоне)
-          sudo apt-get update && sudo apt-get install -y imagemagick
-          cat << 'EOF' > icon.svg
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-            <rect width="512" height="512" rx="110" fill="#1A237E"/>
-            <circle cx="256" cy="256" r="210" fill="none" stroke="#FFD700" stroke-width="14"/>
-            <polygon points="256,70 312,205 456,205 340,290 384,425 256,340 128,425 172,290 56,205 200,205" fill="#FFD700" stroke="#FFA000" stroke-width="8"/>
-          </svg>
-          EOF
-
-          for dir in android/app/src/main/res/mipmap-*; do
-            convert -background none icon.svg -resize 192x192 "$dir/ic_launcher.png"
-          done
 
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Build APK
+      - name: Build Release APK
         run: flutter build apk --release
 
-      - name: Upload APK
+      - name: Build Release App Bundle (AAB)
+        run: flutter build appbundle --release
+
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: mil-calculator-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: rustore-release-builds
+          path: |
+            build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/bundle/release/app-release.aab
