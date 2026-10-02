@@ -176,7 +176,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
     double ods = ovz + ovd;
 
-    // Проценты
+    // Проценты надбавок
     double flightBonusPercent = 0.0;
     if (selectedFlight.startsWith('40%')) flightBonusPercent = 0.40;
     if (selectedFlight.startsWith('50%')) flightBonusPercent = 0.50;
@@ -314,7 +314,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         titleSpacing: 12,
         title: Row(
           children: [
-            // Флаг России (аккуратный миниатюрный триколор)
             _buildRussianFlag(),
             const SizedBox(width: 10),
             const Expanded(
@@ -361,7 +360,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             ),
           ),
 
-          // Георгиевская ленточка (элегантный разделитель, не перекрывает текст)
+          // Георгиевская ленточка (тонкая, аккуратная, из 5 классических полосок)
           _buildStGeorgeRibbon(),
 
           Expanded(
@@ -764,26 +763,26 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     );
   }
 
-  // Виджет: Георгиевская ленточка (3 черные полосы, 2 оранжевые полосы)
+  // Виджет: Георгиевская лента (тонкая линия 4px, 5 классических полос во всю ширину)
   Widget _buildStGeorgeRibbon() {
     const Color orange = Color(0xFFFF6600);
     const Color black = Color(0xFF1A1A1A);
 
     return Container(
-      height: 7,
+      height: 4,
       width: double.infinity,
       decoration: const BoxDecoration(
         boxShadow: [
-          BoxShadow(color: Colors.black12, blurRadius: 2, offset: Offset(0, 1)),
+          BoxShadow(color: Colors.black26, blurRadius: 2, offset: Offset(0, 1)),
         ],
       ),
-      child: Row(
+      child: const Row(
         children: [
-          Expanded(child: Container(color: black)),
-          Expanded(child: Container(color: orange)),
-          Expanded(child: Container(color: black)),
-          Expanded(child: Container(color: orange)),
-          Expanded(child: Container(color: black)),
+          Expanded(flex: 2, child: ColoredBox(color: black)),
+          Expanded(flex: 2, child: ColoredBox(color: orange)),
+          Expanded(flex: 2, child: ColoredBox(color: black)),
+          Expanded(flex: 2, child: ColoredBox(color: orange)),
+          Expanded(flex: 2, child: ColoredBox(color: black)),
         ],
       ),
     );
