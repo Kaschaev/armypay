@@ -24,80 +24,76 @@ jobs:
           flutter-version: '3.24.0'
           channel: 'stable'
 
-      - name: Generate Android scaffold, set Russian name and Patriotic App Icon
+      - name: Generate Android scaffold, set Russian name and App Icon
         run: |
           mkdir temp_app
           flutter create --org ru.milpay --project-name mil_pay_calc temp_app
           cp -r temp_app/android ./android
           rm -rf temp_app
           
-          # 1. Русское название на рабочем столе телефона
+          # Русское название
           sed -i 's/android:label="mil_pay_calc"/android:label="Калькулятор ДД"/g' android/app/src/main/AndroidManifest.xml
 
-          # 2. Установка утилиты генерации изображений
-          sudo apt-get update && sudo apt-get install -y imagemagick
+          # Генерация профессиональной иконки через Python Pillow
+          python3 - << 'EOF'
+          import math
+          from PIL import Image, ImageDraw
 
-          # 3. Создаем векторную иконку: Флаг России + Золотая звезда + Обвивающая Георгиевская лента
-          cat << 'EOF' > icon.svg
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-            <defs>
-              <clipPath id="squircle">
-                <rect width="512" height="512" rx="115" ry="115" />
-              </clipPath>
-              <!-- Градиент для объемной золотой звезды -->
-              <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#FFF2A3" />
-                <stop offset="45%" stop-color="#FFD700" />
-                <stop offset="100%" stop-color="#D48800" />
-              </linearGradient>
-              <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000000" flood-opacity="0.45" />
-              </filter>
-            </defs>
+          size = 512
+          img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+          draw = ImageDraw.Draw(img)
 
-            <g clip-path="url(#squircle)">
-              <!-- 1. Фон: Флаг России -->
-              <rect x="0" y="0" width="512" height="170.6" fill="#F8FAFC" />
-              <rect x="0" y="170.6" width="512" height="170.8" fill="#0039A6" />
-              <rect x="0" y="341.4" width="512" height="170.6" fill="#D52B1E" />
+          # 1. ТРИКОЛОР (Флаг России)
+          draw.rectangle([0, 0, size, 171], fill="#FFFFFF")
+          draw.rectangle([0, 171, size, 342], fill="#0039A6")
+          draw.rectangle([0, 342, size, size], fill="#D52B1E")
 
-              <!-- Тонкая внутренняя рамка значка -->
-              <rect width="512" height="512" fill="none" stroke="#FFFFFF" stroke-width="6" opacity="0.3" />
+          # 2. ЗОЛОТАЯ ЗВЕЗДА В ЦЕНТРЕ
+          cx, cy = 256, 256
+          r_out, r_in = 160, 68
+          points = []
+          for i in range(10):
+              angle = i * math.pi / 5 - math.pi / 2
+              r = r_out if i % 2 == 0 else r_in
+              points.append((cx + r * math.cos(angle), cy + r * math.sin(angle)))
 
-              <!-- 2. Георгиевская лента (нижний изгиб под звездой) -->
-              <g filter="url(#shadow)">
-                <path d="M-40,430 C120,470 230,350 360,370 C430,380 490,420 550,460" fill="none" stroke="#1A1A1A" stroke-width="45" stroke-linecap="round"/>
-                <path d="M-40,430 C120,470 230,350 360,370 C430,380 490,420 550,460" fill="none" stroke="#FF6600" stroke-width="27" stroke-linecap="round"/>
-                <path d="M-40,430 C120,470 230,350 360,370 C430,380 490,420 550,460" fill="none" stroke="#1A1A1A" stroke-width="9" stroke-linecap="round"/>
-              </g>
+          # Тень под звездой
+          shadow_pts = [(x + 4, y + 8) for (x, y) in points]
+          draw.polygon(shadow_pts, fill=(0, 0, 0, 90))
 
-              <!-- Золотое кольцо обрамления -->
-              <circle cx="256" cy="256" r="185" fill="none" stroke="url(#goldGrad)" stroke-width="9" filter="url(#shadow)" opacity="0.9" />
+          # Сама звезда
+          draw.polygon(points, fill="#FFCC00", outline="#B8860B", width=6)
 
-              <!-- 3. Золотая маршальская звезда -->
-              <polygon points="256,92 306,214 436,214 331,291 371,413 256,336 141,413 181,291 76,214 206,214"
-                       fill="url(#goldGrad)" stroke="#B37400" stroke-width="5" stroke-linejoin="round" filter="url(#shadow)" />
+          # 3. ГЕОРГИЕВСКАЯ ЛЕНТА, ОБВИВАЮЩАЯ СНИЗУ ВВЕРХ
+          # Рисуем полосы ленты
+          stripes = ["#000000", "#FF6600", "#000000", "#FF6600", "#000000"]
+          for s_idx, col in enumerate(stripes):
+              offset = (s_idx - 2) * 9
+              pts = []
+              for t in range(0, 520, 10):
+                  x = t
+                  # Плавная синусоида диагонального изгиба
+                  y = 390 - (t * 0.45) + math.sin(t / 40.0) * 35 + offset
+                  pts.append((x, y))
+              draw.line(pts, fill=col, width=10, joint="curve")
 
-              <!-- Лучи грани звезды -->
-              <line x1="256" y1="92" x2="256" y2="280" stroke="#FFF7C2" stroke-width="3" opacity="0.7"/>
-              <line x1="436" y1="214" x2="256" y2="280" stroke="#B37400" stroke-width="3" opacity="0.6"/>
-              <line x1="371" y1="413" x2="256" y2="280" stroke="#B37400" stroke-width="3" opacity="0.6"/>
-              <line x1="141" y1="413" x2="256" y2="280" stroke="#FFF7C2" stroke-width="3" opacity="0.7"/>
-              <line x1="76" y1="214" x2="256" y2="280" stroke="#FFF7C2" stroke-width="3" opacity="0.7"/>
-
-              <!-- 4. Георгиевская лента (верхний перекрестный виток, обвивающий звезду с левого плеча на правый бок) -->
-              <g filter="url(#shadow)">
-                <path d="M -30,130 Q 140,240 280,260 T 540,190" fill="none" stroke="#1A1A1A" stroke-width="38" stroke-linecap="round" />
-                <path d="M -30,130 Q 140,240 280,260 T 540,190" fill="none" stroke="#FF6600" stroke-width="22" stroke-linecap="round" />
-                <path d="M -30,130 Q 140,240 280,260 T 540,190" fill="none" stroke="#1A1A1A" stroke-width="7" stroke-linecap="round" />
-              </g>
-            </g>
-          </svg>
+          img.save("app_icon.png")
           EOF
 
-          # Нарезка иконки под все плотности экранов Android
-          for dir in android/app/src/main/res/mipmap-*; do
-            convert -background none icon.svg -resize 192x192 "$dir/ic_launcher.png"
+          # Удаляем адаптивные XML заглушки Android, которые давали белый фон
+          rm -rf android/app/src/main/res/mipmap-anydpi-v26
+
+          # Копируем созданную иконку во все папки mipmap
+          for res in 48 72 96 144 192; do
+            case $res in
+              48) dir="mipmap-mdpi" ;;
+              72) dir="mipmap-hdpi" ;;
+              96) dir="mipmap-xhdpi" ;;
+              144) dir="mipmap-xxhdpi" ;;
+              192) dir="mipmap-xxxhdpi" ;;
+            esac
+            mkdir -p "android/app/src/main/res/$dir"
+            python3 -c "from PIL import Image; Image.open('app_icon.png').resize(($res, $res), Image.LANCZOS).save('android/app/src/main/res/$dir/ic_launcher.png')"
           done
 
       - name: Install dependencies
