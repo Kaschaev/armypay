@@ -31,69 +31,21 @@ jobs:
           cp -r temp_app/android ./android
           rm -rf temp_app
           
-          # Русское название
+          # 1. Устанавливаем русское название на рабочем столе смартфона
           sed -i 's/android:label="mil_pay_calc"/android:label="Калькулятор ДД"/g' android/app/src/main/AndroidManifest.xml
 
-          # Генерация профессиональной иконки через Python Pillow
-          python3 - << 'EOF'
-          import math
-          from PIL import Image, ImageDraw
-
-          size = 512
-          img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
-          draw = ImageDraw.Draw(img)
-
-          # 1. ТРИКОЛОР (Флаг России)
-          draw.rectangle([0, 0, size, 171], fill="#FFFFFF")
-          draw.rectangle([0, 171, size, 342], fill="#0039A6")
-          draw.rectangle([0, 342, size, size], fill="#D52B1E")
-
-          # 2. ЗОЛОТАЯ ЗВЕЗДА В ЦЕНТРЕ
-          cx, cy = 256, 256
-          r_out, r_in = 160, 68
-          points = []
-          for i in range(10):
-              angle = i * math.pi / 5 - math.pi / 2
-              r = r_out if i % 2 == 0 else r_in
-              points.append((cx + r * math.cos(angle), cy + r * math.sin(angle)))
-
-          # Тень под звездой
-          shadow_pts = [(x + 4, y + 8) for (x, y) in points]
-          draw.polygon(shadow_pts, fill=(0, 0, 0, 90))
-
-          # Сама звезда
-          draw.polygon(points, fill="#FFCC00", outline="#B8860B", width=6)
-
-          # 3. ГЕОРГИЕВСКАЯ ЛЕНТА, ОБВИВАЮЩАЯ СНИЗУ ВВЕРХ
-          # Рисуем полосы ленты
-          stripes = ["#000000", "#FF6600", "#000000", "#FF6600", "#000000"]
-          for s_idx, col in enumerate(stripes):
-              offset = (s_idx - 2) * 9
-              pts = []
-              for t in range(0, 520, 10):
-                  x = t
-                  # Плавная синусоида диагонального изгиба
-                  y = 390 - (t * 0.45) + math.sin(t / 40.0) * 35 + offset
-                  pts.append((x, y))
-              draw.line(pts, fill=col, width=10, joint="curve")
-
-          img.save("app_icon.png")
+          # 2. Создаем красивую армейскую иконку (золотая звезда на темно-синем фоне)
+          sudo apt-get update && sudo apt-get install -y imagemagick
+          cat << 'EOF' > icon.svg
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+            <rect width="512" height="512" rx="110" fill="#1A237E"/>
+            <circle cx="256" cy="256" r="210" fill="none" stroke="#FFD700" stroke-width="14"/>
+            <polygon points="256,70 312,205 456,205 340,290 384,425 256,340 128,425 172,290 56,205 200,205" fill="#FFD700" stroke="#FFA000" stroke-width="8"/>
+          </svg>
           EOF
 
-          # Удаляем адаптивные XML заглушки Android, которые давали белый фон
-          rm -rf android/app/src/main/res/mipmap-anydpi-v26
-
-          # Копируем созданную иконку во все папки mipmap
-          for res in 48 72 96 144 192; do
-            case $res in
-              48) dir="mipmap-mdpi" ;;
-              72) dir="mipmap-hdpi" ;;
-              96) dir="mipmap-xhdpi" ;;
-              144) dir="mipmap-xxhdpi" ;;
-              192) dir="mipmap-xxxhdpi" ;;
-            esac
-            mkdir -p "android/app/src/main/res/$dir"
-            python3 -c "from PIL import Image; Image.open('app_icon.png').resize(($res, $res), Image.LANCZOS).save('android/app/src/main/res/$dir/ic_launcher.png')"
+          for dir in android/app/src/main/res/mipmap-*; do
+            convert -background none icon.svg -resize 192x192 "$dir/ic_launcher.png"
           done
 
       - name: Install dependencies
