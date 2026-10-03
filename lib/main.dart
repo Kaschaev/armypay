@@ -126,7 +126,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     '50 т.р.': 64473.0,
   };
 
-  // Переменные состояния
   String selectedRank = 'Не выбрано';
   String selectedTariff = 'Не выбрано';
   String selectedFlight = 'нет';
@@ -135,6 +134,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   String selectedOuvs = '0%';
   String selectedClass = 'без класса - 0%';
   String selectedDistrict = '1.0';
+  double districtCoeff = 1.0;
   String selectedNorthern = '0% - нет надбавки';
   String selectedPremium = '0%';
 
@@ -165,7 +165,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     super.dispose();
   }
 
-  // Генерация текста расчета для копирования
   String _generateCalculationSummary({
     required double ovz,
     required double ovd,
@@ -296,7 +295,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
     double ods = ovz + ovd;
 
-    // Парсинг процентов
     double flightBonusPercent = 0.0;
     if (selectedFlight.startsWith('40%')) flightBonusPercent = 0.40;
     if (selectedFlight.startsWith('50%')) flightBonusPercent = 0.50;
@@ -323,8 +321,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     if (selectedClass.contains('10%')) classPercent = 0.10;
     if (selectedClass.contains('20%')) classPercent = 0.20;
     if (selectedClass.contains('30%')) classPercent = 0.30;
-
-    double districtCoeff = double.parse(selectedDistrict);
 
     double northernPercent = 0.0;
     if (selectedNorthern.contains('30%')) northernPercent = 0.30;
@@ -429,7 +425,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     double totalHold = ndfl + alimonyAmount;
     double netPay = totalGross - totalHold;
 
-    // Сформированный текст отчета для отправки
     String calculationSummary = _generateCalculationSummary(
       ovz: ovz,
       ovd: ovd,
@@ -463,7 +458,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       appBar: AppBar(
         title: const Text('Денежное довольствие'),
         actions: [
-          // Кнопка: Поделиться расчетом
           IconButton(
             icon: const Icon(Icons.share),
             tooltip: 'Поделиться расчетом',
@@ -486,7 +480,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       ),
       body: Column(
         children: [
-          // Шапка с результатами
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
@@ -510,7 +503,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               children: [
                 _buildPeriodSelector(),
 
-                // Воинское звание
                 _buildDropdownItem(
                   'Воинское звание: ${ovz.toStringAsFixed(0)} руб.',
                   selectedRank,
@@ -521,7 +513,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   },
                 ),
 
-                // Тарифный разряд
                 _buildDropdownItem(
                   'Тарифный разряд: ${ovd.toStringAsFixed(0)} руб.',
                   selectedTariff,
@@ -532,7 +523,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   },
                 ),
 
-                // Летный состав
                 _buildDropdownItem(
                   'Надбавка за летный состав: ${flightAmount > 0 ? "+${flightAmount.toStringAsFixed(1)} руб." : "0.0 руб."}',
                   selectedFlight,
@@ -543,7 +533,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   },
                 ),
 
-                // Выслуга лет
                 _buildDropdownItem(
                   'Выслуга лет: +${nvlAmount.toStringAsFixed(1)} руб.',
                   selectedNvl,
@@ -562,7 +551,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   },
                 ),
 
-                // Гостайна
                 _buildDropdownItem(
                   'Надбавка за допуск к сведениям, составляющим гос. тайну:',
                   selectedSecrecy,
@@ -573,7 +561,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   },
                 ),
 
-                // ОУВС
                 _buildDropdownItem(
                   'Надбавка за особые условия службы: +${ouvsAmount.toStringAsFixed(1)} руб.',
                   selectedOuvs,
@@ -584,7 +571,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   },
                 ),
 
-                // Классная квалификация
                 _buildDropdownItem(
                   'Надбавка за классную квалификацию: +${classAmount.toStringAsFixed(1)} руб.',
                   selectedClass,
@@ -595,18 +581,20 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   },
                 ),
 
-                // Районный коэффициент
+                // Районный коэффициент с корректным обновлением и строки, и числа
                 _buildDropdownItem(
                   'Районный коэффициент: ${rkAmount > 0 ? "+${rkAmount.toStringAsFixed(1)} руб." : "0.0 руб."}',
                   selectedDistrict,
                   ['1.0', '1.15', '1.2', '1.25', '1.3', '1.4', '1.5', '1.6', '2.0'],
                   (val) {
                     _playClickFeedback();
-                    setState(() => districtCoeff = double.parse(val!));
+                    setState(() {
+                      selectedDistrict = val!;
+                      districtCoeff = double.parse(val);
+                    });
                   },
                 ),
 
-                // Северная надбавка
                 _buildDropdownItem(
                   'Северная надбавка: ${northernAmount > 0 ? "+${northernAmount.toStringAsFixed(1)} руб." : "0.0 руб."}',
                   selectedNorthern,
@@ -623,7 +611,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   },
                 ),
 
-                // Ежемесячная премия
                 _buildDropdownItem(
                   'Ежемесячная премия: ${premiumAmount > 0 ? "+${premiumAmount.toStringAsFixed(1)} руб." : "0.0 руб."}',
                   selectedPremium,
@@ -634,7 +621,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   },
                 ),
 
-                // Надбавка подразделениям
                 _buildDropdownItem(
                   'Надбавка подразделениям (ВКС, ВМФ, РВСН, ГУ ГШ): ${specialUnitsAmount > 0 ? "+${specialUnitsAmount.toStringAsFixed(1)} руб." : "0.0 руб."}',
                   selectedSpecialUnits,
@@ -645,7 +631,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   },
                 ),
 
-                // Информационная подсказка
                 Container(
                   margin: const EdgeInsets.only(bottom: 8),
                   padding: const EdgeInsets.all(10),
@@ -670,7 +655,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   ),
                 ),
 
-                // Прочие достижения
                 _buildDropdownItem(
                   'Прочие достижения: ${otherAchievementsAmount > 0 ? "+${otherAchievementsAmount.toStringAsFixed(1)} руб." : "0.0 руб."}',
                   selectedOtherAchievements,
@@ -692,7 +676,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   },
                 ),
 
-                // Чекбокс: Особые достижения (1-4 т.р.)
                 _buildCheckboxTile(
                   'Надбавка за особые достижения (- контракт 1-4 т.р.): ${(ovd * 0.50).toStringAsFixed(1)} рублей',
                   hasContractBonus,
@@ -702,7 +685,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   },
                 ),
 
-                // Чекбокс: Водитель
                 _buildCheckboxTile(
                   'На должности водителя (30% от ОВД): ${(ovd * 0.30).toStringAsFixed(1)} рублей',
                   isDriver,
@@ -712,7 +694,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   },
                 ),
 
-                // Знаки отличия МО РФ
                 _buildDropdownItem(
                   'Ежемесячная надбавка при награждении знаками отличия МО РФ:',
                   selectedMedals,
@@ -728,7 +709,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   },
                 ),
 
-                // ЗГТ
                 _buildDropdownItem(
                   'Надбавка за работу в структурных подразделениях по ЗГТ:',
                   selectedZgt,
@@ -739,7 +719,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   },
                 ),
 
-                // Шифры
                 _buildDropdownItem(
                   'Надбавка за работу с шифрами:',
                   selectedCipher,
@@ -758,7 +737,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   },
                 ),
 
-                // Алименты
                 _buildDropdownItem(
                   'Алименты:',
                   selectedAlimony,
@@ -769,7 +747,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   },
                 ),
 
-                // Материальная помощь
                 _buildCheckboxTile(
                   'Материальная помощь: ${ods.toStringAsFixed(1)} рублей',
                   hasMatHelp,
@@ -779,7 +756,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   },
                 ),
 
-                // ВБД
                 _buildCheckboxTile(
                   'Ветеран боевых действий (ст.218 п.1. пп.2 – 500 рублей)',
                   isVbd,
@@ -789,7 +765,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   },
                 ),
 
-                // Вычет на детей
                 _buildDropdownItem(
                   'Налоговый вычет на несовершеннолетних детей (ст. 218 п.1 пп. 4):',
                   selectedChildDeduction,
@@ -808,7 +783,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
                 const SizedBox(height: 10),
 
-                // Блок: Приказ 844
                 _buildCardSection(
                   title: 'Приказ МО РФ № 844 (дополнительные сутки отдыха)',
                   child: Column(
@@ -851,7 +825,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   ),
                 ),
 
-                // Блок: Риск для жизни
                 _buildCardSection(
                   title: 'Риск для жизни (Приказ МО РФ № 727, 2% в день, макс 100%)',
                   child: Column(
