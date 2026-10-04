@@ -24,15 +24,73 @@ jobs:
           flutter-version: '3.24.0'
           channel: 'stable'
 
-      - name: Generate Android scaffold
+      - name: Generate Android scaffold, set Russian name and Flag Star Icon
         run: |
           mkdir temp_app
           flutter create --org ru.milpay --project-name mil_pay_calc temp_app
           cp -r temp_app/android ./android
           rm -rf temp_app
           
-          # Устанавливаем русское название
+          # Русское название приложения
           sed -i 's/android:label="mil_pay_calc"/android:label="Калькулятор ДД"/g' android/app/src/main/AndroidManifest.xml
+
+          # Генерация значка: Золотая звезда на фоне флага России
+          python3 - << 'EOF'
+          import math
+          from PIL import Image, ImageDraw
+
+          size = 512
+          img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+          draw = ImageDraw.Draw(img)
+
+          # 1. ТРИКОЛОР (Флаг России)
+          draw.rectangle([0, 0, size, 171], fill="#FFFFFF")
+          draw.rectangle([0, 171, size, 342], fill="#0039A6")
+          draw.rectangle([0, 342, size, size], fill="#D52B1E")
+
+          # Внешнее золотое кольцо обрамления
+          draw.ellipse([26, 26, 486, 486], outline="#FFD700", width=12)
+
+          # 2. ЗОЛОТАЯ МАРШАЛЬСКАЯ ЗВЕЗДА
+          cx, cy = 256, 256
+          r_out, r_in = 185, 76
+          points = []
+          for i in range(10):
+              angle = i * math.pi / 5 - math.pi / 2
+              r = r_out if i % 2 == 0 else r_in
+              points.append((cx + r * math.cos(angle), cy + r * math.sin(angle)))
+
+          # Тень под звездой для четкости и объема
+          shadow_pts = [(x + 3, y + 6) for (x, y) in points]
+          draw.polygon(shadow_pts, fill=(0, 0, 0, 110))
+
+          # Сама золотая звезда с окантовкой
+          draw.polygon(points, fill="#FFD700", outline="#B8860B", width=8)
+
+          # Внутренние грани звезды (объем)
+          for pt in points[0::2]:
+              draw.line([(cx, cy), pt], fill="#FFF490", width=4)
+          for pt in points[1::2]:
+              draw.line([(cx, cy), pt], fill="#B8860B", width=4)
+
+          img.save("app_icon.png")
+          EOF
+
+          # Удаляем стандартные адаптивные заглушки Android
+          rm -rf android/app/src/main/res/mipmap-anydpi-v26
+
+          # Нарезаем значок во все папки разрешений
+          for res in 48 72 96 144 192; do
+            case $res in
+              48) dir="mipmap-mdpi" ;;
+              72) dir="mipmap-hdpi" ;;
+              96) dir="mipmap-xhdpi" ;;
+              144) dir="mipmap-xxhdpi" ;;
+              192) dir="mipmap-xxxhdpi" ;;
+            esac
+            mkdir -p "android/app/src/main/res/$dir"
+            python3 -c "from PIL import Image; im = Image.open('app_icon.png').resize(($res, $res), Image.LANCZOS); im.save('android/app/src/main/res/$dir/ic_launcher.png'); im.save('android/app/src/main/res/$dir/ic_launcher_round.png')"
+          done
 
       - name: Install dependencies
         run: flutter pub get
