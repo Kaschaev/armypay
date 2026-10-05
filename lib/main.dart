@@ -1,4 +1,630 @@
-return Scaffold(
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+void main() {
+  runApp(const MilPayCalculatorApp());
+}
+
+// =============================================================
+// ОБЩИЕ СПРАВОЧНИКИ (Все звания и 50 тарифных разрядов)
+// =============================================================
+final Map<String, double> militaryRanks = {
+  'Не выбрано': 0.0,
+  'Рядовой, матрос': 7166.0,
+  'Ефрейтор, старший матрос': 7881.0,
+  'Младший сержант, старшина 2 статьи': 8601.0,
+  'Сержант, старшина 1 статьи': 9315.0,
+  'Старший сержант, главный старшина': 10032.0,
+  'Старшина, главный корабельный старшина': 10750.0,
+  'Прапорщик, мичман': 11464.0,
+  'Старший прапорщик, старший мичман': 12181.0,
+  'Младший лейтенант': 13614.0,
+  'Лейтенант': 14331.0,
+  'Старший лейтенант': 15046.0,
+  'Капитан, капитан-лейтенант': 15761.0,
+  'Майор, капитан 3-го ранга': 16481.0,
+  'Подполковник, капитан 2-го ранга': 17196.0,
+  'Полковник, капитан 1-го ранга': 18629.0,
+  'Генерал-майор, контр-адмирал': 28655.0,
+  'Генерал-лейтенант, вице-адмирал': 32954.0,
+  'Генерал-полковник, адмирал': 35819.0,
+  'Генерал армии, адмирал флота': 38684.0,
+  'Маршал Российской Федерации': 42983.0,
+};
+
+final Map<String, double> militaryTariffRanks = {
+  'Не выбрано': 0.0,
+  '1 т.р.': 14331.0,
+  '2 т.р.': 15761.0,
+  '3 т.р.': 17196.0,
+  '4 т.р.': 18629.0,
+  '5 т.р.': 21494.0,
+  '6 т.р.': 22929.0,
+  '7 т.р.': 24359.0,
+  '8 т.р.': 25794.0,
+  '9 т.р.': 27226.0,
+  '10 т.р.': 28656.0,
+  '11 т.р.': 29374.0,
+  '12 т.р.': 30090.0,
+  '13 т.р.': 30806.0,
+  '14 т.р.': 31521.0,
+  '15 т.р.': 32237.0,
+  '16 т.р.': 32954.0,
+  '17 т.р.': 33671.0,
+  '18 т.р.': 34388.0,
+  '19 т.р.': 35103.0,
+  '20 т.р.': 35819.0,
+  '21 т.р.': 36536.0,
+  '22 т.р.': 37252.0,
+  '23 т.р.': 37968.0,
+  '24 т.р.': 38684.0,
+  '25 т.р.': 39400.0,
+  '26 т.р.': 40117.0,
+  '27 т.р.': 41072.0,
+  '28 т.р.': 42028.0,
+  '29 т.р.': 42983.0,
+  '30 т.р.': 44416.0,
+  '31 т.р.': 45849.0,
+  '32 т.р.': 47282.0,
+  '33 т.р.': 48715.0,
+  '34 т.р.': 50149.0,
+  '35 т.р.': 51582.0,
+  '36 т.р.': 52300.0,
+  '37 т.р.': 53015.0,
+  '38 т.р.': 53732.0,
+  '39 т.р.': 54448.0,
+  '40 т.р.': 55165.0,
+  '41 т.р.': 55881.0,
+  '42 т.р.': 56597.0,
+  '43 т.р.': 57314.0,
+  '44 т.р.': 58031.0,
+  '45 т.р.': 58747.0,
+  '46 т.р.': 59463.0,
+  '47 т.р.': 60179.0,
+  '48 т.р.': 60896.0,
+  '49 т.р.': 63039.0,
+  '50 т.р.': 64473.0,
+};
+
+class MilPayCalculatorApp extends StatefulWidget {
+  const MilPayCalculatorApp({super.key});
+
+  @override
+  State<MilPayCalculatorApp> createState() => _MilPayCalculatorAppState();
+}
+
+class _MilPayCalculatorAppState extends State<MilPayCalculatorApp> {
+  ThemeMode _themeMode = ThemeMode.system;
+
+  void _toggleTheme() {
+    setState(() {
+      _themeMode = _themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Калькулятор ДД',
+      debugShowCheckedModeBanner: false,
+      themeMode: _themeMode,
+      theme: ThemeData(
+        brightness: Brightness.light,
+        primaryColor: const Color(0xFF3F51B5),
+        scaffoldBackgroundColor: const Color(0xFFF2F4F7),
+        cardColor: Colors.white,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF3949AB),
+          foregroundColor: Colors.white,
+          elevation: 2,
+        ),
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          selectedItemColor: Color(0xFF3949AB),
+          unselectedItemColor: Colors.grey,
+        ),
+      ),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        primaryColor: const Color(0xFF5C6BC0),
+        scaffoldBackgroundColor: const Color(0xFF121824),
+        cardColor: const Color(0xFF1E2638),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF1A233A),
+          foregroundColor: Colors.white,
+          elevation: 2,
+        ),
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          backgroundColor: Color(0xFF1A233A),
+          selectedItemColor: Color(0xFF82B1FF),
+          unselectedItemColor: Colors.grey,
+        ),
+      ),
+      home: MainNavigationHolder(
+        onToggleTheme: _toggleTheme,
+        isDarkMode: _themeMode == ThemeMode.dark,
+      ),
+    );
+  }
+}
+
+class MainNavigationHolder extends StatefulWidget {
+  final VoidCallback onToggleTheme;
+  final bool isDarkMode;
+
+  const MainNavigationHolder({
+    super.key,
+    required this.onToggleTheme,
+    required this.isDarkMode,
+  });
+
+  @override
+  State<MainNavigationHolder> createState() => _MainNavigationHolderState();
+}
+
+class _MainNavigationHolderState extends State<MainNavigationHolder> {
+  int _currentIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: IndexedStack(
+        index: _currentIndex,
+        children: [
+          SalaryCalculatorScreen(
+            onToggleTheme: widget.onToggleTheme,
+            isDarkMode: widget.isDarkMode,
+          ),
+          PensionCalculatorScreen(
+            onToggleTheme: widget.onToggleTheme,
+            isDarkMode: widget.isDarkMode,
+          ),
+        ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          HapticFeedback.mediumImpact();
+          setState(() => _currentIndex = index);
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calculate),
+            label: 'Денежное довольствие',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.account_balance),
+            label: 'Военная пенсия',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// -------------------------------------------------------------
+// ЭКРАН 1: КАЛЬКУЛЯТОР ДЕНЕЖНОГО ДОВОЛЬСТВИЯ
+// -------------------------------------------------------------
+class SalaryCalculatorScreen extends StatefulWidget {
+  final VoidCallback onToggleTheme;
+  final bool isDarkMode;
+
+  const SalaryCalculatorScreen({
+    super.key,
+    required this.onToggleTheme,
+    required this.isDarkMode,
+  });
+
+  @override
+  State<SalaryCalculatorScreen> createState() => _SalaryCalculatorScreenState();
+}
+
+class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
+  void _playClickFeedback() {
+    HapticFeedback.mediumImpact();
+  }
+
+  final Map<String, double> salaryPeriods = {
+    'Оклады с 01.10.2025 г.': 1.0,
+    'Оклады с 01.10.2026 г.': 1.0,
+  };
+  String selectedPeriod = 'Оклады с 01.10.2025 г.';
+
+  String selectedRank = 'Не выбрано';
+  String selectedTariff = 'Не выбрано';
+  String selectedFlight = 'нет';
+  String selectedNvl = 'до 2 лет – 0%';
+  String selectedSecrecy = 'нет - 0%';
+  String selectedOuvs = '0%';
+  String selectedClass = 'без класса - 0%';
+
+  double combatDutyPercent = 0.0;
+
+  double selectedDistrictVal = 1.0;
+  double selectedNorthernVal = 0.0;
+
+  String selectedPremium = '0%';
+  String selectedSpecialUnits = 'нет (0%)';
+  String selectedOtherAchievements = '0%';
+
+  bool hasContractBonus = false;
+  bool isDriver = false;
+  bool hasMatHelp = false;
+  bool isVbd = false;
+
+  String selectedMedals = 'нет надбавки - 0%';
+  String selectedZgt = '0%';
+  String selectedCipher = '0%';
+  String selectedAlimony = '0%';
+  String selectedChildDeduction = 'нет детей';
+
+  final TextEditingController _days844Controller = TextEditingController();
+  final TextEditingController _riskDaysController = TextEditingController();
+
+  int days844 = 0;
+  int riskDays = 0;
+
+  final List<double> districtOptions = [
+    1.0, 1.15, 1.2, 1.25, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 2.0
+  ];
+
+  final List<Map<String, dynamic>> northernOptions = [
+    {'val': 0.0, 'label': '0 %'},
+    {'val': 0.10, 'label': '10 %'},
+    {'val': 0.20, 'label': '20 %'},
+    {'val': 0.30, 'label': '30 % - IV группа территорий'},
+    {'val': 0.40, 'label': '40 %'},
+    {'val': 0.50, 'label': '50 % - III группа территорий'},
+    {'val': 0.60, 'label': '60 %'},
+    {'val': 0.70, 'label': '70 %'},
+    {'val': 0.80, 'label': '80 % - II группа территорий'},
+    {'val': 0.90, 'label': '90 %'},
+    {'val': 1.00, 'label': '100 % - I группа территорий'},
+  ];
+
+  @override
+  void dispose() {
+    _days844Controller.dispose();
+    _riskDaysController.dispose();
+    super.dispose();
+  }
+
+  void _resetAllFields() {
+    _playClickFeedback();
+    setState(() {
+      selectedPeriod = 'Оклады с 01.10.2025 г.';
+      selectedRank = 'Не выбрано';
+      selectedTariff = 'Не выбрано';
+      selectedFlight = 'нет';
+      selectedNvl = 'до 2 лет – 0%';
+      selectedSecrecy = 'нет - 0%';
+      selectedOuvs = '0%';
+      selectedClass = 'без класса - 0%';
+      combatDutyPercent = 0.0;
+      selectedDistrictVal = 1.0;
+      selectedNorthernVal = 0.0;
+      selectedPremium = '0%';
+      selectedSpecialUnits = 'нет (0%)';
+      selectedOtherAchievements = '0%';
+      hasContractBonus = false;
+      isDriver = false;
+      hasMatHelp = false;
+      isVbd = false;
+      selectedMedals = 'нет надбавки - 0%';
+      selectedZgt = '0%';
+      selectedCipher = '0%';
+      selectedAlimony = '0%';
+      selectedChildDeduction = 'нет детей';
+      days844 = 0;
+      riskDays = 0;
+      _days844Controller.clear();
+      _riskDaysController.clear();
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Все поля сброшены в исходное состояние'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+  String _generateCalculationSummary({
+    required double ovz,
+    required double ovd,
+    required double ods,
+    required double nvlAmount,
+    required double secrecyAmount,
+    required double ouvsAmount,
+    required double classAmount,
+    required double flightAmount,
+    required double combatDutyAmount,
+    required double rkAmount,
+    required double northernAmount,
+    required double premiumAmount,
+    required double specialUnitsAmount,
+    required double otherAchievementsAmount,
+    required double contractAmount,
+    required double driverAmount,
+    required double zgtAmount,
+    required double cipherAmount,
+    required double medalsAmount,
+    required double matHelpAmount,
+    required double comp844Amount,
+    required double riskAmount,
+    required double totalGross,
+    required double ndfl,
+    required double alimonyAmount,
+    required double totalHold,
+    required double netPay,
+  }) {
+    StringBuffer sb = StringBuffer();
+    sb.writeln('📋 РАСЧЕТ ДЕНЕЖНОГО ДОВОЛЬСТВИЯ');
+    sb.writeln('Период: $selectedPeriod');
+    sb.writeln('--------------------------------');
+    sb.writeln('• Воинское звание: $selectedRank (${ovz.toStringAsFixed(0)} руб.)');
+    sb.writeln('• Тарифный разряд: $selectedTariff (${ovd.toStringAsFixed(0)} руб.)');
+    sb.writeln('• Оклад денежного содержания (ОДС): ${ods.toStringAsFixed(0)} руб.');
+
+    if (nvlAmount > 0) sb.writeln('• Выслуга лет ($selectedNvl): +${nvlAmount.toStringAsFixed(2)} руб.');
+    if (secrecyAmount > 0) sb.writeln('• Гос. тайна ($selectedSecrecy): +${secrecyAmount.toStringAsFixed(2)} руб.');
+    if (ouvsAmount > 0) sb.writeln('• ОУВС ($selectedOuvs): +${ouvsAmount.toStringAsFixed(2)} руб.');
+    if (classAmount > 0) sb.writeln('• Классная квалификация ($selectedClass): +${classAmount.toStringAsFixed(2)} руб.');
+    if (flightAmount > 0) sb.writeln('• Летный состав ($selectedFlight): +${flightAmount.toStringAsFixed(2)} руб.');
+    if (combatDutyAmount > 0) {
+      String desc = combatDutyPercent == 0.30
+          ? '5 и более суток в месяц (30%)'
+          : combatDutyPercent == 0.15
+              ? 'от 3 до 4 суток в месяц (15%)'
+              : 'от 1 до 2 суток в месяц (5%)';
+      sb.writeln('• Боевое дежурство ($desc): +${combatDutyAmount.toStringAsFixed(2)} руб.');
+    }
+    if (premiumAmount > 0) sb.writeln('• Премия ($selectedPremium): +${premiumAmount.toStringAsFixed(2)} руб.');
+    if (rkAmount > 0) sb.writeln('• Районный коэф. (коэф. $selectedDistrictVal): +${rkAmount.toStringAsFixed(2)} руб.');
+    if (northernAmount > 0) sb.writeln('• Северная надбавка (${(selectedNorthernVal * 100).toInt()}%): +${northernAmount.toStringAsFixed(2)} руб.');
+    if (specialUnitsAmount > 0) sb.writeln('• Надбавка подразделениям ($selectedSpecialUnits): +${specialUnitsAmount.toStringAsFixed(2)} руб.');
+    if (otherAchievementsAmount > 0) sb.writeln('• Особые достижения ($selectedOtherAchievements): +${otherAchievementsAmount.toStringAsFixed(2)} руб.');
+    if (contractAmount > 0) sb.writeln('• Контракт 1-4 т.р. (50%): +${contractAmount.toStringAsFixed(2)} руб.');
+    if (driverAmount > 0) sb.writeln('• Должность водителя (30%): +${driverAmount.toStringAsFixed(2)} руб.');
+    if (medalsAmount > 0) sb.writeln('• Знаки отличия МО РФ ($selectedMedals): +${medalsAmount.toStringAsFixed(2)} руб.');
+    if (zgtAmount > 0) sb.writeln('• Подразделения ЗГТ ($selectedZgt): +${zgtAmount.toStringAsFixed(2)} руб.');
+    if (cipherAmount > 0) sb.writeln('• Работа с шифрами ($selectedCipher): +${cipherAmount.toStringAsFixed(2)} руб.');
+    if (matHelpAmount > 0) sb.writeln('• Материальная помощь (1 ОДС): +${matHelpAmount.toStringAsFixed(2)} руб.');
+    if (comp844Amount > 0) sb.writeln('• Компенсация по пр. № 844 ($days844 дн.): +${comp844Amount.toStringAsFixed(2)} руб.');
+    if (riskAmount > 0) sb.writeln('• Риск для жизни ($riskDays дн.): +${riskAmount.toStringAsFixed(2)} руб.');
+
+    sb.writeln('--------------------------------');
+    sb.writeln('💵 ИТОГО НАЧИСЛЕНО: ${totalGross.toStringAsFixed(2)} руб.');
+    sb.writeln('• НДФЛ (13%): -${ndfl.toStringAsFixed(2)} руб.');
+    if (alimonyAmount > 0) sb.writeln('• Алименты ($selectedAlimony): -${alimonyAmount.toStringAsFixed(2)} руб.');
+    sb.writeln('📉 ВСЕГО УДЕРЖАНО: ${totalHold.toStringAsFixed(2)} руб.');
+    sb.writeln('--------------------------------');
+    sb.writeln('💰 НА РУКИ: ${netPay.toStringAsFixed(2)} руб.');
+    sb.writeln('\nРассчитано в приложении «Калькулятор ДД»');
+    return sb.toString();
+  }
+
+  void _showShareDialog(String summary) {
+    _playClickFeedback();
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.description, color: Color(0xFF3949AB)),
+            SizedBox(width: 8),
+            Text('Итоговый расчет', style: TextStyle(fontSize: 18)),
+          ],
+        ),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: SingleChildScrollView(
+            child: SelectableText(
+              summary,
+              style: const TextStyle(fontSize: 13, height: 1.4, fontFamily: 'monospace'),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Закрыть'),
+          ),
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF3949AB),
+              foregroundColor: Colors.white,
+            ),
+            icon: const Icon(Icons.copy, size: 18),
+            label: const Text('Скопировать'),
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: summary));
+              _playClickFeedback();
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Расчет скопирован в буфер обмена!'),
+                  duration: Duration(seconds: 3),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    bool isDark = Theme.of(context).brightness == Brightness.dark;
+    double indexCoeff = salaryPeriods[selectedPeriod] ?? 1.0;
+
+    double baseRankVal = militaryRanks[selectedRank] ?? 0.0;
+    double rawOvz = baseRankVal * indexCoeff;
+    double ovz = (baseRankVal == 0.0 || indexCoeff == 1.0) ? rawOvz : rawOvz.ceilToDouble();
+
+    double baseTariffVal = militaryTariffRanks[selectedTariff] ?? 0.0;
+    double rawOvd = baseTariffVal * indexCoeff;
+    double ovd = (baseTariffVal == 0.0 || indexCoeff == 1.0) ? rawOvd : rawOvd.ceilToDouble();
+
+    double ods = ovz + ovd;
+
+    double flightBonusPercent = 0.0;
+    if (selectedFlight.startsWith('40%')) flightBonusPercent = 0.40;
+    if (selectedFlight.startsWith('50%')) flightBonusPercent = 0.50;
+    if (selectedFlight.startsWith('60%')) flightBonusPercent = 0.60;
+    if (selectedFlight.startsWith('70%')) flightBonusPercent = 0.70;
+
+    double nvlPercent = 0.0;
+    if (selectedNvl.contains('10%')) nvlPercent = 0.10;
+    if (selectedNvl.contains('15%')) nvlPercent = 0.15;
+    if (selectedNvl.contains('20%')) nvlPercent = 0.20;
+    if (selectedNvl.contains('25%')) nvlPercent = 0.25;
+    if (selectedNvl.contains('30%')) nvlPercent = 0.30;
+    if (selectedNvl.contains('40%')) nvlPercent = 0.40;
+
+    double secrecyPercent = 0.0;
+    if (selectedSecrecy.contains('10%')) secrecyPercent = 0.10;
+    if (selectedSecrecy.contains('20%')) secrecyPercent = 0.20;
+    if (selectedSecrecy.contains('25%')) secrecyPercent = 0.25;
+
+    double ouvsPercent = double.parse(selectedOuvs.replaceAll('%', '')) / 100.0;
+
+    double classPercent = 0.0;
+    if (selectedClass.contains('5%')) classPercent = 0.05;
+    if (selectedClass.contains('10%')) classPercent = 0.10;
+    if (selectedClass.contains('20%')) classPercent = 0.20;
+    if (selectedClass.contains('30%')) classPercent = 0.30;
+
+    double combatDutyAmount = ovd * combatDutyPercent;
+
+    double premiumPercent = double.parse(selectedPremium.replaceAll('%', '')) / 100.0;
+
+    double specialUnitsPercent = 0.0;
+    if (selectedSpecialUnits.contains('100%')) specialUnitsPercent = 1.0;
+    if (selectedSpecialUnits.contains('110%')) specialUnitsPercent = 1.10;
+    if (selectedSpecialUnits.contains('120%')) specialUnitsPercent = 1.20;
+    double specialUnitsAmount = ovd * specialUnitsPercent;
+
+    double otherAchievementsPercent = 0.0;
+    if (selectedOtherAchievements.startsWith('15%')) otherAchievementsPercent = 0.15;
+    if (selectedOtherAchievements.startsWith('20%')) otherAchievementsPercent = 0.20;
+    if (selectedOtherAchievements.startsWith('30%')) otherAchievementsPercent = 0.30;
+    if (selectedOtherAchievements.startsWith('40%')) otherAchievementsPercent = 0.40;
+    if (selectedOtherAchievements.startsWith('60%')) otherAchievementsPercent = 0.60;
+    if (selectedOtherAchievements.startsWith('70%')) otherAchievementsPercent = 0.70;
+    if (selectedOtherAchievements.startsWith('80%')) otherAchievementsPercent = 0.80;
+    if (selectedOtherAchievements.startsWith('90%')) otherAchievementsPercent = 0.90;
+    if (selectedOtherAchievements.startsWith('100%')) otherAchievementsPercent = 1.0;
+    double otherAchievementsAmount = ovd * otherAchievementsPercent;
+
+    double contractAmount = hasContractBonus ? (ovd * 0.50) : 0.0;
+    double driverAmount = isDriver ? (ovd * 0.30) : 0.0;
+
+    double medalsPercent = 0.0;
+    if (selectedMedals.contains('10%')) medalsPercent = 0.10;
+    if (selectedMedals.contains('20%')) medalsPercent = 0.20;
+    if (selectedMedals.contains('30%')) medalsPercent = 0.30;
+
+    double zgtPercent = 0.0;
+    if (selectedZgt.contains('10%')) zgtPercent = 0.10;
+    if (selectedZgt.contains('15%')) zgtPercent = 0.15;
+    if (selectedZgt.contains('20%')) zgtPercent = 0.20;
+
+    double cipherPercent = 0.0;
+    if (selectedCipher.contains('5%')) cipherPercent = 0.05;
+    if (selectedCipher.contains('10%')) cipherPercent = 0.10;
+    if (selectedCipher.contains('15%')) cipherPercent = 0.15;
+    if (selectedCipher.contains('20%')) cipherPercent = 0.20;
+    if (selectedCipher.contains('30%')) cipherPercent = 0.30;
+
+    double alimonyPercent = 0.0;
+    if (selectedAlimony.contains('25%')) alimonyPercent = 0.25;
+    if (selectedAlimony.contains('33%')) alimonyPercent = 0.3333;
+    if (selectedAlimony.contains('50%')) alimonyPercent = 0.50;
+
+    double childDeduction = 0.0;
+    if (selectedChildDeduction.contains('1400')) childDeduction = 1400.0;
+    if (selectedChildDeduction.contains('2800')) childDeduction = 2800.0;
+    if (selectedChildDeduction.contains('5800')) childDeduction = 5800.0;
+    if (selectedChildDeduction.contains('8800')) childDeduction = 8800.0;
+
+    double nvlAmount = ods * nvlPercent;
+    double secrecyAmount = ovd * secrecyPercent;
+    double ouvsAmount = ovd * ouvsPercent;
+    double classAmount = ovd * classPercent;
+    double flightAmount = ovd * flightBonusPercent;
+
+    double baseRkSn = ods + nvlAmount + secrecyAmount + ouvsAmount + classAmount + flightAmount + combatDutyAmount;
+    double rkAmount = baseRkSn * (selectedDistrictVal - 1.0);
+    double northernAmount = baseRkSn * selectedNorthernVal;
+
+    double premiumAmount = ods * premiumPercent;
+    double zgtAmount = ovd * zgtPercent;
+    double cipherAmount = ovd * cipherPercent;
+    double medalsAmount = ovd * medalsPercent;
+    double matHelpAmount = hasMatHelp ? ods : 0.0;
+
+    int extraRestDays = (days844 ~/ 3) * 2;
+    double comp844Amount = (ods / 30.0) * extraRestDays;
+
+    double riskPercent = (riskDays * 0.02).clamp(0.0, 1.0);
+    double riskAmount = ovd * riskPercent;
+
+    double totalGross = baseRkSn +
+        rkAmount +
+        northernAmount +
+        premiumAmount +
+        specialUnitsAmount +
+        otherAchievementsAmount +
+        contractAmount +
+        driverAmount +
+        zgtAmount +
+        cipherAmount +
+        medalsAmount +
+        matHelpAmount +
+        comp844Amount +
+        riskAmount;
+
+    double totalDeductions = (isVbd ? 500.0 : 0.0) + childDeduction;
+    double taxableBase = (totalGross - totalDeductions).clamp(0.0, double.infinity);
+    double ndfl = (taxableBase * 0.13).roundToDouble();
+
+    double afterTax = totalGross - ndfl;
+    double alimonyAmount = afterTax * alimonyPercent;
+    double totalHold = ndfl + alimonyAmount;
+    double netPay = totalGross - totalHold;
+
+    String calculationSummary = _generateCalculationSummary(
+      ovz: ovz,
+      ovd: ovd,
+      ods: ods,
+      nvlAmount: nvlAmount,
+      secrecyAmount: secrecyAmount,
+      ouvsAmount: ouvsAmount,
+      classAmount: classAmount,
+      flightAmount: flightAmount,
+      combatDutyAmount: combatDutyAmount,
+      rkAmount: rkAmount,
+      northernAmount: northernAmount,
+      premiumAmount: premiumAmount,
+      specialUnitsAmount: specialUnitsAmount,
+      otherAchievementsAmount: otherAchievementsAmount,
+      contractAmount: contractAmount,
+      driverAmount: driverAmount,
+      zgtAmount: zgtAmount,
+      cipherAmount: cipherAmount,
+      medalsAmount: medalsAmount,
+      matHelpAmount: matHelpAmount,
+      comp844Amount: comp844Amount,
+      riskAmount: riskAmount,
+      totalGross: totalGross,
+      ndfl: ndfl,
+      alimonyAmount: alimonyAmount,
+      totalHold: totalHold,
+      netPay: netPay,
+    );
+
+    return Scaffold(
       appBar: AppBar(
         title: const Text('Калькулятор ДД', style: TextStyle(fontWeight: FontWeight.bold)),
         actions: [
@@ -135,7 +761,7 @@ return Scaffold(
                   isDark,
                 ),
 
-                // ---------------- НАДБАВКА ЗА БОЕВОЕ ДЕЖУРСТВО С ОБНОВЛЕННЫМИ СТРОКАМИ ----------------
+                // НАДБАВКА ЗА БОЕВОЕ ДЕЖУРСТВО (ВЫБОР ГАЛОЧКАМИ)
                 _buildCardSection(
                   title: 'Надбавка за боевое дежурство (от ОВД): ${combatDutyAmount > 0 ? "+${combatDutyAmount.toStringAsFixed(1)} руб." : "0.0 руб."}',
                   isDark: isDark,
@@ -183,7 +809,7 @@ return Scaffold(
                   ),
                 ),
 
-                // ---------------- РАЙОННЫЙ КОЭФФИЦИЕНТ ----------------
+                // РАЙОННЫЙ КОЭФФИЦИЕНТ
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8.0),
                   child: Column(
@@ -232,7 +858,7 @@ return Scaffold(
                   ),
                 ),
 
-                // ---------------- СЕВЕРНАЯ НАДБАВКА ----------------
+                // СЕВЕРНАЯ НАДБАВКА
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8.0),
                   child: Column(
