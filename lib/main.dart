@@ -1,10 +1,76 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const MilPayCalculatorApp());
+}
+
+// =============================================================
+// АВТОНОМНОЕ СОХРАНЕНИЕ БЕЗ СТОРОННИХ ПЛАГИНОВ (JSON файл)
+// =============================================================
+class StorageService {
+  static Map<String, dynamic> _data = {};
+  static bool _initialized = false;
+
+  static Future<File?> _getFile() async {
+    try {
+      // Стандартный путь к папке данных приложения Android
+      final dir = Directory('/data/user/0/ru.milpay/app_flutter');
+      if (!await dir.exists()) {
+        await dir.create(recursive: true);
+      }
+      return File('${dir.path}/app_settings.json');
+    } catch (_) {
+      try {
+        final fallbackDir = Directory('/data/data/ru.milpay/files');
+        if (!await fallbackDir.exists()) {
+          await fallbackDir.create(recursive: true);
+        }
+        return File('${fallbackDir.path}/app_settings.json');
+      } catch (_) {
+        return null;
+      }
+    }
+  }
+
+  static Future<void> init() async {
+    if (_initialized) return;
+    try {
+      final file = await _getFile();
+      if (file != null && await file.exists()) {
+        final content = await file.readAsString();
+        _data = jsonDecode(content) as Map<String, dynamic>;
+      }
+    } catch (_) {}
+    _initialized = true;
+  }
+
+  static dynamic get(String key, [dynamic defaultValue]) {
+    return _data.containsKey(key) ? _data[key] : defaultValue;
+  }
+
+  static Future<void> set(String key, dynamic value) async {
+    _data[key] = value;
+    try {
+      final file = await _getFile();
+      if (file != null) {
+        await file.writeAsString(jsonEncode(_data));
+      }
+    } catch (_) {}
+  }
+
+  static Future<void> clearPrefix(String prefix) async {
+    _data.removeWhere((key, _) => key.startsWith(prefix));
+    try {
+      final file = await _getFile();
+      if (file != null) {
+        await file.writeAsString(jsonEncode(_data));
+      }
+    } catch (_) {}
+  }
 }
 
 // =============================================================
@@ -105,23 +171,19 @@ class _MilPayCalculatorAppState extends State<MilPayCalculatorApp> {
   }
 
   Future<void> _loadTheme() async {
-    final prefs = await SharedPreferences.getInstance();
-    final isDark = prefs.getBool('app_is_dark');
+    await StorageService.init();
+    final isDark = StorageService.get('app_is_dark');
     if (isDark != null) {
       setState(() {
-        _themeMode = isDark ? ThemeMode.dark : ThemeMode.light;
+        _themeMode = (isDark as bool) ? ThemeMode.dark : ThemeMode.light;
       });
     }
   }
 
   Future<void> _toggleTheme() async {
-    final isDark = _themeMode == ThemeMode.dark;
-    final nextMode = isDark ? ThemeMode.light : ThemeMode.dark;
-    setState(() {
-      _themeMode = nextMode;
-    });
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('app_is_dark', nextMode == ThemeMode.dark);
+    final nextMode = _themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+    setState(() => _themeMode = nextMode);
+    await StorageService.set('app_is_dark', nextMode == ThemeMode.dark);
   }
 
   @override
@@ -193,17 +255,16 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
   }
 
   Future<void> _loadTab() async {
-    final prefs = await SharedPreferences.getInstance();
+    await StorageService.init();
     setState(() {
-      _currentIndex = prefs.getInt('app_tab_index') ?? 0;
+      _currentIndex = (StorageService.get('app_tab_index', 0) as num).toInt();
     });
   }
 
   Future<void> _setTab(int index) async {
     HapticFeedback.mediumImpact();
     setState(() => _currentIndex = index);
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('app_tab_index', index);
+    await StorageService.set('app_tab_index', index);
   }
 
   @override
@@ -322,49 +383,41 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
   @override
   void initState() {
     super.initState();
-    _loadPreferences();
+    _loadSavedData();
   }
 
-  Future<void> _loadPreferences() async {
-    final prefs = await SharedPreferences.getInstance();
+  Future<void> _loadSavedData() async {
+    await StorageService.init();
     setState(() {
-      selectedPeriod = prefs.getString('dd_period') ?? 'Оклады с 01.10.2025 г.';
-      selectedRank = prefs.getString('dd_rank') ?? 'Не выбрано';
-      selectedTariff = prefs.getString('dd_tariff') ?? 'Не выбрано';
-      selectedFlight = prefs.getString('dd_flight') ?? 'нет';
-      selectedNvl = prefs.getString('dd_nvl') ?? 'до 2 лет – 0%';
-      selectedSecrecy = prefs.getString('dd_secrecy') ?? 'нет - 0%';
-      selectedOuvs = prefs.getString('dd_ouvs') ?? '0%';
-      selectedClass = prefs.getString('dd_class') ?? 'без класса - 0%';
-      combatDutyPercent = prefs.getDouble('dd_combat_duty') ?? 0.0;
-      selectedDistrictVal = prefs.getDouble('dd_district') ?? 1.0;
-      selectedNorthernVal = prefs.getDouble('dd_northern') ?? 0.0;
-      selectedPremium = prefs.getString('dd_premium') ?? '0%';
-      selectedSpecialUnits = prefs.getString('dd_special_units') ?? 'нет (0%)';
-      selectedOtherAchievements = prefs.getString('dd_achievements') ?? '0%';
-      hasContractBonus = prefs.getBool('dd_contract_bonus') ?? false;
-      isDriver = prefs.getBool('dd_driver') ?? false;
-      hasMatHelp = prefs.getBool('dd_mat_help') ?? false;
-      isVbd = prefs.getBool('dd_vbd') ?? false;
-      selectedMedals = prefs.getString('dd_medals') ?? 'нет надбавки - 0%';
-      selectedZgt = prefs.getString('dd_zgt') ?? '0%';
-      selectedCipher = prefs.getString('dd_cipher') ?? '0%';
-      selectedAlimony = prefs.getString('dd_alimony') ?? '0%';
-      selectedChildDeduction = prefs.getString('dd_child') ?? 'нет детей';
-      days844 = prefs.getInt('dd_days844') ?? 0;
-      riskDays = prefs.getInt('dd_risk_days') ?? 0;
+      selectedPeriod = StorageService.get('dd_period', 'Оклады с 01.10.2025 г.');
+      selectedRank = StorageService.get('dd_rank', 'Не выбрано');
+      selectedTariff = StorageService.get('dd_tariff', 'Не выбрано');
+      selectedFlight = StorageService.get('dd_flight', 'нет');
+      selectedNvl = StorageService.get('dd_nvl', 'до 2 лет – 0%');
+      selectedSecrecy = StorageService.get('dd_secrecy', 'нет - 0%');
+      selectedOuvs = StorageService.get('dd_ouvs', '0%');
+      selectedClass = StorageService.get('dd_class', 'без класса - 0%');
+      combatDutyPercent = (StorageService.get('dd_combat_duty', 0.0) as num).toDouble();
+      selectedDistrictVal = (StorageService.get('dd_district', 1.0) as num).toDouble();
+      selectedNorthernVal = (StorageService.get('dd_northern', 0.0) as num).toDouble();
+      selectedPremium = StorageService.get('dd_premium', '0%');
+      selectedSpecialUnits = StorageService.get('dd_special_units', 'нет (0%)');
+      selectedOtherAchievements = StorageService.get('dd_achievements', '0%');
+      hasContractBonus = StorageService.get('dd_contract_bonus', false) as bool;
+      isDriver = StorageService.get('dd_driver', false) as bool;
+      hasMatHelp = StorageService.get('dd_mat_help', false) as bool;
+      isVbd = StorageService.get('dd_vbd', false) as bool;
+      selectedMedals = StorageService.get('dd_medals', 'нет надбавки - 0%');
+      selectedZgt = StorageService.get('dd_zgt', '0%');
+      selectedCipher = StorageService.get('dd_cipher', '0%');
+      selectedAlimony = StorageService.get('dd_alimony', '0%');
+      selectedChildDeduction = StorageService.get('dd_child', 'нет детей');
+      days844 = (StorageService.get('dd_days844', 0) as num).toInt();
+      riskDays = (StorageService.get('dd_risk_days', 0) as num).toInt();
 
       if (days844 > 0) _days844Controller.text = days844.toString();
       if (riskDays > 0) _riskDaysController.text = riskDays.toString();
     });
-  }
-
-  Future<void> _savePreference(String key, dynamic val) async {
-    final prefs = await SharedPreferences.getInstance();
-    if (val is String) await prefs.setString(key, val);
-    if (val is bool) await prefs.setBool(key, val);
-    if (val is int) await prefs.setInt(key, val);
-    if (val is double) await prefs.setDouble(key, val);
   }
 
   @override
@@ -406,11 +459,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
       _riskDaysController.clear();
     });
 
-    final prefs = await SharedPreferences.getInstance();
-    final keys = prefs.getKeys().where((k) => k.startsWith('dd_'));
-    for (var k in keys) {
-      await prefs.remove(k);
-    }
+    await StorageService.clearPrefix('dd_');
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -546,7 +595,6 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
       ),
     );
   }
-
   @override
   Widget build(BuildContext context) {
     bool isDark = Theme.of(context).brightness == Brightness.dark;
@@ -590,7 +638,6 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     if (selectedClass.contains('30%')) classPercent = 0.30;
 
     double combatDutyAmount = ovd * combatDutyPercent;
-
     double premiumPercent = double.parse(selectedPremium.replaceAll('%', '')) / 100.0;
 
     double specialUnitsPercent = 0.0;
@@ -777,7 +824,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   (val) {
                     _playClickFeedback();
                     setState(() => selectedRank = val!);
-                    _savePreference('dd_rank', val);
+                    StorageService.set('dd_rank', val);
                   },
                   isDark,
                 ),
@@ -789,7 +836,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   (val) {
                     _playClickFeedback();
                     setState(() => selectedTariff = val!);
-                    _savePreference('dd_tariff', val);
+                    StorageService.set('dd_tariff', val);
                   },
                   isDark,
                 ),
@@ -801,7 +848,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   (val) {
                     _playClickFeedback();
                     setState(() => selectedFlight = val!);
-                    _savePreference('dd_flight', val);
+                    StorageService.set('dd_flight', val);
                   },
                   isDark,
                 ),
@@ -821,7 +868,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   (val) {
                     _playClickFeedback();
                     setState(() => selectedNvl = val!);
-                    _savePreference('dd_nvl', val);
+                    StorageService.set('dd_nvl', val);
                   },
                   isDark,
                 ),
@@ -833,7 +880,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   (val) {
                     _playClickFeedback();
                     setState(() => selectedSecrecy = val!);
-                    _savePreference('dd_secrecy', val);
+                    StorageService.set('dd_secrecy', val);
                   },
                   isDark,
                 ),
@@ -845,7 +892,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   (val) {
                     _playClickFeedback();
                     setState(() => selectedOuvs = val!);
-                    _savePreference('dd_ouvs', val);
+                    StorageService.set('dd_ouvs', val);
                   },
                   isDark,
                 ),
@@ -857,12 +904,12 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   (val) {
                     _playClickFeedback();
                     setState(() => selectedClass = val!);
-                    _savePreference('dd_class', val);
+                    StorageService.set('dd_class', val);
                   },
                   isDark,
                 ),
 
-                // НАДБАВКА ЗА БОЕВОЕ ДЕЖУРСТВО (ВЫБОР ГАЛОЧКАМИ)
+                // НАДБАВКА ЗА БОЕВОЕ ДЕЖУРСТВО
                 _buildCardSection(
                   title: 'Надбавка за боевое дежурство (от ОВД): ${combatDutyAmount > 0 ? "+${combatDutyAmount.toStringAsFixed(1)} руб." : "0.0 руб."}',
                   isDark: isDark,
@@ -876,7 +923,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                           _playClickFeedback();
                           final nextVal = combatDutyPercent == 0.30 ? 0.0 : 0.30;
                           setState(() => combatDutyPercent = nextVal);
-                          _savePreference('dd_combat_duty', nextVal);
+                          StorageService.set('dd_combat_duty', nextVal);
                         },
                         isDark: isDark,
                       ),
@@ -889,7 +936,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                           _playClickFeedback();
                           final nextVal = combatDutyPercent == 0.15 ? 0.0 : 0.15;
                           setState(() => combatDutyPercent = nextVal);
-                          _savePreference('dd_combat_duty', nextVal);
+                          StorageService.set('dd_combat_duty', nextVal);
                         },
                         isDark: isDark,
                       ),
@@ -902,7 +949,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                           _playClickFeedback();
                           final nextVal = combatDutyPercent == 0.05 ? 0.0 : 0.05;
                           setState(() => combatDutyPercent = nextVal);
-                          _savePreference('dd_combat_duty', nextVal);
+                          StorageService.set('dd_combat_duty', nextVal);
                         },
                         isDark: isDark,
                       ),
@@ -952,7 +999,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                               _playClickFeedback();
                               final newVal = val ?? 1.0;
                               setState(() => selectedDistrictVal = newVal);
-                              _savePreference('dd_district', newVal);
+                              StorageService.set('dd_district', newVal);
                             },
                           ),
                         ),
@@ -1006,7 +1053,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                               _playClickFeedback();
                               final newVal = val ?? 0.0;
                               setState(() => selectedNorthernVal = newVal);
-                              _savePreference('dd_northern', newVal);
+                              StorageService.set('dd_northern', newVal);
                             },
                           ),
                         ),
@@ -1022,7 +1069,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   (val) {
                     _playClickFeedback();
                     setState(() => selectedPremium = val!);
-                    _savePreference('dd_premium', val);
+                    StorageService.set('dd_premium', val);
                   },
                   isDark,
                 ),
@@ -1039,7 +1086,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   (val) {
                     _playClickFeedback();
                     setState(() => selectedSpecialUnits = val!);
-                    _savePreference('dd_special_units', val);
+                    StorageService.set('dd_special_units', val);
                   },
                   isDark,
                 ),
@@ -1085,7 +1132,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   (val) {
                     _playClickFeedback();
                     setState(() => selectedOtherAchievements = val!);
-                    _savePreference('dd_achievements', val);
+                    StorageService.set('dd_achievements', val);
                   },
                   isDark,
                 ),
@@ -1097,7 +1144,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                     _playClickFeedback();
                     final newVal = val ?? false;
                     setState(() => hasContractBonus = newVal);
-                    _savePreference('dd_contract_bonus', newVal);
+                    StorageService.set('dd_contract_bonus', newVal);
                   },
                   isDark,
                 ),
@@ -1109,7 +1156,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                     _playClickFeedback();
                     final newVal = val ?? false;
                     setState(() => isDriver = newVal);
-                    _savePreference('dd_driver', newVal);
+                    StorageService.set('dd_driver', newVal);
                   },
                   isDark,
                 ),
@@ -1126,7 +1173,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   (val) {
                     _playClickFeedback();
                     setState(() => selectedMedals = val!);
-                    _savePreference('dd_medals', val);
+                    StorageService.set('dd_medals', val);
                   },
                   isDark,
                 ),
@@ -1138,7 +1185,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   (val) {
                     _playClickFeedback();
                     setState(() => selectedZgt = val!);
-                    _savePreference('dd_zgt', val);
+                    StorageService.set('dd_zgt', val);
                   },
                   isDark,
                 ),
@@ -1158,7 +1205,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   (val) {
                     _playClickFeedback();
                     setState(() => selectedCipher = val!);
-                    _savePreference('dd_cipher', val);
+                    StorageService.set('dd_cipher', val);
                   },
                   isDark,
                 ),
@@ -1170,7 +1217,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   (val) {
                     _playClickFeedback();
                     setState(() => selectedAlimony = val!);
-                    _savePreference('dd_alimony', val);
+                    StorageService.set('dd_alimony', val);
                   },
                   isDark,
                 ),
@@ -1182,7 +1229,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                     _playClickFeedback();
                     final newVal = val ?? false;
                     setState(() => hasMatHelp = newVal);
-                    _savePreference('dd_mat_help', newVal);
+                    StorageService.set('dd_mat_help', newVal);
                   },
                   isDark,
                 ),
@@ -1194,7 +1241,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                     _playClickFeedback();
                     final newVal = val ?? false;
                     setState(() => isVbd = newVal);
-                    _savePreference('dd_vbd', newVal);
+                    StorageService.set('dd_vbd', newVal);
                   },
                   isDark,
                 ),
@@ -1212,7 +1259,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   (val) {
                     _playClickFeedback();
                     setState(() => selectedChildDeduction = val!);
-                    _savePreference('dd_child', val);
+                    StorageService.set('dd_child', val);
                   },
                   isDark,
                 ),
@@ -1247,7 +1294,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                               onChanged: (val) {
                                 final newVal = int.tryParse(val) ?? 0;
                                 setState(() => days844 = newVal);
-                                _savePreference('dd_days844', newVal);
+                                StorageService.set('dd_days844', newVal);
                               },
                             ),
                           ),
@@ -1292,7 +1339,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                               onChanged: (val) {
                                 final newVal = int.tryParse(val) ?? 0;
                                 setState(() => riskDays = newVal);
-                                _savePreference('dd_risk_days', newVal);
+                                StorageService.set('dd_risk_days', newVal);
                               },
                             ),
                           ),
@@ -1403,7 +1450,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
           onChanged: (val) {
             _playClickFeedback();
             setState(() => selectedPeriod = val!);
-            _savePreference('dd_period', val);
+            StorageService.set('dd_period', val);
           },
         ),
       ),
@@ -1546,22 +1593,14 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
   }
 
   Future<void> _loadPensionPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
+    await StorageService.init();
     setState(() {
-      selectedRank = prefs.getString('pension_rank') ?? 'Прапорщик, мичман';
-      selectedTariff = prefs.getString('pension_tariff') ?? '4 т.р.';
-      serviceYears = prefs.getInt('pension_years') ?? 20;
-      selectedDistrictVal = prefs.getDouble('pension_district') ?? 1.0;
-      isVbd = prefs.getBool('pension_vbd') ?? false;
+      selectedRank = StorageService.get('pension_rank', 'Прапорщик, мичман');
+      selectedTariff = StorageService.get('pension_tariff', '4 т.р.');
+      serviceYears = (StorageService.get('pension_years', 20) as num).toInt();
+      selectedDistrictVal = (StorageService.get('pension_district', 1.0) as num).toDouble();
+      isVbd = StorageService.get('pension_vbd', false) as bool;
     });
-  }
-
-  Future<void> _savePensionPref(String key, dynamic val) async {
-    final prefs = await SharedPreferences.getInstance();
-    if (val is String) await prefs.setString(key, val);
-    if (val is bool) await prefs.setBool(key, val);
-    if (val is int) await prefs.setInt(key, val);
-    if (val is double) await prefs.setDouble(key, val);
   }
 
   void _sharePensionSummary(double totalPension, double baseOds, double nvlPercent, double pensionPercent) {
@@ -1685,7 +1724,7 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
                   (val) {
                     _playClickFeedback();
                     setState(() => selectedRank = val!);
-                    _savePensionPref('pension_rank', val);
+                    StorageService.set('pension_rank', val);
                   },
                   isDark,
                 ),
@@ -1697,7 +1736,7 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
                   (val) {
                     _playClickFeedback();
                     setState(() => selectedTariff = val!);
-                    _savePensionPref('pension_tariff', val);
+                    StorageService.set('pension_tariff', val);
                   },
                   isDark,
                 ),
@@ -1725,7 +1764,7 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
                           _playClickFeedback();
                           final newVal = val.toInt();
                           setState(() => serviceYears = newVal);
-                          _savePensionPref('pension_years', newVal);
+                          StorageService.set('pension_years', newVal);
                         },
                       ),
                     ],
@@ -1763,7 +1802,7 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
                               _playClickFeedback();
                               final newVal = val ?? 1.0;
                               setState(() => selectedDistrictVal = newVal);
-                              _savePensionPref('pension_district', newVal);
+                              StorageService.set('pension_district', newVal);
                             },
                           ),
                         ),
@@ -1787,7 +1826,7 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
                       _playClickFeedback();
                       final newVal = val ?? false;
                       setState(() => isVbd = newVal);
-                      _savePensionPref('pension_vbd', newVal);
+                      StorageService.set('pension_vbd', newVal);
                     },
                   ),
                 ),
