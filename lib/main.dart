@@ -142,7 +142,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     HapticFeedback.mediumImpact();
   }
 
-  // Оклады с 01.10.2026 идут без прибавки 4% (коэффициент 1.0)
+  // Оклады с 01.10.2026 без +4% (коэффициент 1.0)
   final Map<String, double> salaryPeriods = {
     'Оклады с 01.10.2025 г.': 1.0,
     'Оклады с 01.10.2026 г.': 1.0,
@@ -239,7 +239,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
   String selectedNorthern = '0% - нет надбавки';
   String selectedPremium = '0%';
 
-  // Обновленное меню надбавки спецподразделениям
+  // Обновленная надбавка подразделениям с разделением по категориям
   String selectedSpecialUnits = 'нет (0%)';
   String selectedOtherAchievements = '0%';
 
@@ -474,7 +474,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
 
     double premiumPercent = double.parse(selectedPremium.replaceAll('%', '')) / 100.0;
 
-    // Расчет надбавки подразделениям по новым формулировкам
+    // Расчет надбавки спецподразделениям
     double specialUnitsPercent = 0.0;
     if (selectedSpecialUnits.contains('100%')) specialUnitsPercent = 1.0;
     if (selectedSpecialUnits.contains('110%')) specialUnitsPercent = 1.10;
@@ -775,7 +775,6 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   isDark,
                 ),
 
-                // Обновленный блок надбавки подразделениям с понятным распределением по составам
                 _buildDropdownItem(
                   'Надбавка подразделениям (ВКС, ВМФ, РВСН, ГУ ГШ): ${specialUnitsAmount > 0 ? "+${specialUnitsAmount.toStringAsFixed(1)} руб." : "0.0 руб."}',
                   selectedSpecialUnits,
@@ -1182,7 +1181,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
 }
 
 // -------------------------------------------------------------
-// ЭКРАН 2: КАЛЬКУЛЯТОР ВОЕННОЙ ПЕНСИИ (Закон РФ № 4468-1)
+// ЭКРАН 2: КАЛЬКУЛЯТОР ВОЕННОЙ ПЕНСИИ (Закон РФ № 4468-1 и № 433-ФЗ)
 // -------------------------------------------------------------
 class PensionCalculatorScreen extends StatefulWidget {
   final VoidCallback onToggleTheme;
@@ -1241,20 +1240,20 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
   String selectedDistrict = '1.0';
   bool isVbd = false;
 
-  // Понижающий коэффициент (89.83%)
-  double loweringCoeff = 0.8983;
+  // Понижающий коэффициент по Федеральному закону от 28.11.2025 № 433-ФЗ (93.59%)
+  double loweringCoeff = 0.9359;
 
   void _sharePensionSummary(double totalPension, double baseOds, double nvlPercent, double pensionPercent) {
     _playClickFeedback();
     String text = '''
-🎖 РАСЧЕТ ВОЕННОЙ ПЕНСИИ (Закон № 4468-1)
+🎖 РАСЧЕТ ВОЕННОЙ ПЕНСИИ (Законы № 4468-1 и № 433-ФЗ)
 --------------------------------
 • Воинское звание: $selectedRank
 • Тарифный разряд: $selectedTariff
 • Базовый оклад для пенсии: ${baseOds.toStringAsFixed(2)} руб.
 • Выслуга лет: $serviceYears лет
 • Процент пенсии от ДД: ${(pensionPercent * 100).toInt()}%
-• Понижающий коэффициент: ${(loweringCoeff * 100).toStringAsFixed(2)}%
+• Понижающий коэффициент (№ 433-ФЗ): ${(loweringCoeff * 100).toStringAsFixed(2)}%
 • Районный коэффициент: $selectedDistrict
 • Ветеран боевых действий: ${isVbd ? "Да (+4184 руб.)" : "Нет"}
 --------------------------------
@@ -1311,7 +1310,7 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
 
     double rk = double.tryParse(selectedDistrict) ?? 1.0;
 
-    // Базовый размер военной пенсии
+    // Базовый размер военной пенсии с коэффициентом 93,59% (0.9359)
     double rawPension = totalBaseDds * pensionPercent * loweringCoeff * rk;
 
     // ЕДВ ветеранам боевых действий к пенсии
@@ -1452,7 +1451,7 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Нормативы расчета пенсии (Закон № 4468-1):',
+                        Text('Нормативы расчета пенсии (Законы № 4468-1 и № 433-ФЗ):',
                             style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 13,
@@ -1460,8 +1459,8 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
                         const SizedBox(height: 6),
                         const Text('• 20 лет выслуги дают 50% от окладов денежного содержания.', style: TextStyle(fontSize: 12)),
                         const Text('• За каждый год свыше 20 лет начисляется +3% (но не более 85%).', style: TextStyle(fontSize: 12)),
-                        Text('• Применяется законодательный понижающий коэффициент: ${(loweringCoeff * 100).toStringAsFixed(2)}%.',
-                            style: const TextStyle(fontSize: 12)),
+                        const Text('• Понижающий коэффициент (№ 433-ФЗ): 93,59% (0,9359).',
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                       ],
                     ),
                   ),
