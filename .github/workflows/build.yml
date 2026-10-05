@@ -46,19 +46,17 @@ jobs:
           </svg>
           EOF
 
-          # Удаляем адаптивные XML заглушки, которые давали белый фон
+          # Удаляем адаптивные XML заглушки
           rm -rf android/app/src/main/res/mipmap-anydpi-v26
 
-          # Нарезаем обычные и круглые значки во все папки разрешений
+          # Нарезаем обычные и круглые значки
           for dir in android/app/src/main/res/mipmap-*; do
             convert -background none icon.svg -resize 192x192 "$dir/ic_launcher.png"
             convert -background none icon.svg -resize 192x192 "$dir/ic_launcher_round.png"
           done
 
-      - name: Install dependencies with shared_preferences
-        run: |
-          flutter pub add shared_preferences
-          flutter pub get
+      - name: Install dependencies
+        run: flutter pub get
 
       - name: Build Release APK
         run: flutter build apk --release
