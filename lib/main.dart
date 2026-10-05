@@ -142,7 +142,6 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     HapticFeedback.mediumImpact();
   }
 
-  // Оклады с 01.10.2026 без +4% (коэффициент 1.0)
   final Map<String, double> salaryPeriods = {
     'Оклады с 01.10.2025 г.': 1.0,
     'Оклады с 01.10.2026 г.': 1.0,
@@ -235,11 +234,12 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
   String selectedSecrecy = 'нет - 0%';
   String selectedOuvs = '0%';
   String selectedClass = 'без класса - 0%';
-  String selectedDistrict = '1.0';
-  String selectedNorthern = '0% - нет надбавки';
-  String selectedPremium = '0%';
 
-  // Обновленная надбавка подразделениям с разделением по категориям
+  // Районный и северный коэффициенты (значения по умолчанию)
+  double selectedDistrictVal = 1.0;
+  double selectedNorthernVal = 0.0;
+
+  String selectedPremium = '0%';
   String selectedSpecialUnits = 'нет (0%)';
   String selectedOtherAchievements = '0%';
 
@@ -260,6 +260,26 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
   int days844 = 0;
   int riskDays = 0;
 
+  // Расширенный список вариантов районного коэффициента со скриншота
+  final List<double> districtOptions = [
+    1.0, 1.15, 1.2, 1.25, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 2.0
+  ];
+
+  // Расширенный список северной надбавки со скриншота
+  final List<Map<String, dynamic>> northernOptions = [
+    {'val': 0.0, 'label': '0 %'},
+    {'val': 0.10, 'label': '10 %'},
+    {'val': 0.20, 'label': '20 %'},
+    {'val': 0.30, 'label': '30 % - IV группа территорий'},
+    {'val': 0.40, 'label': '40 %'},
+    {'val': 0.50, 'label': '50 % - III группа территорий'},
+    {'val': 0.60, 'label': '60 %'},
+    {'val': 0.70, 'label': '70 %'},
+    {'val': 0.80, 'label': '80 % - II группа территорий'},
+    {'val': 0.90, 'label': '90 %'},
+    {'val': 1.00, 'label': '100 % - I группа территорий'},
+  ];
+
   @override
   void dispose() {
     _days844Controller.dispose();
@@ -278,8 +298,8 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
       selectedSecrecy = 'нет - 0%';
       selectedOuvs = '0%';
       selectedClass = 'без класса - 0%';
-      selectedDistrict = '1.0';
-      selectedNorthern = '0% - нет надбавки';
+      selectedDistrictVal = 1.0;
+      selectedNorthernVal = 0.0;
       selectedPremium = '0%';
       selectedSpecialUnits = 'нет (0%)';
       selectedOtherAchievements = '0%';
@@ -348,8 +368,8 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     if (classAmount > 0) sb.writeln('• Классная квалификация ($selectedClass): +${classAmount.toStringAsFixed(2)} руб.');
     if (flightAmount > 0) sb.writeln('• Летный состав ($selectedFlight): +${flightAmount.toStringAsFixed(2)} руб.');
     if (premiumAmount > 0) sb.writeln('• Премия ($selectedPremium): +${premiumAmount.toStringAsFixed(2)} руб.');
-    if (rkAmount > 0) sb.writeln('• Районный коэф. (коэф. $selectedDistrict): +${rkAmount.toStringAsFixed(2)} руб.');
-    if (northernAmount > 0) sb.writeln('• Северная надбавка ($selectedNorthern): +${northernAmount.toStringAsFixed(2)} руб.');
+    if (rkAmount > 0) sb.writeln('• Районный коэф. (коэф. $selectedDistrictVal): +${rkAmount.toStringAsFixed(2)} руб.');
+    if (northernAmount > 0) sb.writeln('• Северная надбавка (${(selectedNorthernVal * 100).toInt()}%): +${northernAmount.toStringAsFixed(2)} руб.');
     if (specialUnitsAmount > 0) sb.writeln('• Надбавка подразделениям ($selectedSpecialUnits): +${specialUnitsAmount.toStringAsFixed(2)} руб.');
     if (otherAchievementsAmount > 0) sb.writeln('• Особые достижения ($selectedOtherAchievements): +${otherAchievementsAmount.toStringAsFixed(2)} руб.');
     if (contractAmount > 0) sb.writeln('• Контракт 1-4 т.р. (50%): +${contractAmount.toStringAsFixed(2)} руб.');
@@ -464,17 +484,8 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     if (selectedClass.contains('20%')) classPercent = 0.20;
     if (selectedClass.contains('30%')) classPercent = 0.30;
 
-    double districtCoeff = double.tryParse(selectedDistrict) ?? 1.0;
-
-    double northernPercent = 0.0;
-    if (selectedNorthern.contains('30%')) northernPercent = 0.30;
-    if (selectedNorthern.contains('50%')) northernPercent = 0.50;
-    if (selectedNorthern.contains('80%')) northernPercent = 0.80;
-    if (selectedNorthern.contains('100%')) northernPercent = 1.0;
-
     double premiumPercent = double.parse(selectedPremium.replaceAll('%', '')) / 100.0;
 
-    // Расчет надбавки спецподразделениям
     double specialUnitsPercent = 0.0;
     if (selectedSpecialUnits.contains('100%')) specialUnitsPercent = 1.0;
     if (selectedSpecialUnits.contains('110%')) specialUnitsPercent = 1.10;
@@ -530,9 +541,10 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     double classAmount = ovd * classPercent;
     double flightAmount = ovd * flightBonusPercent;
 
+    // База для начисления РК и СН (ОДС + обязательные надбавки)
     double baseRkSn = ods + nvlAmount + secrecyAmount + ouvsAmount + classAmount + flightAmount;
-    double rkAmount = baseRkSn * (districtCoeff - 1.0);
-    double northernAmount = baseRkSn * northernPercent;
+    double rkAmount = baseRkSn * (selectedDistrictVal - 1.0);
+    double northernAmount = baseRkSn * selectedNorthernVal;
 
     double premiumAmount = ods * premiumPercent;
     double zgtAmount = ovd * zgtPercent;
@@ -736,32 +748,105 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   isDark,
                 ),
 
-                _buildDropdownItem(
-                  'Районный коэффициент: ${rkAmount > 0 ? "+${rkAmount.toStringAsFixed(1)} руб." : "0.0 руб."}',
-                  selectedDistrict,
-                  ['1.0', '1.15', '1.2', '1.25', '1.3', '1.4', '1.5', '1.6', '2.0'],
-                  (val) {
-                    _playClickFeedback();
-                    setState(() => selectedDistrict = val!);
-                  },
-                  isDark,
+                // ---------------- РАСШИРЕННЫЙ РАЙОННЫЙ КОЭФФИЦИЕНТ ----------------
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Районный коэффициент: ${rkAmount > 0 ? "+${rkAmount.toStringAsFixed(2)} руб." : "0.0 руб."}',
+                        style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? Colors.grey.shade300 : Colors.black87),
+                      ),
+                      const SizedBox(height: 2),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF1E2638) : const Color(0xFFE4E7ED),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(
+                              color: isDark ? Colors.grey.shade700 : Colors.grey.shade400),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<double>(
+                            value: districtOptions.contains(selectedDistrictVal) ? selectedDistrictVal : 1.0,
+                            isExpanded: true,
+                            dropdownColor: isDark ? const Color(0xFF1E2638) : Colors.white,
+                            items: districtOptions.map((k) {
+                              double sum = baseRkSn * (k - 1.0);
+                              String labelText = k == 1.0 || k == 2.0 ? k.toStringAsFixed(0) : k.toString();
+                              return DropdownMenuItem<double>(
+                                value: k,
+                                child: Text(
+                                  '$labelText – ${sum.toStringAsFixed(2)} руб.',
+                                  style: const TextStyle(fontSize: 13),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (val) {
+                              _playClickFeedback();
+                              setState(() => selectedDistrictVal = val ?? 1.0);
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
 
-                _buildDropdownItem(
-                  'Северная надбавка: ${northernAmount > 0 ? "+${northernAmount.toStringAsFixed(1)} руб." : "0.0 руб."}',
-                  selectedNorthern,
-                  [
-                    '0% - нет надбавки',
-                    '30% - IV группа',
-                    '50% - III группа',
-                    '80% - II группа территорий',
-                    '100% - I группа территорий'
-                  ],
-                  (val) {
-                    _playClickFeedback();
-                    setState(() => selectedNorthern = val!);
-                  },
-                  isDark,
+                // ---------------- РАСШИРЕННАЯ СЕВЕРНАЯ НАДБАВКА ----------------
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Северная надбавка: ${northernAmount > 0 ? "+${northernAmount.toStringAsFixed(2)} руб." : "0.0 руб."}',
+                        style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? Colors.grey.shade300 : Colors.black87),
+                      ),
+                      const SizedBox(height: 2),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF1E2638) : const Color(0xFFE4E7ED),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(
+                              color: isDark ? Colors.grey.shade700 : Colors.grey.shade400),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<double>(
+                            value: northernOptions.any((opt) => (opt['val'] as double) == selectedNorthernVal)
+                                ? selectedNorthernVal
+                                : 0.0,
+                            isExpanded: true,
+                            dropdownColor: isDark ? const Color(0xFF1E2638) : Colors.white,
+                            items: northernOptions.map((opt) {
+                              double p = opt['val'] as double;
+                              double sum = baseRkSn * p;
+                              String label = opt['label'] as String;
+                              return DropdownMenuItem<double>(
+                                value: p,
+                                child: Text(
+                                  '$label – ${sum.toStringAsFixed(2)} руб.',
+                                  style: const TextStyle(fontSize: 13),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (val) {
+                              _playClickFeedback();
+                              setState(() => selectedNorthernVal = val ?? 0.0);
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
 
                 _buildDropdownItem(
@@ -1181,7 +1266,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
 }
 
 // -------------------------------------------------------------
-// ЭКРАН 2: КАЛЬКУЛЯТОР ВОЕННОЙ ПЕНСИИ (Закон РФ № 4468-1 и № 433-ФЗ)
+// ЭКРАН 2: КАЛЬКУЛЯТОР ВОЕННОЙ ПЕНСИИ (Законы № 4468-1 и № 433-ФЗ)
 // -------------------------------------------------------------
 class PensionCalculatorScreen extends StatefulWidget {
   final VoidCallback onToggleTheme;
@@ -1237,11 +1322,15 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
   String selectedRank = 'Прапорщик';
   String selectedTariff = '4 т.р.';
   int serviceYears = 20;
-  String selectedDistrict = '1.0';
+  double selectedDistrictVal = 1.0;
   bool isVbd = false;
 
   // Понижающий коэффициент по Федеральному закону от 28.11.2025 № 433-ФЗ (93.59%)
   double loweringCoeff = 0.9359;
+
+  final List<double> pensionDistrictOptions = [
+    1.0, 1.15, 1.2, 1.25, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 2.0
+  ];
 
   void _sharePensionSummary(double totalPension, double baseOds, double nvlPercent, double pensionPercent) {
     _playClickFeedback();
@@ -1254,7 +1343,7 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
 • Выслуга лет: $serviceYears лет
 • Процент пенсии от ДД: ${(pensionPercent * 100).toInt()}%
 • Понижающий коэффициент (№ 433-ФЗ): ${(loweringCoeff * 100).toStringAsFixed(2)}%
-• Районный коэффициент: $selectedDistrict
+• Районный коэффициент: $selectedDistrictVal
 • Ветеран боевых действий: ${isVbd ? "Да (+4184 руб.)" : "Нет"}
 --------------------------------
 💰 ИТОГОВАЯ ПЕНСИЯ: ${totalPension.toStringAsFixed(2)} руб./мес.
@@ -1303,17 +1392,15 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
     double nvlAmount = ods * nvlPercent;
     double totalBaseDds = ods + nvlAmount;
 
-    // Расчет процента пенсии: 50% за 20 лет + 3% за каждый год свыше (максимум 85%)
+    // 50% за 20 лет + 3% за каждый год сверх 20 лет (максимум 85%)
     double pensionPercent = 0.50 + ((serviceYears - 20) * 0.03);
     if (pensionPercent > 0.85) pensionPercent = 0.85;
     if (pensionPercent < 0.50) pensionPercent = 0.50;
 
-    double rk = double.tryParse(selectedDistrict) ?? 1.0;
+    // Расчет пенсии с коэффициентом 93,59% (0.9359)
+    double rawPension = totalBaseDds * pensionPercent * loweringCoeff * selectedDistrictVal;
 
-    // Базовый размер военной пенсии с коэффициентом 93,59% (0.9359)
-    double rawPension = totalBaseDds * pensionPercent * loweringCoeff * rk;
-
-    // ЕДВ ветеранам боевых действий к пенсии
+    // ЕДВ ветеранам боевых действий
     double vbdBonus = isVbd ? 4184.0 : 0.0;
     double totalPension = rawPension + vbdBonus;
 
@@ -1414,15 +1501,42 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
                   ),
                 ),
 
-                _buildDropdown(
-                  'Районный коэффициент:',
-                  selectedDistrict,
-                  ['1.0', '1.15', '1.2', '1.25', '1.3', '1.4', '1.5', '1.6', '2.0'],
-                  (val) {
-                    _playClickFeedback();
-                    setState(() => selectedDistrict = val!);
-                  },
-                  isDark,
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Районный коэффициент:',
+                          style: TextStyle(fontSize: 12, color: isDark ? Colors.grey.shade300 : Colors.black87)),
+                      const SizedBox(height: 2),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF1E2638) : const Color(0xFFE4E7ED),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: isDark ? Colors.grey.shade700 : Colors.grey.shade400),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<double>(
+                            value: pensionDistrictOptions.contains(selectedDistrictVal) ? selectedDistrictVal : 1.0,
+                            isExpanded: true,
+                            dropdownColor: isDark ? const Color(0xFF1E2638) : Colors.white,
+                            items: pensionDistrictOptions.map((k) {
+                              String labelText = k == 1.0 || k == 2.0 ? k.toStringAsFixed(0) : k.toString();
+                              return DropdownMenuItem<double>(
+                                value: k,
+                                child: Text(labelText),
+                              );
+                            }).toList(),
+                            onChanged: (val) {
+                              _playClickFeedback();
+                              setState(() => selectedDistrictVal = val ?? 1.0);
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
 
                 Container(
@@ -1459,8 +1573,8 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
                         const SizedBox(height: 6),
                         const Text('• 20 лет выслуги дают 50% от окладов денежного содержания.', style: TextStyle(fontSize: 12)),
                         const Text('• За каждый год свыше 20 лет начисляется +3% (но не более 85%).', style: TextStyle(fontSize: 12)),
-                        const Text('• Понижающий коэффициент (№ 433-ФЗ): 93,59% (0,9359).',
-                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                        Text('• Понижающий коэффициент (№ 433-ФЗ): 93,59% (0,9359).',
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                       ],
                     ),
                   ),
