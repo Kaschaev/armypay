@@ -55,8 +55,10 @@ jobs:
             convert -background none icon.svg -resize 192x192 "$dir/ic_launcher_round.png"
           done
 
-      - name: Install dependencies
-        run: flutter pub get
+      - name: Install dependencies with shared_preferences
+        run: |
+          flutter pub add shared_preferences
+          flutter pub get
 
       - name: Build Release APK
         run: flutter build apk --release
