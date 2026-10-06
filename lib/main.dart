@@ -379,6 +379,9 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     {'val': 1.00, 'label': '100 % - I группа территорий'},
   ];
 
+  // Варианты ОУС кратно 5% до 100%
+  final List<String> ouvsOptions = List.generate(21, (i) => '${i * 5}%');
+
   @override
   void initState() {
     super.initState();
@@ -895,11 +898,12 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   isDark,
                 ),
 
+                // НАДБАВКА ЗА ОУС КРАТНО 5% ДО 100%
                 _buildColoredLabelDropdown(
                   title: 'НАДБАВКА ЗА ОУС + Командование подразделением:',
                   highlightAmount: '+${ouvsAmount.toStringAsFixed(1)} руб.',
                   value: selectedOuvs,
-                  items: ['0%', '10%', '20%', '30%', '50%', '70%', '100%'],
+                  items: ouvsOptions,
                   onChanged: (val) {
                     _playClickFeedback();
                     setState(() => selectedOuvs = val!);
@@ -1035,16 +1039,38 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                           child: DropdownButton<double>(
                             value: districtOptions.contains(selectedDistrictVal) ? selectedDistrictVal : 1.0,
                             isExpanded: true,
+                            itemHeight: 38.0,
                             dropdownColor: isDark ? const Color(0xFF1E2638) : Colors.white,
                             items: districtOptions.map((k) {
                               double sum = baseRkSn * (k - 1.0);
                               String labelText = k == 1.0 || k == 2.0 ? k.toStringAsFixed(0) : k.toString();
+                              final bool isSelected = k == selectedDistrictVal;
                               return DropdownMenuItem<double>(
                                 value: k,
-                                child: Text(
-                                  '$labelText – ${sum.toStringAsFixed(2)} руб.',
-                                  style: const TextStyle(fontSize: 13),
-                                  overflow: TextOverflow.ellipsis,
+                                child: Container(
+                                  width: double.infinity,
+                                  alignment: Alignment.centerLeft,
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? (isDark ? const Color(0xFF2C3854) : const Color(0xFFD0D7DE))
+                                        : Colors.transparent,
+                                    border: Border(
+                                      bottom: BorderSide(
+                                        color: isDark ? Colors.white12 : Colors.black12,
+                                        width: 0.5,
+                                      ),
+                                    ),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                                  child: Text(
+                                    '$labelText – ${sum.toStringAsFixed(2)} руб.',
+                                    style: TextStyle(
+                                      fontSize: 12.5,
+                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                      color: isSelected ? highlightColor : (isDark ? Colors.white : Colors.black87),
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
                               );
                             }).toList(),
@@ -1099,17 +1125,39 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                                 ? selectedNorthernVal
                                 : 0.0,
                             isExpanded: true,
+                            itemHeight: 38.0,
                             dropdownColor: isDark ? const Color(0xFF1E2638) : Colors.white,
                             items: northernOptions.map((opt) {
                               double p = opt['val'] as double;
                               double sum = baseRkSn * p;
                               String label = opt['label'] as String;
+                              final bool isSelected = p == selectedNorthernVal;
                               return DropdownMenuItem<double>(
                                 value: p,
-                                child: Text(
-                                  '$label – ${sum.toStringAsFixed(2)} руб.',
-                                  style: const TextStyle(fontSize: 13),
-                                  overflow: TextOverflow.ellipsis,
+                                child: Container(
+                                  width: double.infinity,
+                                  alignment: Alignment.centerLeft,
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? (isDark ? const Color(0xFF2C3854) : const Color(0xFFD0D7DE))
+                                        : Colors.transparent,
+                                    border: Border(
+                                      bottom: BorderSide(
+                                        color: isDark ? Colors.white12 : Colors.black12,
+                                        width: 0.5,
+                                      ),
+                                    ),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                                  child: Text(
+                                    '$label – ${sum.toStringAsFixed(2)} руб.',
+                                    style: TextStyle(
+                                      fontSize: 12.5,
+                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                      color: isSelected ? highlightColor : (isDark ? Colors.white : Colors.black87),
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
                               );
                             }).toList(),
@@ -1509,12 +1557,39 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
               child: DropdownButton<String>(
                 value: effectiveValue,
                 isExpanded: true,
+                itemHeight: 38.0,
                 dropdownColor: isDark ? const Color(0xFF1E2638) : Colors.white,
-                items: items
-                    .map((item) => DropdownMenuItem(
-                        value: item,
-                        child: Text(item, overflow: TextOverflow.ellipsis)))
-                    .toList(),
+                items: items.map((item) {
+                  final bool isSelected = item == effectiveValue;
+                  return DropdownMenuItem<String>(
+                    value: item,
+                    child: Container(
+                      width: double.infinity,
+                      alignment: Alignment.centerLeft,
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? (isDark ? const Color(0xFF2C3854) : const Color(0xFFD0D7DE))
+                            : Colors.transparent,
+                        border: Border(
+                          bottom: BorderSide(
+                            color: isDark ? Colors.white12 : Colors.black12,
+                            width: 0.5,
+                          ),
+                        ),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                      child: Text(
+                        item,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          color: isSelected ? highlightColor : (isDark ? Colors.white : Colors.black87),
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  );
+                }).toList(),
                 onChanged: onChanged,
               ),
             ),
@@ -1639,6 +1714,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
         child: DropdownButton<String>(
           value: selectedPeriod,
           isExpanded: true,
+          itemHeight: 38.0,
           dropdownColor: isDark ? const Color(0xFF1E2638) : Colors.white,
           icon: const Icon(Icons.arrow_drop_down),
           style: TextStyle(
@@ -1689,12 +1765,41 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
               child: DropdownButton<String>(
                 value: effectiveValue,
                 isExpanded: true,
+                itemHeight: 38.0,
                 dropdownColor: isDark ? const Color(0xFF1E2638) : Colors.white,
-                items: items
-                    .map((item) => DropdownMenuItem(
-                        value: item,
-                        child: Text(item, overflow: TextOverflow.ellipsis)))
-                    .toList(),
+                items: items.map((item) {
+                  final bool isSelected = item == effectiveValue;
+                  return DropdownMenuItem<String>(
+                    value: item,
+                    child: Container(
+                      width: double.infinity,
+                      alignment: Alignment.centerLeft,
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? (isDark ? const Color(0xFF2C3854) : const Color(0xFFD0D7DE))
+                            : Colors.transparent,
+                        border: Border(
+                          bottom: BorderSide(
+                            color: isDark ? Colors.white12 : Colors.black12,
+                            width: 0.5,
+                          ),
+                        ),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                      child: Text(
+                        item,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          color: isSelected
+                              ? (isDark ? const Color(0xFFFFD54F) : const Color(0xFF1A237E))
+                              : (isDark ? Colors.white : Colors.black87),
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  );
+                }).toList(),
                 onChanged: onChanged,
               ),
             ),
@@ -1992,12 +2097,37 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
                           child: DropdownButton<double>(
                             value: pensionDistrictOptions.contains(selectedDistrictVal) ? selectedDistrictVal : 1.0,
                             isExpanded: true,
+                            itemHeight: 38.0,
                             dropdownColor: isDark ? const Color(0xFF1E2638) : Colors.white,
                             items: pensionDistrictOptions.map((k) {
                               String labelText = k == 1.0 || k == 2.0 ? k.toStringAsFixed(0) : k.toString();
+                              final bool isSelected = k == selectedDistrictVal;
                               return DropdownMenuItem<double>(
                                 value: k,
-                                child: Text(labelText),
+                                child: Container(
+                                  width: double.infinity,
+                                  alignment: Alignment.centerLeft,
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? (isDark ? const Color(0xFF2C3854) : const Color(0xFFD0D7DE))
+                                        : Colors.transparent,
+                                    border: Border(
+                                      bottom: BorderSide(
+                                        color: isDark ? Colors.white12 : Colors.black12,
+                                        width: 0.5,
+                                      ),
+                                    ),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                                  child: Text(
+                                    labelText,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                      color: isSelected ? highlightColor : (isDark ? Colors.white : Colors.black87),
+                                    ),
+                                  ),
+                                ),
                               );
                             }).toList(),
                             onChanged: (val) {
@@ -2070,6 +2200,8 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
     ValueChanged<String?> onChanged,
     bool isDark,
   ) {
+    String effectiveValue = items.contains(value) ? value : items.first;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 10.0),
       child: Column(
@@ -2086,12 +2218,43 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
-                value: value,
+                value: effectiveValue,
                 isExpanded: true,
+                itemHeight: 38.0,
                 dropdownColor: isDark ? const Color(0xFF1E2638) : Colors.white,
-                items: items
-                    .map((item) => DropdownMenuItem(value: item, child: Text(item, overflow: TextOverflow.ellipsis)))
-                    .toList(),
+                items: items.map((item) {
+                  final bool isSelected = item == effectiveValue;
+                  return DropdownMenuItem<String>(
+                    value: item,
+                    child: Container(
+                      width: double.infinity,
+                      alignment: Alignment.centerLeft,
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? (isDark ? const Color(0xFF2C3854) : const Color(0xFFD0D7DE))
+                            : Colors.transparent,
+                        border: Border(
+                          bottom: BorderSide(
+                            color: isDark ? Colors.white12 : Colors.black12,
+                            width: 0.5,
+                          ),
+                        ),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                      child: Text(
+                        item,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          color: isSelected
+                              ? (isDark ? const Color(0xFFFFD54F) : const Color(0xFF1A237E))
+                              : (isDark ? Colors.white : Colors.black87),
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  );
+                }).toList(),
                 onChanged: onChanged,
               ),
             ),
