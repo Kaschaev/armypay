@@ -17,7 +17,6 @@ class StorageService {
 
   static Future<File?> _getFile() async {
     try {
-      // Стандартный путь к папке данных приложения Android
       final dir = Directory('/data/user/0/ru.milpay/app_flutter');
       if (!await dir.exists()) {
         await dir.create(recursive: true);
@@ -510,7 +509,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
 
     if (nvlAmount > 0) sb.writeln('• Выслуга лет ($selectedNvl): +${nvlAmount.toStringAsFixed(2)} руб.');
     if (secrecyAmount > 0) sb.writeln('• Гос. тайна ($selectedSecrecy): +${secrecyAmount.toStringAsFixed(2)} руб.');
-    if (ouvsAmount > 0) sb.writeln('• ОУВС ($selectedOuvs): +${ouvsAmount.toStringAsFixed(2)} руб.');
+    if (ouvsAmount > 0) sb.writeln('• НАДБАВКА ЗА ОУС + Командование подразделением ($selectedOuvs): +${ouvsAmount.toStringAsFixed(2)} руб.');
     if (classAmount > 0) sb.writeln('• Классная квалификация ($selectedClass): +${classAmount.toStringAsFixed(2)} руб.');
     if (flightAmount > 0) sb.writeln('• Летный состав ($selectedFlight): +${flightAmount.toStringAsFixed(2)} руб.');
     if (combatDutyAmount > 0) {
@@ -595,9 +594,12 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
       ),
     );
   }
+
   @override
   Widget build(BuildContext context) {
     bool isDark = Theme.of(context).brightness == Brightness.dark;
+    Color highlightColor = isDark ? const Color(0xFFFFD54F) : const Color(0xFF1A237E);
+
     double indexCoeff = salaryPeriods[selectedPeriod] ?? 1.0;
 
     double baseRankVal = militaryRanks[selectedRank] ?? 0.0;
@@ -805,7 +807,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
-                        color: isDark ? Colors.amberAccent : Colors.black)),
+                        color: highlightColor)),
               ],
             ),
           ),
@@ -817,46 +819,53 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
               children: [
                 _buildPeriodSelector(isDark),
 
-                _buildDropdownItem(
-                  'Воинское звание: ${ovz.toStringAsFixed(0)} руб.',
-                  selectedRank,
-                  militaryRanks.keys.toList(),
-                  (val) {
+                _buildColoredLabelDropdown(
+                  title: 'Воинское звание:',
+                  highlightAmount: '${ovz.toStringAsFixed(0)} руб.',
+                  value: selectedRank,
+                  items: militaryRanks.keys.toList(),
+                  onChanged: (val) {
                     _playClickFeedback();
                     setState(() => selectedRank = val!);
                     StorageService.set('dd_rank', val);
                   },
-                  isDark,
+                  isDark: isDark,
+                  highlightColor: highlightColor,
                 ),
 
-                _buildDropdownItem(
-                  'Тарифный разряд: ${ovd.toStringAsFixed(0)} руб.',
-                  selectedTariff,
-                  militaryTariffRanks.keys.toList(),
-                  (val) {
+                _buildColoredLabelDropdown(
+                  title: 'Тарифный разряд:',
+                  highlightAmount: '${ovd.toStringAsFixed(0)} руб.',
+                  value: selectedTariff,
+                  items: militaryTariffRanks.keys.toList(),
+                  onChanged: (val) {
                     _playClickFeedback();
                     setState(() => selectedTariff = val!);
                     StorageService.set('dd_tariff', val);
                   },
-                  isDark,
+                  isDark: isDark,
+                  highlightColor: highlightColor,
                 ),
 
-                _buildDropdownItem(
-                  'Надбавка за летный состав: ${flightAmount > 0 ? "+${flightAmount.toStringAsFixed(1)} руб." : "0.0 руб."}',
-                  selectedFlight,
-                  ['нет', '40% - 3 класс', '50% - 2 класс', '60% - 1 класс', '70% - снайпер'],
-                  (val) {
+                _buildColoredLabelDropdown(
+                  title: 'Надбавка за летный состав:',
+                  highlightAmount: flightAmount > 0 ? '+${flightAmount.toStringAsFixed(1)} руб.' : '0.0 руб.',
+                  value: selectedFlight,
+                  items: ['нет', '40% - 3 класс', '50% - 2 класс', '60% - 1 класс', '70% - снайпер'],
+                  onChanged: (val) {
                     _playClickFeedback();
                     setState(() => selectedFlight = val!);
                     StorageService.set('dd_flight', val);
                   },
-                  isDark,
+                  isDark: isDark,
+                  highlightColor: highlightColor,
                 ),
 
-                _buildDropdownItem(
-                  'Выслуга лет: +${nvlAmount.toStringAsFixed(1)} руб.',
-                  selectedNvl,
-                  [
+                _buildColoredLabelDropdown(
+                  title: 'Выслуга лет:',
+                  highlightAmount: '+${nvlAmount.toStringAsFixed(1)} руб.',
+                  value: selectedNvl,
+                  items: [
                     'до 2 лет – 0%',
                     'от 2 до 5 лет – 10%',
                     'от 5 до 10 лет – 15%',
@@ -865,12 +874,13 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                     'от 20 до 25 лет – 30%',
                     '25 лет и более – 40%'
                   ],
-                  (val) {
+                  onChanged: (val) {
                     _playClickFeedback();
                     setState(() => selectedNvl = val!);
                     StorageService.set('dd_nvl', val);
                   },
-                  isDark,
+                  isDark: isDark,
+                  highlightColor: highlightColor,
                 ),
 
                 _buildDropdownItem(
@@ -885,75 +895,107 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   isDark,
                 ),
 
-                _buildDropdownItem(
-                  'Надбавка за особые условия службы: +${ouvsAmount.toStringAsFixed(1)} руб.',
-                  selectedOuvs,
-                  ['0%', '10%', '20%', '30%', '50%', '70%', '100%'],
-                  (val) {
+                _buildColoredLabelDropdown(
+                  title: 'НАДБАВКА ЗА ОУС + Командование подразделением:',
+                  highlightAmount: '+${ouvsAmount.toStringAsFixed(1)} руб.',
+                  value: selectedOuvs,
+                  items: ['0%', '10%', '20%', '30%', '50%', '70%', '100%'],
+                  onChanged: (val) {
                     _playClickFeedback();
                     setState(() => selectedOuvs = val!);
                     StorageService.set('dd_ouvs', val);
                   },
-                  isDark,
+                  isDark: isDark,
+                  highlightColor: highlightColor,
                 ),
 
-                _buildDropdownItem(
-                  'Надбавка за классную квалификацию: +${classAmount.toStringAsFixed(1)} руб.',
-                  selectedClass,
-                  ['без класса - 0%', '3 класс - 5%', '2 класс - 10%', '1 класс - 20%', 'мастер - 30%'],
-                  (val) {
+                _buildColoredLabelDropdown(
+                  title: 'Надбавка за классную квалификацию:',
+                  highlightAmount: '+${classAmount.toStringAsFixed(1)} руб.',
+                  value: selectedClass,
+                  items: ['без класса - 0%', '3 класс - 5%', '2 класс - 10%', '1 класс - 20%', 'мастер - 30%'],
+                  onChanged: (val) {
                     _playClickFeedback();
                     setState(() => selectedClass = val!);
                     StorageService.set('dd_class', val);
                   },
-                  isDark,
+                  isDark: isDark,
+                  highlightColor: highlightColor,
                 ),
 
                 // НАДБАВКА ЗА БОЕВОЕ ДЕЖУРСТВО
-                _buildCardSection(
-                  title: 'Надбавка за боевое дежурство (от ОВД): ${combatDutyAmount > 0 ? "+${combatDutyAmount.toStringAsFixed(1)} руб." : "0.0 руб."}',
-                  isDark: isDark,
-                  child: Column(
-                    children: [
-                      _buildRadioOptionTile(
-                        title: '5 и более суток в месяц — 30%',
-                        amount: ovd * 0.30,
-                        isSelected: combatDutyPercent == 0.30,
-                        onTap: () {
-                          _playClickFeedback();
-                          final nextVal = combatDutyPercent == 0.30 ? 0.0 : 0.30;
-                          setState(() => combatDutyPercent = nextVal);
-                          StorageService.set('dd_combat_duty', nextVal);
-                        },
-                        isDark: isDark,
-                      ),
-                      const SizedBox(height: 4),
-                      _buildRadioOptionTile(
-                        title: 'от 3 до 4 суток в месяц — 15%',
-                        amount: ovd * 0.15,
-                        isSelected: combatDutyPercent == 0.15,
-                        onTap: () {
-                          _playClickFeedback();
-                          final nextVal = combatDutyPercent == 0.15 ? 0.0 : 0.15;
-                          setState(() => combatDutyPercent = nextVal);
-                          StorageService.set('dd_combat_duty', nextVal);
-                        },
-                        isDark: isDark,
-                      ),
-                      const SizedBox(height: 4),
-                      _buildRadioOptionTile(
-                        title: 'от 1 до 2 суток в месяц — 5%',
-                        amount: ovd * 0.05,
-                        isSelected: combatDutyPercent == 0.05,
-                        onTap: () {
-                          _playClickFeedback();
-                          final nextVal = combatDutyPercent == 0.05 ? 0.0 : 0.05;
-                          setState(() => combatDutyPercent = nextVal);
-                          StorageService.set('dd_combat_duty', nextVal);
-                        },
-                        isDark: isDark,
-                      ),
-                    ],
+                Card(
+                  elevation: 1,
+                  margin: const EdgeInsets.only(bottom: 10),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        RichText(
+                          text: TextSpan(
+                            text: 'Надбавка за боевое дежурство (от ОВД): ',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              color: isDark ? const Color(0xFF82B1FF) : const Color(0xFF1A237E),
+                            ),
+                            children: [
+                              TextSpan(
+                                text: combatDutyAmount > 0 ? '+${combatDutyAmount.toStringAsFixed(1)} руб.' : '0.0 руб.',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: highlightColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        _buildRadioOptionTile(
+                          title: '5 и более суток в месяц — 30%',
+                          amount: ovd * 0.30,
+                          isSelected: combatDutyPercent == 0.30,
+                          onTap: () {
+                            _playClickFeedback();
+                            final nextVal = combatDutyPercent == 0.30 ? 0.0 : 0.30;
+                            setState(() => combatDutyPercent = nextVal);
+                            StorageService.set('dd_combat_duty', nextVal);
+                          },
+                          isDark: isDark,
+                          highlightColor: highlightColor,
+                        ),
+                        const SizedBox(height: 4),
+                        _buildRadioOptionTile(
+                          title: 'от 3 до 4 суток в месяц — 15%',
+                          amount: ovd * 0.15,
+                          isSelected: combatDutyPercent == 0.15,
+                          onTap: () {
+                            _playClickFeedback();
+                            final nextVal = combatDutyPercent == 0.15 ? 0.0 : 0.15;
+                            setState(() => combatDutyPercent = nextVal);
+                            StorageService.set('dd_combat_duty', nextVal);
+                          },
+                          isDark: isDark,
+                          highlightColor: highlightColor,
+                        ),
+                        const SizedBox(height: 4),
+                        _buildRadioOptionTile(
+                          title: 'от 1 до 2 суток в месяц — 5%',
+                          amount: ovd * 0.05,
+                          isSelected: combatDutyPercent == 0.05,
+                          onTap: () {
+                            _playClickFeedback();
+                            final nextVal = combatDutyPercent == 0.05 ? 0.0 : 0.05;
+                            setState(() => combatDutyPercent = nextVal);
+                            StorageService.set('dd_combat_duty', nextVal);
+                          },
+                          isDark: isDark,
+                          highlightColor: highlightColor,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
 
@@ -963,11 +1005,22 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Районный коэффициент: ${rkAmount > 0 ? "+${rkAmount.toStringAsFixed(2)} руб." : "0.0 руб."}',
-                        style: TextStyle(
-                            fontSize: 12,
-                            color: isDark ? Colors.grey.shade300 : Colors.black87),
+                      RichText(
+                        text: TextSpan(
+                          text: 'Районный коэффициент: ',
+                          style: TextStyle(
+                              fontSize: 12,
+                              color: isDark ? Colors.grey.shade300 : Colors.black87),
+                          children: [
+                            TextSpan(
+                              text: rkAmount > 0 ? '+${rkAmount.toStringAsFixed(2)} руб.' : '0.0 руб.',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: highlightColor,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                       const SizedBox(height: 2),
                       Container(
@@ -1014,11 +1067,22 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Северная надбавка: ${northernAmount > 0 ? "+${northernAmount.toStringAsFixed(2)} руб." : "0.0 руб."}',
-                        style: TextStyle(
-                            fontSize: 12,
-                            color: isDark ? Colors.grey.shade300 : Colors.black87),
+                      RichText(
+                        text: TextSpan(
+                          text: 'Северная надбавка: ',
+                          style: TextStyle(
+                              fontSize: 12,
+                              color: isDark ? Colors.grey.shade300 : Colors.black87),
+                          children: [
+                            TextSpan(
+                              text: northernAmount > 0 ? '+${northernAmount.toStringAsFixed(2)} руб.' : '0.0 руб.',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: highlightColor,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                       const SizedBox(height: 2),
                       Container(
@@ -1062,33 +1126,37 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   ),
                 ),
 
-                _buildDropdownItem(
-                  'Ежемесячная премия: ${premiumAmount > 0 ? "+${premiumAmount.toStringAsFixed(1)} руб." : "0.0 руб."}',
-                  selectedPremium,
-                  List.generate(26, (i) => '$i%'),
-                  (val) {
+                _buildColoredLabelDropdown(
+                  title: 'Ежемесячная премия:',
+                  highlightAmount: premiumAmount > 0 ? '+${premiumAmount.toStringAsFixed(1)} руб.' : '0.0 руб.',
+                  value: selectedPremium,
+                  items: List.generate(26, (i) => '$i%'),
+                  onChanged: (val) {
                     _playClickFeedback();
                     setState(() => selectedPremium = val!);
                     StorageService.set('dd_premium', val);
                   },
-                  isDark,
+                  isDark: isDark,
+                  highlightColor: highlightColor,
                 ),
 
-                _buildDropdownItem(
-                  'Надбавка подразделениям (ВКС, ВМФ, РВСН, ГУ ГШ): ${specialUnitsAmount > 0 ? "+${specialUnitsAmount.toStringAsFixed(1)} руб." : "0.0 руб."}',
-                  selectedSpecialUnits,
-                  [
+                _buildColoredLabelDropdown(
+                  title: 'Надбавка подразделениям (ВКС, ВМФ, РВСН, ГУ ГШ):',
+                  highlightAmount: specialUnitsAmount > 0 ? '+${specialUnitsAmount.toStringAsFixed(1)} руб.' : '0.0 руб.',
+                  value: selectedSpecialUnits,
+                  items: [
                     'нет (0%)',
                     '100% от ОВД - офицерам',
                     '110% от ОВД - мичманы, прапорщики',
                     '120% от ОВД - матросы, старшины',
                   ],
-                  (val) {
+                  onChanged: (val) {
                     _playClickFeedback();
                     setState(() => selectedSpecialUnits = val!);
                     StorageService.set('dd_special_units', val);
                   },
-                  isDark,
+                  isDark: isDark,
+                  highlightColor: highlightColor,
                 ),
 
                 Container(
@@ -1114,10 +1182,11 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   ),
                 ),
 
-                _buildDropdownItem(
-                  'Прочие достижения: ${otherAchievementsAmount > 0 ? "+${otherAchievementsAmount.toStringAsFixed(1)} руб." : "0.0 руб."}',
-                  selectedOtherAchievements,
-                  [
+                _buildColoredLabelDropdown(
+                  title: 'Прочие достижения:',
+                  highlightAmount: otherAchievementsAmount > 0 ? '+${otherAchievementsAmount.toStringAsFixed(1)} руб.' : '0.0 руб.',
+                  value: selectedOtherAchievements,
+                  items: [
                     '0%',
                     '15% - 2 уровень физо',
                     '20% - за разминирование',
@@ -1129,36 +1198,41 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                     '90% - КМС по ВПВС',
                     '100% - МС по ВПВС',
                   ],
-                  (val) {
+                  onChanged: (val) {
                     _playClickFeedback();
                     setState(() => selectedOtherAchievements = val!);
                     StorageService.set('dd_achievements', val);
                   },
-                  isDark,
+                  isDark: isDark,
+                  highlightColor: highlightColor,
                 ),
 
-                _buildCheckboxTile(
-                  'Надбавка за особые достижения (- контракт 1-4 т.р.): ${(ovd * 0.50).toStringAsFixed(1)} рублей',
-                  hasContractBonus,
-                  (val) {
+                _buildColoredCheckboxTile(
+                  title: 'Надбавка за особые достижения (- контракт 1-4 т.р.):',
+                  highlightAmount: '${(ovd * 0.50).toStringAsFixed(1)} руб.',
+                  value: hasContractBonus,
+                  onChanged: (val) {
                     _playClickFeedback();
                     final newVal = val ?? false;
                     setState(() => hasContractBonus = newVal);
                     StorageService.set('dd_contract_bonus', newVal);
                   },
-                  isDark,
+                  isDark: isDark,
+                  highlightColor: highlightColor,
                 ),
 
-                _buildCheckboxTile(
-                  'На должности водителя (30% от ОВД): ${(ovd * 0.30).toStringAsFixed(1)} рублей',
-                  isDriver,
-                  (val) {
+                _buildColoredCheckboxTile(
+                  title: 'На должности водителя (30% от ОВД):',
+                  highlightAmount: '${(ovd * 0.30).toStringAsFixed(1)} руб.',
+                  value: isDriver,
+                  onChanged: (val) {
                     _playClickFeedback();
                     final newVal = val ?? false;
                     setState(() => isDriver = newVal);
                     StorageService.set('dd_driver', newVal);
                   },
-                  isDark,
+                  isDark: isDark,
+                  highlightColor: highlightColor,
                 ),
 
                 _buildDropdownItem(
@@ -1222,16 +1296,18 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   isDark,
                 ),
 
-                _buildCheckboxTile(
-                  'Материальная помощь: ${ods.toStringAsFixed(1)} рублей',
-                  hasMatHelp,
-                  (val) {
+                _buildColoredCheckboxTile(
+                  title: 'Материальная помощь:',
+                  highlightAmount: '${ods.toStringAsFixed(1)} руб.',
+                  value: hasMatHelp,
+                  onChanged: (val) {
                     _playClickFeedback();
                     final newVal = val ?? false;
                     setState(() => hasMatHelp = newVal);
                     StorageService.set('dd_mat_help', newVal);
                   },
-                  isDark,
+                  isDark: isDark,
+                  highlightColor: highlightColor,
                 ),
 
                 _buildCheckboxTile(
@@ -1301,12 +1377,23 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                         ],
                       ),
                       const SizedBox(height: 6),
-                      Text(
-                        'Положено суток отдыха: $extraRestDays дн. | Компенсация: ${comp844Amount.toStringAsFixed(2)} руб.',
-                        style: TextStyle(
-                            fontSize: 12,
-                            color: isDark ? Colors.lightBlueAccent : Colors.blueGrey,
-                            fontWeight: FontWeight.bold),
+                      RichText(
+                        text: TextSpan(
+                          text: 'Положено суток отдыха: $extraRestDays дн. | Компенсация: ',
+                          style: TextStyle(
+                              fontSize: 12,
+                              color: isDark ? Colors.grey.shade300 : Colors.blueGrey,
+                              fontWeight: FontWeight.bold),
+                          children: [
+                            TextSpan(
+                              text: '${comp844Amount.toStringAsFixed(2)} руб.',
+                              style: TextStyle(
+                                color: highlightColor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -1346,12 +1433,23 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                         ],
                       ),
                       const SizedBox(height: 6),
-                      Text(
-                        'Надбавка: ${(riskPercent * 100).toInt()}% от ОВД | Сумма: ${riskAmount.toStringAsFixed(2)} руб.',
-                        style: TextStyle(
-                            fontSize: 12,
-                            color: isDark ? Colors.lightBlueAccent : Colors.blueGrey,
-                            fontWeight: FontWeight.bold),
+                      RichText(
+                        text: TextSpan(
+                          text: 'Надбавка: ${(riskPercent * 100).toInt()}% от ОВД | Сумма: ',
+                          style: TextStyle(
+                              fontSize: 12,
+                              color: isDark ? Colors.grey.shade300 : Colors.blueGrey,
+                              fontWeight: FontWeight.bold),
+                          children: [
+                            TextSpan(
+                              text: '${riskAmount.toStringAsFixed(2)} руб.',
+                              style: TextStyle(
+                                color: highlightColor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -1365,12 +1463,117 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     );
   }
 
+  Widget _buildColoredLabelDropdown({
+    required String title,
+    required String highlightAmount,
+    required String value,
+    required List<String> items,
+    required ValueChanged<String?> onChanged,
+    required bool isDark,
+    required Color highlightColor,
+  }) {
+    String effectiveValue = items.contains(value) ? value : items.first;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          RichText(
+            text: TextSpan(
+              text: '$title ',
+              style: TextStyle(
+                  fontSize: 12,
+                  color: isDark ? Colors.grey.shade300 : Colors.black87),
+              children: [
+                TextSpan(
+                  text: highlightAmount,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: highlightColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 2),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1E2638) : const Color(0xFFE4E7ED),
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(
+                  color: isDark ? Colors.grey.shade700 : Colors.grey.shade400),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: effectiveValue,
+                isExpanded: true,
+                dropdownColor: isDark ? const Color(0xFF1E2638) : Colors.white,
+                items: items
+                    .map((item) => DropdownMenuItem(
+                        value: item,
+                        child: Text(item, overflow: TextOverflow.ellipsis)))
+                    .toList(),
+                onChanged: onChanged,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildColoredCheckboxTile({
+    required String title,
+    required String highlightAmount,
+    required bool value,
+    required ValueChanged<bool?> onChanged,
+    required bool isDark,
+    required Color highlightColor,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E2638) : const Color(0xFFE4E7ED),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(
+            color: isDark ? Colors.grey.shade700 : Colors.grey.shade400),
+      ),
+      child: CheckboxListTile(
+        title: RichText(
+          text: TextSpan(
+            text: '$title ',
+            style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: isDark ? Colors.white : Colors.black87),
+            children: [
+              TextSpan(
+                text: highlightAmount,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: highlightColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+        value: value,
+        dense: true,
+        controlAffinity: ListTileControlAffinity.leading,
+        onChanged: onChanged,
+      ),
+    );
+  }
+
   Widget _buildRadioOptionTile({
     required String title,
     required double amount,
     required bool isSelected,
     required VoidCallback onTap,
     required bool isDark,
+    required Color highlightColor,
   }) {
     return InkWell(
       onTap: onTap,
@@ -1413,9 +1616,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
-                color: isSelected
-                    ? (isDark ? Colors.amberAccent : const Color(0xFF1A237E))
-                    : (isDark ? Colors.grey.shade400 : Colors.grey.shade700),
+                color: highlightColor,
               ),
             ),
           ],
@@ -1646,6 +1847,7 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
   @override
   Widget build(BuildContext context) {
     bool isDark = Theme.of(context).brightness == Brightness.dark;
+    Color highlightColor = isDark ? const Color(0xFFFFD54F) : const Color(0xFF1A237E);
 
     double ovz = militaryRanks[selectedRank] ?? 0.0;
     double ovd = militaryTariffRanks[selectedTariff] ?? 0.0;
@@ -1704,7 +1906,7 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 22,
-                        color: isDark ? Colors.amberAccent : const Color(0xFF1A237E))),
+                        color: highlightColor)),
                 const SizedBox(height: 2),
                 Text('База ДД: ${totalBaseDds.toStringAsFixed(0)} руб. | ${(pensionPercent * 100).toInt()}% от ДД',
                     style: const TextStyle(fontSize: 12, color: Colors.blueGrey)),
