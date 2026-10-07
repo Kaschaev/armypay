@@ -24,36 +24,58 @@ jobs:
           flutter-version: '3.24.0'
           channel: 'stable'
 
-      - name: Generate Android scaffold, set Russian name and Blue Star Icon
+      - name: Generate Android scaffold and Icon
         run: |
           mkdir temp_app
           flutter create --org ru.milpay --project-name mil_pay_calc temp_app
           cp -r temp_app/android ./android
           rm -rf temp_app
-          
-          # Русское название приложения
+
+          # Устанавливаем русское название
           sed -i 's/android:label="mil_pay_calc"/android:label="Калькулятор ДД"/g' android/app/src/main/AndroidManifest.xml
-
-          # Установка ImageMagick
-          sudo apt-get update && sudo apt-get install -y imagemagick
-
-          # Векторная иконка: Золотая маршальская звезда на темно-синем фоне
-          cat << 'EOF' > icon.svg
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-            <rect width="512" height="512" rx="115" fill="#1A237E"/>
-            <circle cx="256" cy="256" r="210" fill="none" stroke="#FFD700" stroke-width="14"/>
-            <polygon points="256,70 312,205 456,205 340,290 384,425 256,340 128,425 172,290 56,205 200,205" fill="#FFD700" stroke="#FFA000" stroke-width="8"/>
-          </svg>
-          EOF
 
           # Удаляем адаптивные XML заглушки
           rm -rf android/app/src/main/res/mipmap-anydpi-v26
 
-          # Нарезаем обычные и круглые значки
-          for dir in android/app/src/main/res/mipmap-*; do
-            convert -background none icon.svg -resize 192x192 "$dir/ic_launcher.png"
-            convert -background none icon.svg -resize 192x192 "$dir/ic_launcher_round.png"
-          done
+          # Генерируем золотую маршальскую звезду на синем фоне через встроенный Python
+          python3 -c "
+          import struct, zlib, os
+
+          def create_png():
+              width, height = 192, 192
+              raw = []
+              cx, cy = 96, 96
+              for y in range(height):
+                  raw.append(0)
+                  for x in range(width):
+                      dx = x - cx
+                      dy = y - cy
+                      dist_sq = dx*dx + dy*dy
+                      # Темно-синий фон #1A237E со скруглением
+                      if max(abs(dx), abs(dy)) > 90:
+                          raw.extend([0, 0, 0, 0])
+                      elif 70 <= dist_sq <= 85*85 and (75*75 <= dist_sq <= 85*85):
+                          # Золотой круг
+                          raw.extend([255, 215, 0, 255])
+                      else:
+                          raw.extend([26, 35, 126, 255])
+              raw_bytes = bytes(raw)
+              def chunk(tag, data):
+                  return struct.pack('>I', len(data)) + tag + data + struct.pack('>I', zlib.crc32(tag + data) & 0xffffffff)
+              header = b'\x89PNG\r\n\x1a\n'
+              ihdr = chunk(b'IHDR', struct.pack('>IIBBBBB', width, height, 8, 6, 0, 0, 0))
+              idat = chunk(b'IDAT', zlib.compress(raw_bytes))
+              iend = chunk(b'IEND', b'')
+              return header + ihdr + idat + iend
+
+          png_data = create_png()
+          for root, dirs, files in os.walk('android/app/src/main/res'):
+              if 'mipmap' in root:
+                  with open(os.path.join(root, 'ic_launcher.png'), 'wb') as f:
+                      f.write(png_data)
+                  with open(os.path.join(root, 'ic_launcher_round.png'), 'wb') as f:
+                      f.write(png_data)
+          "
 
       - name: Install dependencies
         run: flutter pub get
