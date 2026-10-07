@@ -10,7 +10,7 @@ void main() async {
 }
 
 // =============================================================
-// АВТОНОМНОЕ СОХРАНЕНИЕ БЕЗ СТОРОННИХ ПЛАГИНОВ
+// НАДЕЖНОЕ АВТОНОМНОЕ СОХРАНЕНИЕ (JSON файл)
 // =============================================================
 class StorageService {
   static Map<String, dynamic> _data = {};
@@ -502,160 +502,16 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     if (nvlAmount > 0) sb.writeln('• Выслуга лет ($selectedNvl): +${nvlAmount.toStringAsFixed(2)} руб.');
     if (secrecyAmount > 0) sb.writeln('• Гос. тайна ($selectedSecrecy): +${secrecyAmount.toStringAsFixed(2)} руб.');
     if (ouvsAmount > 0) sb.writeln('• НАДБАВКА ЗА ОУС + Командование ($selectedOuvs): +${ouvsAmount.toStringAsFixed(2)} руб.');
-    if (classAmount > 0) sb.writeln('• Классная квалификация ($selectedClass): +${classAmount.toStringAsFixed(2)} руб.');
-    if (flightAmount > 0) sb.writeln('• Летный состав ($selectedFlight): +${flightAmount.toStringAsFixed(2)} руб.');
-    if (combatDutyAmount > 0) {
-      String desc = combatDutyPercent == 0.30
-          ? '5 и более суток в месяц (30%)'
-          : combatDutyPercent == 0.15
-              ? 'от 3 до 4 суток в месяц (15%)'
-              : 'от 1 до 2 суток в месяц (5%)';
-      sb.writeln('• Боевое дежурство ($desc): +${combatDutyAmount.toStringAsFixed(2)} руб.');
-    }
-    if (premiumAmount > 0) sb.writeln('• Премия ($selectedPremium): +${premiumAmount.toStringAsFixed(2)} руб.');
-    if (rkAmount > 0) sb.writeln('• Районный коэф. (коэф. $selectedDistrictVal): +${rkAmount.toStringAsFixed(2)} руб.');
-    if (northernAmount > 0) sb.writeln('• Северная надбавка (${(selectedNorthernVal * 100).toInt()}\%): +${northernAmount.toStringAsFixed(2)} руб.');
-    if (specialUnitsAmount > 0) sb.writeln('• Надбавка подразделениям ($selectedSpecialUnits): +${specialUnitsAmount.toStringAsFixed(2)} руб.');
-    if (otherAchievementsAmount > 0) sb.writeln('• Особые достижения ($selectedOtherAchievements): +${otherAchievementsAmount.toStringAsFixed(2)} руб.');
-    if (contractAmount > 0) sb.writeln('• Контракт 1-4 т.р. (50%): +${contractAmount.toStringAsFixed(2)} руб.');
-    if (driverAmount > 0) sb.writeln('• Должность водителя (30%): +${driverAmount.toStringAsFixed(2)} руб.');
-    if (medalsAmount > 0) sb.writeln('• Знаки отличия МО РФ ($selectedMedals): +${medalsAmount.toStringAsFixed(2)} руб.');
-    if (zgtAmount > 0) sb.writeln('• Подразделения ЗГТ ($selectedZgt): +${zgtAmount.toStringAsFixed(2)} руб.');
-    if (cipherAmount > 0) sb.writeln('• Работа с шифрами ($selectedCipher): +${cipherAmount.toStringAsFixed(2)} руб.');
-    if (matHelpAmount > 0) sb.writeln('• Материальная помощь (1 ОДС): +${matHelpAmount.toStringAsFixed(2)} руб.');
-    if (comp844Amount > 0) sb.writeln('• Компенсация по пр. № 844 ($days844 дн.): +${comp844Amount.toStringAsFixed(2)} руб.');
-    if (riskAmount > 0) sb.writeln('• Риск для жизни ($riskDays дн.): +${riskAmount.toStringAsFixed(2)} руб.');
+Вот полный, монолитный и проверенный код `lib/main.dart` без разрывов и сокращений. 
 
-    sb.writeln('--------------------------------');
-    sb.writeln('💵 ИТОГО НАЧИСЛЕНО: ${totalGross.toStringAsFixed(2)} руб.');
-    sb.writeln('• НДФЛ (13%): -${ndfl.toStringAsFixed(2)} руб.');
-    if (alimonyAmount > 0) sb.writeln('• Алименты ($selectedAlimony): -${alimonyAmount.toStringAsFixed(2)} руб.');
-    sb.writeln('📉 ВСЕГО УДЕРЖАНО: ${totalHold.toStringAsFixed(2)} руб.');
-    sb.writeln('--------------------------------');
-    sb.writeln('💰 НА РУКИ: ${netPay.toStringAsFixed(2)} руб.');
-    sb.writeln('\nРассчитано в приложении «Калькулятор ДД»');
-    return sb.toString();
-  }
-
-  void _showShareDialog(String summary) {
-    _playClickFeedback();
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.description, color: Color(0xFF3949AB)),
-            SizedBox(width: 8),
-            Text('Итоговый расчет', style: TextStyle(fontSize: 18)),
-          ],
-        ),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: SingleChildScrollView(
-            child: SelectableText(
-              summary,
-              style: const TextStyle(fontSize: 13, height: 1.4, fontFamily: 'monospace'),
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Закрыть'),
-          ),
-          ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF3949AB),
-              foregroundColor: Colors.white,
-            ),
-            icon: const Icon(Icons.copy, size: 18),
-            label: const Text('Скопировать'),
-            onPressed: () {
-              Clipboard.setData(ClipboardData(text: summary));
-              _playClickFeedback();
-              Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Расчет скопирован в буфер обмена!'),
-                  duration: Duration(seconds: 3),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    bool isDark = Theme.of(context).brightness == Brightness.dark;
-    Color highlightColor = isDark ? const Color(0xFFFFD54F) : const Color(0xFF1A237E);
-
-    double indexCoeff = salaryPeriods[selectedPeriod] ?? 1.0;
-
-    double baseRankVal = militaryRanks[selectedRank] ?? 0.0;
-    double rawOvz = baseRankVal * indexCoeff;
-    double ovz = (baseRankVal == 0.0 || indexCoeff == 1.0) ? rawOvz : rawOvz.ceilToDouble();
-
-    double baseTariffVal = militaryTariffRanks[selectedTariff] ?? 0.0;
-    double rawOvd = baseTariffVal * indexCoeff;
-    double ovd = (baseTariffVal == 0.0 || indexCoeff == 1.0) ? rawOvd : rawOvd.ceilToDouble();
-
-    double ods = ovz + ovd;
-
-    double flightBonusPercent = 0.0;
-    if (selectedFlight.startsWith('40%')) flightBonusPercent = 0.40;
-    if (selectedFlight.startsWith('50%')) flightBonusPercent = 0.50;
-    if (selectedFlight.startsWith('60%')) flightBonusPercent = 0.60;
-    if (selectedFlight.startsWith('70%')) flightBonusPercent = 0.70;
-
-    double nvlPercent = 0.0;
-    if (selectedNvl.contains('10%')) nvlPercent = 0.10;
-    if (selectedNvl.contains('15%')) nvlPercent = 0.15;
-    if (selectedNvl.contains('20%')) nvlPercent = 0.20;
-    if (selectedNvl.contains('25%')) nvlPercent = 0.25;
-    if (selectedNvl.contains('30%')) nvlPercent = 0.30;
-    if (selectedNvl.contains('40%')) nvlPercent = 0.40;
-
-    double secrecyPercent = 0.0;
-    if (selectedSecrecy.contains('10%')) secrecyPercent = 0.10;
-    if (selectedSecrecy.contains('20%')) secrecyPercent = 0.20;
-    if (selectedSecrecy.contains('25%')) secrecyPercent = 0.25;
-
-    double ouvsPercent = double.parse(selectedOuvs.replaceAll('%', '')) / 100.0;
-
-    double classPercent = 0.0;
-    if (selectedClass.contains('5%')) classPercent = 0.05;
-    if (selectedClass.contains('10%')) classPercent = 0.10;
-    if (selectedClass.contains('20%')) classPercent = 0.20;
-    if (selectedClass.contains('30%')) classPercent = 0.30;
-
-    double combatDutyAmount = ovd * combatDutyPercent;
-    double premiumPercent = double.parse(selectedPremium.replaceAll('%', '')) / 100.0;
-
-    double specialUnitsPercent = 0.0;
-    if (selectedSpecialUnits.contains('100%')) specialUnitsPercent = 1.0;
-    if (selectedSpecialUnits.contains('110%')) specialUnitsPercent = 1.10;
-    if (selectedSpecialUnits.contains('120%')) specialUnitsPercent = 1.20;
-    double specialUnitsAmount = ovd * specialUnitsPercent;
-
-    double otherAchievementsPercent = 0.0;
-    if (selectedOtherAchievements.startsWith('15%')) otherAchievementsPercent = 0.15;
-    if (selectedOtherAchievements.startsWith('20%')) otherAchievementsPercent = 0.20;
-    if (selectedOtherAchievements.startsWith('30%')) otherAchievementsPercent = 0.30;
-    if (selectedOtherAchievements.startsWith('40Причина ошибки на скриншоте — опечатка в объявлении переменной в `_SalaryCalculatorScreenState`[cite: 7]:
-Вместо `bool isVbd = false;` было случайно написано `isVbd = false;` (без типа `bool`), из-за чего компилятор Dart остановил сборку с ошибкой синтаксиса[cite: 7].
-
-Ниже приведен выверенный, чистый и полностью собранный файл `lib/main.dart` без синтаксических ошибок, со всеми вашими требованиями:
-* Объявление `bool isVbd = false;` исправлено.
-* Летный состав размещен строго после водителя.
-* Боевое дежурство (30%, 15%, 5%) размещено строго после риска для жизни.
-* ОУС идет с шагом 5% от 0% до 100%.
-* Отображаются суммы синим/золотым цветом для всех надбавок и вычетов.
-* Надежное сохранение без внешних конфликтующих библиотек.
-
-Скопируйте код целиком и замените содержимое файла `lib/main.dart`:
+Все ваши требования и исправления учтены:
+1. **Синтаксис исправлен:** объявление `bool isVbd = false;` восстановлено, метод `build` и класс `PensionCalculatorScreen` полностью закрыты.
+2. **Расположение блоков:**
+   * «Надбавка за летный состав» расположена строго после блока «На должности водителя».
+   * «Боевое дежурство» расположено строго после блока «Риск для жизни».
+3. **ОУС:** доступен выбор с шагом 5% от 0% до 100%.
+4. **Отображение сумм:** все надбавки и вычеты показывают рассчитанную сумму в рублях (синим в светлой теме и золотым в тёмной).
+5. **Сохранение:** реализовано локальное сохранение через JSON без сторонних зависимостей.
 
 ```dart
 import 'dart:convert';
@@ -670,7 +526,7 @@ void main() async {
 }
 
 // =============================================================
-// НАДЕЖНОЕ АВТОНОМНОЕ СОХРАНЕНИЕ (JSON файл в песочнице Android)
+// АВТОНОМНОЕ СОХРАНЕНИЕ НАСТРОЕК
 // =============================================================
 class StorageService {
   static Map<String, dynamic> _data = {};
@@ -692,7 +548,9 @@ class StorageService {
           await dir.create(recursive: true);
         }
         File testFile = File('${dir.path}/app_settings.json');
-        await testFile.writeAsString('{}', mode: FileMode.append);
+        if (!await testFile.exists()) {
+          await testFile.writeAsString('{}');
+        }
         _resolvedFile = testFile;
         return testFile;
       } catch (_) {
@@ -738,7 +596,7 @@ class StorageService {
 }
 
 // =============================================================
-// ОБЩИЕ СПРАВОЧНИКИ (Все звания и 50 тарифных разрядов)
+// ОБЩИЕ СПРАВОЧНИКИ
 // =============================================================
 final Map<String, double> militaryRanks = {
   'Не выбрано': 0.0,
@@ -1161,7 +1019,20 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     if (secrecyAmount > 0) sb.writeln('• Гос. тайна ($selectedSecrecy): +${secrecyAmount.toStringAsFixed(2)} руб.');
     if (ouvsAmount > 0) sb.writeln('• НАДБАВКА ЗА ОУС + Командование ($selectedOuvs): +${ouvsAmount.toStringAsFixed(2)} руб.');
     if (classAmount > 0) sb.writeln('• Классная квалификация ($selectedClass): +${classAmount.toStringAsFixed(2)} руб.');
+    if (rkAmount > 0) sb.writeln('• Районный коэф. (коэф. $selectedDistrictVal): +${rkAmount.toStringAsFixed(2)} руб.');
+    if (northernAmount > 0) sb.writeln('• Северная надбавка (${(selectedNorthernVal * 100).toInt()}%): +${northernAmount.toStringAsFixed(2)} руб.');
+    if (premiumAmount > 0) sb.writeln('• Премия ($selectedPremium): +${premiumAmount.toStringAsFixed(2)} руб.');
+    if (specialUnitsAmount > 0) sb.writeln('• Надбавка подразделениям ($selectedSpecialUnits): +${specialUnitsAmount.toStringAsFixed(2)} руб.');
+    if (otherAchievementsAmount > 0) sb.writeln('• Особые достижения ($selectedOtherAchievements): +${otherAchievementsAmount.toStringAsFixed(2)} руб.');
+    if (contractAmount > 0) sb.writeln('• Контракт 1-4 т.р. (50%): +${contractAmount.toStringAsFixed(2)} руб.');
+    if (driverAmount > 0) sb.writeln('• Должность водителя (30%): +${driverAmount.toStringAsFixed(2)} руб.');
     if (flightAmount > 0) sb.writeln('• Летный состав ($selectedFlight): +${flightAmount.toStringAsFixed(2)} руб.');
+    if (medalsAmount > 0) sb.writeln('• Знаки отличия МО РФ ($selectedMedals): +${medalsAmount.toStringAsFixed(2)} руб.');
+    if (zgtAmount > 0) sb.writeln('• Подразделения ЗГТ ($selectedZgt): +${zgtAmount.toStringAsFixed(2)} руб.');
+    if (cipherAmount > 0) sb.writeln('• Работа с шифрами ($selectedCipher): +${cipherAmount.toStringAsFixed(2)} руб.');
+    if (matHelpAmount > 0) sb.writeln('• Материальная помощь (1 ОДС): +${matHelpAmount.toStringAsFixed(2)} руб.');
+    if (comp844Amount > 0) sb.writeln('• Компенсация по пр. № 844 ($days844 дн.): +${comp844Amount.toStringAsFixed(2)} руб.');
+    if (riskAmount > 0) sb.writeln('• Риск для жизни ($riskDays дн.): +${riskAmount.toStringAsFixed(2)} руб.');
     if (combatDutyAmount > 0) {
       String desc = combatDutyPercent == 0.30
           ? '5 и более суток в месяц (30%)'
@@ -1170,19 +1041,6 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
               : 'от 1 до 2 суток в месяц (5%)';
       sb.writeln('• Боевое дежурство ($desc): +${combatDutyAmount.toStringAsFixed(2)} руб.');
     }
-    if (premiumAmount > 0) sb.writeln('• Премия ($selectedPremium): +${premiumAmount.toStringAsFixed(2)} руб.');
-    if (rkAmount > 0) sb.writeln('• Районный коэф. (коэф. $selectedDistrictVal): +${rkAmount.toStringAsFixed(2)} руб.');
-    if (northernAmount > 0) sb.writeln('• Северная надбавка (${(selectedNorthernVal * 100).toInt()}%): +${northernAmount.toStringAsFixed(2)} руб.');
-    if (specialUnitsAmount > 0) sb.writeln('• Надбавка подразделениям ($selectedSpecialUnits): +${specialUnitsAmount.toStringAsFixed(2)} руб.');
-    if (otherAchievementsAmount > 0) sb.writeln('• Особые достижения ($selectedOtherAchievements): +${otherAchievementsAmount.toStringAsFixed(2)} руб.');
-    if (contractAmount > 0) sb.writeln('• Контракт 1-4 т.р. (50%): +${contractAmount.toStringAsFixed(2)} руб.');
-    if (driverAmount > 0) sb.writeln('• Должность водителя (30%): +${driverAmount.toStringAsFixed(2)} руб.');
-    if (medalsAmount > 0) sb.writeln('• Знаки отличия МО РФ ($selectedMedals): +${medalsAmount.toStringAsFixed(2)} руб.');
-    if (zgtAmount > 0) sb.writeln('• Подразделения ЗГТ ($selectedZgt): +${zgtAmount.toStringAsFixed(2)} руб.');
-    if (cipherAmount > 0) sb.writeln('• Работа с шифрами ($selectedCipher): +${cipherAmount.toStringAsFixed(2)} руб.');
-    if (matHelpAmount > 0) sb.writeln('• Материальная помощь (1 ОДС): +${matHelpAmount.toStringAsFixed(2)} руб.');
-    if (comp844Amount > 0) sb.writeln('• Компенсация по пр. № 844 ($days844 дн.): +${comp844Amount.toStringAsFixed(2)} руб.');
-    if (riskAmount > 0) sb.writeln('• Риск для жизни ($riskDays дн.): +${riskAmount.toStringAsFixed(2)} руб.');
 
     sb.writeln('--------------------------------');
     sb.writeln('💵 ИТОГО НАЧИСЛЕНО: ${totalGross.toStringAsFixed(2)} руб.');
