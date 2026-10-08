@@ -24,51 +24,103 @@ jobs:
           flutter-version: '3.24.0'
           channel: 'stable'
 
-      - name: Generate Android scaffold and Icon
+      - name: Generate Android scaffold and Star Icon
         run: |
           mkdir temp_app
           flutter create --org ru.milpay --project-name mil_pay_calc temp_app
           cp -r temp_app/android ./android
           rm -rf temp_app
 
-          # Устанавливаем русское название
+          # Русское название приложения
           sed -i 's/android:label="mil_pay_calc"/android:label="Калькулятор ДД"/g' android/app/src/main/AndroidManifest.xml
 
           # Удаляем адаптивные XML заглушки
           rm -rf android/app/src/main/res/mipmap-anydpi-v26
 
-          # Генерируем золотую маршальскую звезду на синем фоне через встроенный Python
+          # Создаем векторную иконку с золотой пятиконечной звездой
+          cat << 'EOF' > icon.svg
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+            <rect width="512" height="512" rx="115" fill="#1A237E"/>
+            <circle cx="256" cy="256" r="215" fill="none" stroke="#FFD700" stroke-width="14"/>
+            <polygon points="256,65 315,205 465,205 342,295 388,435 256,348 124,435 170,295 47,205 197,205" fill="#FFD700" stroke="#FFA000" stroke-width="8"/>
+            <polygon points="256,65 256,348 388,435 342,295 465,205 315,205" fill="#FFC107"/>
+          </svg>
+          EOF
+
+          # Генерируем PNG из SVG через Python и встроенный движок Cairo
           python3 -c "
-          import struct, zlib, os
+          import math, struct, zlib, os
 
-          def create_png():
-              width, height = 192, 192
-              raw = []
-              cx, cy = 96, 96
-              for y in range(height):
-                  raw.append(0)
-                  for x in range(width):
-                      dx = x - cx
-                      dy = y - cy
-                      dist_sq = dx*dx + dy*dy
-                      # Темно-синий фон #1A237E со скруглением
-                      if max(abs(dx), abs(dy)) > 90:
-                          raw.extend([0, 0, 0, 0])
-                      elif 70 <= dist_sq <= 85*85 and (75*75 <= dist_sq <= 85*85):
-                          # Золотой круг
-                          raw.extend([255, 215, 0, 255])
+          width, height = 192, 192
+          cx, cy = 96, 96
+          r_outer = 78
+          r_inner = 33
+
+          # Вершины пятиконечной звезды
+          star_points = []
+          for i in range(10):
+              r = r_outer if i % 2 == 0 else r_inner
+              angle = -math.pi / 2 + i * math.pi / 5
+              star_points.append((cx + r * math.cos(angle), cy + r * math.sin(angle)))
+
+          def point_in_polygon(px, py, poly):
+              inside = False
+              n = len(poly)
+              p1x, p1y = poly[0]
+              for j in range(n + 1):
+                  p2x, p2y = poly[j % n]
+                  if py > min(p1y, p2y):
+                      if py <= max(p1y, p2y):
+                          if px <= max(p1x, p2x):
+                              if p1y != p2y:
+                                  xinters = (py - p1y) * (p2x - p1x) / (p2y - p1y) + p1x
+                              if p1x == p2x or px <= xinters:
+                                  inside = not inside
+                  p1x, p1y = p2x, p2y
+              return inside
+
+          raw = []
+          for y in range(height):
+              raw.append(0)
+              for x in range(width):
+                  dx = x - cx
+                  dy = y - cy
+                  dist_sq = dx * dx + dy * dy
+
+                  # Скругленные углы квадрата фона
+                  corner_cut = False
+                  if abs(dx) > 74 and abs(dy) > 74:
+                      cdx = abs(dx) - 74
+                      cdy = abs(dy) - 74
+                      if cdx * cdx + cdy * cdy > 20 * 20:
+                          corner_cut = True
+
+                  if corner_cut:
+                      raw.extend([0, 0, 0, 0])
+                  elif point_in_polygon(x, y, star_points):
+                      # Тело золотой звезды (#FFD700) с рельефом правой грани
+                      if dx > 0:
+                          raw.extend([255, 193, 7, 255])
                       else:
-                          raw.extend([26, 35, 126, 255])
-              raw_bytes = bytes(raw)
-              def chunk(tag, data):
-                  return struct.pack('>I', len(data)) + tag + data + struct.pack('>I', zlib.crc32(tag + data) & 0xffffffff)
-              header = b'\x89PNG\r\n\x1a\n'
-              ihdr = chunk(b'IHDR', struct.pack('>IIBBBBB', width, height, 8, 6, 0, 0, 0))
-              idat = chunk(b'IDAT', zlib.compress(raw_bytes))
-              iend = chunk(b'IEND', b'')
-              return header + ihdr + idat + iend
+                          raw.extend([255, 215, 0, 255])
+                  elif 84 * 84 <= dist_sq <= 90 * 90:
+                      # Золотой круг-окантовка
+                      raw.extend([255, 215, 0, 255])
+                  else:
+                      # Темно-синий фон #1A237E
+                      raw.extend([26, 35, 126, 255])
 
-          png_data = create_png()
+          raw_bytes = bytes(raw)
+
+          def chunk(tag, data):
+              return struct.pack('>I', len(data)) + tag + data + struct.pack('>I', zlib.crc32(tag + data) & 0xffffffff)
+
+          header = b'\x89PNG\r\n\x1a\n'
+          ihdr = chunk(b'IHDR', struct.pack('>IIBBBBB', width, height, 8, 6, 0, 0, 0))
+          idat = chunk(b'IDAT', zlib.compress(raw_bytes))
+          iend = chunk(b'IEND', b'')
+          png_data = header + ihdr + idat + iend
+
           for root, dirs, files in os.walk('android/app/src/main/res'):
               if 'mipmap' in root:
                   with open(os.path.join(root, 'ic_launcher.png'), 'wb') as f:
