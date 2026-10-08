@@ -515,8 +515,8 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     if (zgtAmount > 0) sb.writeln('• Подразделения ЗГТ ($selectedZgt): +${zgtAmount.toStringAsFixed(2)} руб.');
     if (cipherAmount > 0) sb.writeln('• Работа с шифрами ($selectedCipher): +${cipherAmount.toStringAsFixed(2)} руб.');
     if (matHelpAmount > 0) sb.writeln('• Материальная помощь (1 ОДС): +${matHelpAmount.toStringAsFixed(2)} руб.');
-    if (comp844Amount > 0) sb.writeln('• Компенсация по пр. № 844 ($days844 дн.): +${comp844Amount.toStringAsFixed(2)} руб.');
-    if (riskAmount > 0) sb.writeln('• Риск для жизни ($riskDays дн.): +${riskAmount.toStringAsFixed(2)} руб.');
+    if (comp844Amount > 0) sb.writeln('• Дополнительные сутки отдыха (пр. № 492, $days844 дн.): +${comp844Amount.toStringAsFixed(2)} руб.');
+    if (riskAmount > 0) sb.writeln('• Риск для жизни (пр. № 727 / № 844, $riskDays дн.): +${riskAmount.toStringAsFixed(2)} руб.');
     if (combatDutyAmount > 0) {
       String desc = combatDutyPercent == 0.30
           ? '5 и более суток в месяц (30%)'
@@ -1314,8 +1314,9 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
 
                 const SizedBox(height: 10),
 
+                // ОБНОВЛЕННОЕ НАЗВАНИЕ: ПРИКАЗ № 492
                 _buildCardSection(
-                  title: 'Приказ МО РФ № 844 (дополнительные сутки отдыха)',
+                  title: 'Дополнительные сутки отдыха. Перечень мероприятий в приказе №492 от 10.10.1998г. МО РФ.',
                   isDark: isDark,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1371,8 +1372,9 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   ),
                 ),
 
+                // ОБНОВЛЕННОЕ НАЗВАНИЕ: ПРИКАЗ № 727 И № 844
                 _buildCardSection(
-                  title: 'Риск для жизни (Приказ МО РФ № 727, 2% в день, макс 100%)',
+                  title: 'Риск для жизни (приказ МО РФ № 727) (2% в день но не более 100%) перечень мероприятий в приказе №844 МО РФ.',
                   isDark: isDark,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1657,7 +1659,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected
-              ? (isDark ? const Color(0xFF2C3854) : const Color(0xFFD0D7DE))
+              ? (isDark ? const Color(0xFF2C3854) : const Color(0xFFD6DBE4))
               : (isDark ? const Color(0xFF1E2638) : const Color(0xFFE4E7ED)),
           borderRadius: BorderRadius.circular(4),
           border: Border.all(
