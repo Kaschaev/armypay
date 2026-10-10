@@ -783,7 +783,6 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
       ),
       body: Column(
         children: [
-          // ВАРИАНТ 1: Компактный гармоничный виджет итогов
           Container(
             margin: const EdgeInsets.fromLTRB(12, 10, 12, 6),
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
@@ -1664,7 +1663,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                     ),
                   ),
                 );
-              }).toList>,
+              }).toList(),
               onChanged: onChanged,
             ),
           ),
@@ -1904,7 +1903,6 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
       ),
       body: Column(
         children: [
-          // ВАРИАНТ 1: Компактный гармоничный виджет пенсии
           Container(
             margin: const EdgeInsets.fromLTRB(12, 10, 12, 6),
             padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
@@ -2110,7 +2108,7 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
                       const SizedBox(height: 6),
                       const Text('• 20 лет выслуги дают 50% от окладов денежного содержания.', style: TextStyle(fontSize: 12)),
                       const Text('• За каждый год свыше 20 лет начисляется +3% (но не более 85%).', style: TextStyle(fontSize: 12)),
-                      const Text('• Понижающий коэффициент (№ 433-ФЗ): 93,59% (0,9359).',
+                      Text('• Понижающий коэффициент (№ 433-ФЗ): 93,59% (0,9359).',
                           style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                     ],
                   ),
