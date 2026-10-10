@@ -193,32 +193,31 @@ class _MilPayCalculatorAppState extends State<MilPayCalculatorApp> {
       themeMode: _themeMode,
       theme: ThemeData(
         brightness: Brightness.light,
-        primaryColor: const Color(0xFF3F51B5),
-        scaffoldBackgroundColor: const Color(0xFFF2F4F7),
+        scaffoldBackgroundColor: const Color(0xFFF0F3F8),
         cardColor: Colors.white,
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF3949AB),
+          backgroundColor: Color(0xFF1A237E),
           foregroundColor: Colors.white,
           elevation: 2,
         ),
         bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          selectedItemColor: Color(0xFF3949AB),
+          backgroundColor: Colors.white,
+          selectedItemColor: Color(0xFF1A237E),
           unselectedItemColor: Colors.grey,
         ),
       ),
       darkTheme: ThemeData(
         brightness: Brightness.dark,
-        primaryColor: const Color(0xFF5C6BC0),
-        scaffoldBackgroundColor: const Color(0xFF121824),
-        cardColor: const Color(0xFF1E2638),
+        scaffoldBackgroundColor: const Color(0xFF111726),
+        cardColor: const Color(0xFF1C2438),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF1A233A),
+          backgroundColor: Color(0xFF151D30),
           foregroundColor: Colors.white,
           elevation: 2,
         ),
         bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          backgroundColor: Color(0xFF1A233A),
-          selectedItemColor: Color(0xFF82B1FF),
+          backgroundColor: Color(0xFF151D30),
+          selectedItemColor: Color(0xFFFFD54F),
           unselectedItemColor: Colors.grey,
         ),
       ),
@@ -544,7 +543,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
       builder: (ctx) => AlertDialog(
         title: const Row(
           children: [
-            Icon(Icons.description, color: Color(0xFF3949AB)),
+            Icon(Icons.description, color: Color(0xFF1A237E)),
             SizedBox(width: 8),
             Text('Итоговый расчет', style: TextStyle(fontSize: 18)),
           ],
@@ -565,7 +564,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
           ),
           ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF3949AB),
+              backgroundColor: const Color(0xFF1A237E),
               foregroundColor: Colors.white,
             ),
             icon: const Icon(Icons.copy, size: 18),
@@ -784,33 +783,67 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
       ),
       body: Column(
         children: [
+          // ВАРИАНТ 1: Компактный гармоничный виджет итогов
           Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-            color: isDark ? const Color(0xFF1E2638) : Colors.white,
+            margin: const EdgeInsets.fromLTRB(12, 10, 12, 6),
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1C2438) : Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isDark ? Colors.white12 : const Color(0xFFD6DBE4),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(isDark ? 0.3 : 0.04),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
             child: Column(
               children: [
-                Text('Начислено: ${totalGross.toStringAsFixed(2)} рублей',
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                Text('Удержано: ${totalHold.toStringAsFixed(2)} рублей',
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                Text('На руки: ${netPay.toStringAsFixed(2)} рублей.',
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: highlightColor)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Начислено: ${totalGross.toStringAsFixed(2)} ₽',
+                        style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? Colors.grey.shade300 : Colors.black87)),
+                    Text('Удержано: ${totalHold.toStringAsFixed(2)} ₽',
+                        style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? Colors.grey.shade400 : Colors.red.shade700)),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Divider(height: 1, color: isDark ? Colors.white12 : Colors.grey.shade200),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('На руки:',
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                    Text('${netPay.toStringAsFixed(2)} ₽',
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: highlightColor)),
+                  ],
+                ),
               ],
             ),
           ),
-          const Divider(height: 1),
 
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               children: [
-                _buildPeriodSelector(isDark),
+                _buildCardPeriodSelector(isDark),
 
-                _buildColoredLabelDropdown(
+                _buildUnifiedCardDropdown(
                   title: 'Воинское звание:',
                   highlightAmount: '${ovz.toStringAsFixed(0)} руб.',
                   value: selectedRank,
@@ -824,7 +857,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   highlightColor: highlightColor,
                 ),
 
-                _buildColoredLabelDropdown(
+                _buildUnifiedCardDropdown(
                   title: 'Тарифный разряд:',
                   highlightAmount: '${ovd.toStringAsFixed(0)} руб.',
                   value: selectedTariff,
@@ -838,7 +871,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   highlightColor: highlightColor,
                 ),
 
-                _buildColoredLabelDropdown(
+                _buildUnifiedCardDropdown(
                   title: 'Выслуга лет:',
                   highlightAmount: '+${nvlAmount.toStringAsFixed(1)} руб.',
                   value: selectedNvl,
@@ -860,7 +893,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   highlightColor: highlightColor,
                 ),
 
-                _buildColoredLabelDropdown(
+                _buildUnifiedCardDropdown(
                   title: 'Надбавка за допуск к сведениям, составляющим гос. тайну:',
                   highlightAmount: secrecyAmount > 0 ? '+${secrecyAmount.toStringAsFixed(1)} руб.' : '0.0 руб.',
                   value: selectedSecrecy,
@@ -874,7 +907,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   highlightColor: highlightColor,
                 ),
 
-                _buildColoredLabelDropdown(
+                _buildUnifiedCardDropdown(
                   title: 'НАДБАВКА ЗА ОУС + Командование подразделением:',
                   highlightAmount: '+${ouvsAmount.toStringAsFixed(1)} руб.',
                   value: selectedOuvs,
@@ -888,7 +921,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   highlightColor: highlightColor,
                 ),
 
-                _buildColoredLabelDropdown(
+                _buildUnifiedCardDropdown(
                   title: 'Надбавка за классную квалификацию:',
                   highlightAmount: '+${classAmount.toStringAsFixed(1)} руб.',
                   value: selectedClass,
@@ -903,8 +936,8 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                 ),
 
                 // РАЙОННЫЙ КОЭФФИЦИЕНТ
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
+                _buildCardWrapper(
+                  isDark: isDark,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -912,7 +945,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                         text: TextSpan(
                           text: 'Районный коэффициент: ',
                           style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 12.5,
                               color: isDark ? Colors.grey.shade300 : Colors.black87),
                           children: [
                             TextSpan(
@@ -925,61 +958,52 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 2),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF1E2638) : const Color(0xFFE4E7ED),
-                          borderRadius: BorderRadius.circular(4),
-                          border: Border.all(
-                              color: isDark ? Colors.grey.shade700 : Colors.grey.shade400),
-                        ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<double>(
-                            value: districtOptions.contains(selectedDistrictVal) ? selectedDistrictVal : 1.0,
-                            isExpanded: true,
-                            itemHeight: 38.0,
-                            dropdownColor: isDark ? const Color(0xFF1E2638) : Colors.white,
-                            items: districtOptions.map((k) {
-                              double sum = baseRkSn * (k - 1.0);
-                              String labelText = k == 1.0 || k == 2.0 ? k.toStringAsFixed(0) : k.toString();
-                              final bool isSelected = k == selectedDistrictVal;
-                              return DropdownMenuItem<double>(
-                                value: k,
-                                child: Container(
-                                  width: double.infinity,
-                                  alignment: Alignment.centerLeft,
-                                  decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? (isDark ? const Color(0xFF2C3854) : const Color(0xFFD0D7DE))
-                                        : Colors.transparent,
-                                    border: Border(
-                                      bottom: BorderSide(
-                                        color: isDark ? Colors.white12 : Colors.black12,
-                                        width: 0.5,
-                                      ),
+                      const SizedBox(height: 6),
+                      DropdownButtonHideUnderline(
+                        child: DropdownButton<double>(
+                          value: districtOptions.contains(selectedDistrictVal) ? selectedDistrictVal : 1.0,
+                          isExpanded: true,
+                          itemHeight: 38.0,
+                          dropdownColor: isDark ? const Color(0xFF1C2438) : Colors.white,
+                          items: districtOptions.map((k) {
+                            double sum = baseRkSn * (k - 1.0);
+                            String labelText = k == 1.0 || k == 2.0 ? k.toStringAsFixed(0) : k.toString();
+                            final bool isSelected = k == selectedDistrictVal;
+                            return DropdownMenuItem<double>(
+                              value: k,
+                              child: Container(
+                                width: double.infinity,
+                                alignment: Alignment.centerLeft,
+                                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? (isDark ? const Color(0xFF2C3854) : const Color(0xFFE8EEF8))
+                                      : Colors.transparent,
+                                  border: Border(
+                                    bottom: BorderSide(
+                                      color: isDark ? Colors.white10 : Colors.black12,
+                                      width: 0.5,
                                     ),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-                                  child: Text(
-                                    '$labelText – ${sum.toStringAsFixed(2)} руб.',
-                                    style: TextStyle(
-                                      fontSize: 12.5,
-                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                      color: isSelected ? highlightColor : (isDark ? Colors.white : Colors.black87),
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                              );
-                            }).toList(),
-                            onChanged: (val) {
-                              _playClickFeedback();
-                              final newVal = val ?? 1.0;
-                              setState(() => selectedDistrictVal = newVal);
-                              StorageService.set('dd_district', newVal);
-                            },
-                          ),
+                                child: Text(
+                                  '$labelText – ${sum.toStringAsFixed(2)} руб.',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                    color: isSelected ? highlightColor : (isDark ? Colors.white : Colors.black87),
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (val) {
+                            _playClickFeedback();
+                            final newVal = val ?? 1.0;
+                            setState(() => selectedDistrictVal = newVal);
+                            StorageService.set('dd_district', newVal);
+                          },
                         ),
                       ),
                     ],
@@ -987,8 +1011,8 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                 ),
 
                 // СЕВЕРНАЯ НАДБАВКА
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
+                _buildCardWrapper(
+                  isDark: isDark,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -996,7 +1020,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                         text: TextSpan(
                           text: 'Северная надбавка: ',
                           style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 12.5,
                               color: isDark ? Colors.grey.shade300 : Colors.black87),
                           children: [
                             TextSpan(
@@ -1009,71 +1033,62 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 2),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF1E2638) : const Color(0xFFE4E7ED),
-                          borderRadius: BorderRadius.circular(4),
-                          border: Border.all(
-                              color: isDark ? Colors.grey.shade700 : Colors.grey.shade400),
-                        ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<double>(
-                            value: northernOptions.any((opt) => (opt['val'] as double) == selectedNorthernVal)
-                                ? selectedNorthernVal
-                                : 0.0,
-                            isExpanded: true,
-                            itemHeight: 38.0,
-                            dropdownColor: isDark ? const Color(0xFF1E2638) : Colors.white,
-                            items: northernOptions.map((opt) {
-                              double p = opt['val'] as double;
-                              double sum = baseRkSn * p;
-                              String label = opt['label'] as String;
-                              final bool isSelected = p == selectedNorthernVal;
-                              return DropdownMenuItem<double>(
-                                value: p,
-                                child: Container(
-                                  width: double.infinity,
-                                  alignment: Alignment.centerLeft,
-                                  decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? (isDark ? const Color(0xFF2C3854) : const Color(0xFFD0D7DE))
-                                        : Colors.transparent,
-                                    border: Border(
-                                      bottom: BorderSide(
-                                        color: isDark ? Colors.white12 : Colors.black12,
-                                        width: 0.5,
-                                      ),
+                      const SizedBox(height: 6),
+                      DropdownButtonHideUnderline(
+                        child: DropdownButton<double>(
+                          value: northernOptions.any((opt) => (opt['val'] as double) == selectedNorthernVal)
+                              ? selectedNorthernVal
+                              : 0.0,
+                          isExpanded: true,
+                          itemHeight: 38.0,
+                          dropdownColor: isDark ? const Color(0xFF1C2438) : Colors.white,
+                          items: northernOptions.map((opt) {
+                            double p = opt['val'] as double;
+                            double sum = baseRkSn * p;
+                            String label = opt['label'] as String;
+                            final bool isSelected = p == selectedNorthernVal;
+                            return DropdownMenuItem<double>(
+                              value: p,
+                              child: Container(
+                                width: double.infinity,
+                                alignment: Alignment.centerLeft,
+                                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? (isDark ? const Color(0xFF2C3854) : const Color(0xFFE8EEF8))
+                                      : Colors.transparent,
+                                  border: Border(
+                                    bottom: BorderSide(
+                                      color: isDark ? Colors.white10 : Colors.black12,
+                                      width: 0.5,
                                     ),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-                                  child: Text(
-                                    '$label – ${sum.toStringAsFixed(2)} руб.',
-                                    style: TextStyle(
-                                      fontSize: 12.5,
-                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                      color: isSelected ? highlightColor : (isDark ? Colors.white : Colors.black87),
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                              );
-                            }).toList(),
-                            onChanged: (val) {
-                              _playClickFeedback();
-                              final newVal = val ?? 0.0;
-                              setState(() => selectedNorthernVal = newVal);
-                              StorageService.set('dd_northern', newVal);
-                            },
-                          ),
+                                child: Text(
+                                  '$label – ${sum.toStringAsFixed(2)} руб.',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                    color: isSelected ? highlightColor : (isDark ? Colors.white : Colors.black87),
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (val) {
+                            _playClickFeedback();
+                            final newVal = val ?? 0.0;
+                            setState(() => selectedNorthernVal = newVal);
+                            StorageService.set('dd_northern', newVal);
+                          },
                         ),
                       ),
                     ],
                   ),
                 ),
 
-                _buildColoredLabelDropdown(
+                _buildUnifiedCardDropdown(
                   title: 'Ежемесячная премия:',
                   highlightAmount: premiumAmount > 0 ? '+${premiumAmount.toStringAsFixed(1)} руб.' : '0.0 руб.',
                   value: selectedPremium,
@@ -1087,7 +1102,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   highlightColor: highlightColor,
                 ),
 
-                _buildColoredLabelDropdown(
+                _buildUnifiedCardDropdown(
                   title: 'Надбавка подразделениям (ВКС, ВМФ, РВСН, ГУ ГШ):',
                   highlightAmount: specialUnitsAmount > 0 ? '+${specialUnitsAmount.toStringAsFixed(1)} руб.' : '0.0 руб.',
                   value: selectedSpecialUnits,
@@ -1108,28 +1123,28 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
 
                 Container(
                   margin: const EdgeInsets.only(bottom: 8),
-                  padding: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF1E2638) : const Color(0xFFECEFF1),
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: isDark ? Colors.blueGrey.shade700 : Colors.blueGrey.shade200),
+                    color: isDark ? const Color(0xFF182234) : const Color(0xFFE8EEF8),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: isDark ? Colors.white10 : const Color(0xFFD6DBE4)),
                   ),
                   child: const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'Надбавка положена контрактникам, проходящим службу в подразделениях: ВКС (летный состав), ВМФ (экипажи боевых кораблей/судов), РВСН и ГУ ГШ:',
-                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                        style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 4),
-                      Text('• 100% от ОВД — офицерам', style: TextStyle(fontSize: 11)),
-                      Text('• 110% от ОВД — мичманам и прапорщикам', style: TextStyle(fontSize: 11)),
-                      Text('• 120% от ОВД — матросам, солдатам, сержантам и старшинам', style: TextStyle(fontSize: 11)),
+                      Text('• 100% от ОВД — офицерам', style: TextStyle(fontSize: 11.5)),
+                      Text('• 110% от ОВД — мичманам и прапорщикам', style: TextStyle(fontSize: 11.5)),
+                      Text('• 120% от ОВД — матросам, солдатам, сержантам и старшинам', style: TextStyle(fontSize: 11.5)),
                     ],
                   ),
                 ),
 
-                _buildColoredLabelDropdown(
+                _buildUnifiedCardDropdown(
                   title: 'Прочие достижения:',
                   highlightAmount: otherAchievementsAmount > 0 ? '+${otherAchievementsAmount.toStringAsFixed(1)} руб.' : '0.0 руб.',
                   value: selectedOtherAchievements,
@@ -1154,7 +1169,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   highlightColor: highlightColor,
                 ),
 
-                _buildColoredCheckboxTile(
+                _buildUnifiedCardCheckbox(
                   title: 'Надбавка за особые достижения (- контракт 1-4 т.р.):',
                   highlightAmount: '${(ovd * 0.50).toStringAsFixed(1)} руб.',
                   value: hasContractBonus,
@@ -1168,7 +1183,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   highlightColor: highlightColor,
                 ),
 
-                _buildColoredCheckboxTile(
+                _buildUnifiedCardCheckbox(
                   title: 'На должности водителя (30% от ОВД):',
                   highlightAmount: '${(ovd * 0.30).toStringAsFixed(1)} руб.',
                   value: isDriver,
@@ -1183,7 +1198,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                 ),
 
                 // ЛЕТНЫЙ СОСТАВ СРАЗУ ПОСЛЕ ВОДИТЕЛЯ
-                _buildColoredLabelDropdown(
+                _buildUnifiedCardDropdown(
                   title: 'Надбавка за летный состав:',
                   highlightAmount: flightAmount > 0 ? '+${flightAmount.toStringAsFixed(1)} руб.' : '0.0 руб.',
                   value: selectedFlight,
@@ -1197,7 +1212,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   highlightColor: highlightColor,
                 ),
 
-                _buildColoredLabelDropdown(
+                _buildUnifiedCardDropdown(
                   title: 'Ежемесячная надбавка при награждении знаками отличия МО РФ:',
                   highlightAmount: medalsAmount > 0 ? '+${medalsAmount.toStringAsFixed(1)} руб.' : '0.0 руб.',
                   value: selectedMedals,
@@ -1216,7 +1231,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   highlightColor: highlightColor,
                 ),
 
-                _buildColoredLabelDropdown(
+                _buildUnifiedCardDropdown(
                   title: 'Надбавка за работу в структурных подразделениях по ЗГТ:',
                   highlightAmount: zgtAmount > 0 ? '+${zgtAmount.toStringAsFixed(1)} руб.' : '0.0 руб.',
                   value: selectedZgt,
@@ -1230,7 +1245,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   highlightColor: highlightColor,
                 ),
 
-                _buildColoredLabelDropdown(
+                _buildUnifiedCardDropdown(
                   title: 'Надбавка за работу с шифрами:',
                   highlightAmount: cipherAmount > 0 ? '+${cipherAmount.toStringAsFixed(1)} руб.' : '0.0 руб.',
                   value: selectedCipher,
@@ -1252,7 +1267,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   highlightColor: highlightColor,
                 ),
 
-                _buildColoredLabelDropdown(
+                _buildUnifiedCardDropdown(
                   title: 'Алименты:',
                   highlightAmount: alimonyAmount > 0 ? '-${alimonyAmount.toStringAsFixed(1)} руб.' : '0.0 руб.',
                   value: selectedAlimony,
@@ -1266,7 +1281,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   highlightColor: highlightColor,
                 ),
 
-                _buildColoredCheckboxTile(
+                _buildUnifiedCardCheckbox(
                   title: 'Материальная помощь:',
                   highlightAmount: '${ods.toStringAsFixed(1)} руб.',
                   value: hasMatHelp,
@@ -1280,19 +1295,25 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   highlightColor: highlightColor,
                 ),
 
-                _buildCheckboxTile(
-                  'Ветеран боевых действий (ст.218 п.1. пп.2 – 500 рублей)',
-                  isVbd,
-                  (val) {
-                    _playClickFeedback();
-                    final newVal = val ?? false;
-                    setState(() => isVbd = newVal);
-                    StorageService.set('dd_vbd', newVal);
-                  },
-                  isDark,
+                _buildCardWrapper(
+                  isDark: isDark,
+                  child: CheckboxListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Ветеран боевых действий (ст.218 п.1. пп.2 – 500 рублей)',
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                    value: isVbd,
+                    dense: true,
+                    controlAffinity: ListTileControlAffinity.leading,
+                    onChanged: (val) {
+                      _playClickFeedback();
+                      final newVal = val ?? false;
+                      setState(() => isVbd = newVal);
+                      StorageService.set('dd_vbd', newVal);
+                    },
+                  ),
                 ),
 
-                _buildColoredLabelDropdown(
+                _buildUnifiedCardDropdown(
                   title: 'Налоговый вычет на детей (ст. 218 п.1 пп. 4):',
                   highlightAmount: childDeduction > 0 ? '${childDeduction.toStringAsFixed(0)} руб.' : '0.0 руб.',
                   value: selectedChildDeduction,
@@ -1312,21 +1333,26 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   highlightColor: highlightColor,
                 ),
 
-                const SizedBox(height: 10),
-
-                // ОБНОВЛЕННОЕ НАЗВАНИЕ: ПРИКАЗ № 492
-                _buildCardSection(
-                  title: 'Дополнительные сутки отдыха. Перечень мероприятий в приказе №492 от 10.10.1998г. МО РФ.',
+                // ДОПОЛНИТЕЛЬНЫЕ СУТКИ ОТДЫХА
+                _buildCardWrapper(
                   isDark: isDark,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Text(
+                        'Дополнительные сутки отдыха. Перечень мероприятий в приказе №492 от 10.10.1998г. МО РФ.',
+                        style: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? const Color(0xFF82B1FF) : const Color(0xFF1A237E)),
+                      ),
+                      const SizedBox(height: 8),
                       Row(
                         children: [
                           const Expanded(
                             flex: 3,
                             child: Text('Дней мероприятий (без ограничения времени):',
-                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                                style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w500)),
                           ),
                           const SizedBox(width: 10),
                           Expanded(
@@ -1335,9 +1361,10 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                               controller: _days844Controller,
                               keyboardType: TextInputType.number,
                               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 isDense: true,
-                                border: OutlineInputBorder(),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                                 hintText: '0',
                               ),
                               onChanged: (val) {
@@ -1372,19 +1399,26 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   ),
                 ),
 
-                // ОБНОВЛЕННОЕ НАЗВАНИЕ: ПРИКАЗ № 727 И № 844
-                _buildCardSection(
-                  title: 'Риск для жизни (приказ МО РФ № 727) (2% в день но не более 100%) перечень мероприятий в приказе №844 МО РФ.',
+                // РИСК ДЛЯ ЖИЗНИ
+                _buildCardWrapper(
                   isDark: isDark,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Text(
+                        'Риск для жизни (приказ МО РФ № 727) (2% в день но не более 100%) перечень мероприятий в приказе №844 МО РФ.',
+                        style: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? const Color(0xFF82B1FF) : const Color(0xFF1A237E)),
+                      ),
+                      const SizedBox(height: 8),
                       Row(
                         children: [
                           const Expanded(
                             flex: 3,
                             child: Text('Дней участия с риском для жизни:',
-                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                                style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w500)),
                           ),
                           const SizedBox(width: 10),
                           Expanded(
@@ -1393,9 +1427,10 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                               controller: _riskDaysController,
                               keyboardType: TextInputType.number,
                               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 isDense: true,
-                                border: OutlineInputBorder(),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                               ),
                               onChanged: (val) {
                                 final newVal = int.tryParse(val) ?? 0;
@@ -1429,82 +1464,77 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   ),
                 ),
 
-                // БОЕВОЕ ДЕЖУРСТВО СРАЗУ ПОСЛЕ РИСКА ДЛЯ ЖИЗНИ
-                Card(
-                  elevation: 1,
-                  margin: const EdgeInsets.only(bottom: 10),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        RichText(
-                          text: TextSpan(
-                            text: 'Надбавка за боевое дежурство (от ОВД): ',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13,
-                              color: isDark ? const Color(0xFF82B1FF) : const Color(0xFF1A237E),
-                            ),
-                            children: [
-                              TextSpan(
-                                text: combatDutyAmount > 0 ? '+${combatDutyAmount.toStringAsFixed(1)} руб.' : '0.0 руб.',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: highlightColor,
-                                ),
-                              ),
-                            ],
+                // БОЕВОЕ ДЕЖУРСТВО
+                _buildCardWrapper(
+                  isDark: isDark,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      RichText(
+                        text: TextSpan(
+                          text: 'Надбавка за боевое дежурство (от ОВД): ',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            color: isDark ? const Color(0xFF82B1FF) : const Color(0xFF1A237E),
                           ),
+                          children: [
+                            TextSpan(
+                              text: combatDutyAmount > 0 ? '+${combatDutyAmount.toStringAsFixed(1)} руб.' : '0.0 руб.',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: highlightColor,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 8),
-                        _buildRadioOptionTile(
-                          title: '5 и более суток в месяц — 30%',
-                          amount: ovd * 0.30,
-                          isSelected: combatDutyPercent == 0.30,
-                          onTap: () {
-                            _playClickFeedback();
-                            final nextVal = combatDutyPercent == 0.30 ? 0.0 : 0.30;
-                            setState(() => combatDutyPercent = nextVal);
-                            StorageService.set('dd_combat_duty', nextVal);
-                          },
-                          isDark: isDark,
-                          highlightColor: highlightColor,
-                        ),
-                        const SizedBox(height: 4),
-                        _buildRadioOptionTile(
-                          title: 'от 3 до 4 суток в месяц — 15%',
-                          amount: ovd * 0.15,
-                          isSelected: combatDutyPercent == 0.15,
-                          onTap: () {
-                            _playClickFeedback();
-                            final nextVal = combatDutyPercent == 0.15 ? 0.0 : 0.15;
-                            setState(() => combatDutyPercent = nextVal);
-                            StorageService.set('dd_combat_duty', nextVal);
-                          },
-                          isDark: isDark,
-                          highlightColor: highlightColor,
-                        ),
-                        const SizedBox(height: 4),
-                        _buildRadioOptionTile(
-                          title: 'от 1 до 2 суток в месяц — 5%',
-                          amount: ovd * 0.05,
-                          isSelected: combatDutyPercent == 0.05,
-                          onTap: () {
-                            _playClickFeedback();
-                            final nextVal = combatDutyPercent == 0.05 ? 0.0 : 0.05;
-                            setState(() => combatDutyPercent = nextVal);
-                            StorageService.set('dd_combat_duty', nextVal);
-                          },
-                          isDark: isDark,
-                          highlightColor: highlightColor,
-                        ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 8),
+                      _buildRadioOptionTile(
+                        title: '5 и более суток в месяц — 30%',
+                        amount: ovd * 0.30,
+                        isSelected: combatDutyPercent == 0.30,
+                        onTap: () {
+                          _playClickFeedback();
+                          final nextVal = combatDutyPercent == 0.30 ? 0.0 : 0.30;
+                          setState(() => combatDutyPercent = nextVal);
+                          StorageService.set('dd_combat_duty', nextVal);
+                        },
+                        isDark: isDark,
+                        highlightColor: highlightColor,
+                      ),
+                      const SizedBox(height: 4),
+                      _buildRadioOptionTile(
+                        title: 'от 3 до 4 суток в месяц — 15%',
+                        amount: ovd * 0.15,
+                        isSelected: combatDutyPercent == 0.15,
+                        onTap: () {
+                          _playClickFeedback();
+                          final nextVal = combatDutyPercent == 0.15 ? 0.0 : 0.15;
+                          setState(() => combatDutyPercent = nextVal);
+                          StorageService.set('dd_combat_duty', nextVal);
+                        },
+                        isDark: isDark,
+                        highlightColor: highlightColor,
+                      ),
+                      const SizedBox(height: 4),
+                      _buildRadioOptionTile(
+                        title: 'от 1 до 2 суток в месяц — 5%',
+                        amount: ovd * 0.05,
+                        isSelected: combatDutyPercent == 0.05,
+                        onTap: () {
+                          _playClickFeedback();
+                          final nextVal = combatDutyPercent == 0.05 ? 0.0 : 0.05;
+                          setState(() => combatDutyPercent = nextVal);
+                          StorageService.set('dd_combat_duty', nextVal);
+                        },
+                        isDark: isDark,
+                        highlightColor: highlightColor,
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 35),
               ],
             ),
           ),
@@ -1513,7 +1543,58 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     );
   }
 
-  Widget _buildColoredLabelDropdown({
+  // =============================================================
+  // ХЕЛПЕРЫ ДИЗАЙНА КАРТОЧЕК (ВАРИАНТ 1)
+  // =============================================================
+  Widget _buildCardWrapper({required Widget child, required bool isDark}) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1C2438) : Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: isDark ? Colors.white10 : const Color(0xFFD6DBE4),
+        ),
+      ),
+      child: child,
+    );
+  }
+
+  Widget _buildCardPeriodSelector(bool isDark) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1C2438) : Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: isDark ? const Color(0xFF5C6BC0) : const Color(0xFF1A237E), width: 1.2),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: selectedPeriod,
+          isExpanded: true,
+          itemHeight: 40.0,
+          dropdownColor: isDark ? const Color(0xFF1C2438) : Colors.white,
+          icon: const Icon(Icons.arrow_drop_down),
+          style: TextStyle(
+              color: isDark ? Colors.white : const Color(0xFF1A237E),
+              fontWeight: FontWeight.bold,
+              fontSize: 13.5),
+          items: salaryPeriods.keys
+              .map((p) => DropdownMenuItem(value: p, child: Text(p)))
+              .toList(),
+          onChanged: (val) {
+            _playClickFeedback();
+            setState(() => selectedPeriod = val!);
+            StorageService.set('dd_period', val);
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUnifiedCardDropdown({
     required String title,
     required String highlightAmount,
     required String value,
@@ -1524,8 +1605,8 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
   }) {
     String effectiveValue = items.contains(value) ? value : items.first;
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
+    return _buildCardWrapper(
+      isDark: isDark,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1533,7 +1614,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
             text: TextSpan(
               text: '$title ',
               style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 12.5,
                   color: isDark ? Colors.grey.shade300 : Colors.black87),
               children: [
                 TextSpan(
@@ -1546,54 +1627,45 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 2),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF1E2638) : const Color(0xFFE4E7ED),
-              borderRadius: BorderRadius.circular(4),
-              border: Border.all(
-                  color: isDark ? Colors.grey.shade700 : Colors.grey.shade400),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: effectiveValue,
-                isExpanded: true,
-                itemHeight: 38.0,
-                dropdownColor: isDark ? const Color(0xFF1E2638) : Colors.white,
-                items: items.map((item) {
-                  final bool isSelected = item == effectiveValue;
-                  return DropdownMenuItem<String>(
-                    value: item,
-                    child: Container(
-                      width: double.infinity,
-                      alignment: Alignment.centerLeft,
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? (isDark ? const Color(0xFF2C3854) : const Color(0xFFD0D7DE))
-                            : Colors.transparent,
-                        border: Border(
-                          bottom: BorderSide(
-                            color: isDark ? Colors.white12 : Colors.black12,
-                            width: 0.5,
-                          ),
+          const SizedBox(height: 4),
+          DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: effectiveValue,
+              isExpanded: true,
+              itemHeight: 38.0,
+              dropdownColor: isDark ? const Color(0xFF1C2438) : Colors.white,
+              items: items.map((item) {
+                final bool isSelected = item == effectiveValue;
+                return DropdownMenuItem<String>(
+                  value: item,
+                  child: Container(
+                    width: double.infinity,
+                    alignment: Alignment.centerLeft,
+                    padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? (isDark ? const Color(0xFF2C3854) : const Color(0xFFE8EEF8))
+                          : Colors.transparent,
+                      border: Border(
+                        bottom: BorderSide(
+                          color: isDark ? Colors.white10 : Colors.black12,
+                          width: 0.5,
                         ),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-                      child: Text(
-                        item,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                          color: isSelected ? highlightColor : (isDark ? Colors.white : Colors.black87),
-                        ),
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                  );
-                }).toList(),
-                onChanged: onChanged,
-              ),
+                    child: Text(
+                      item,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        color: isSelected ? highlightColor : (isDark ? Colors.white : Colors.black87),
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                );
+              }).toList>,
+              onChanged: onChanged,
             ),
           ),
         ],
@@ -1601,7 +1673,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     );
   }
 
-  Widget _buildColoredCheckboxTile({
+  Widget _buildUnifiedCardCheckbox({
     required String title,
     required String highlightAmount,
     required bool value,
@@ -1609,15 +1681,10 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     required bool isDark,
     required Color highlightColor,
   }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E2638) : const Color(0xFFE4E7ED),
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(
-            color: isDark ? Colors.grey.shade700 : Colors.grey.shade400),
-      ),
+    return _buildCardWrapper(
+      isDark: isDark,
       child: CheckboxListTile(
+        contentPadding: EdgeInsets.zero,
         title: RichText(
           text: TextSpan(
             text: '$title ',
@@ -1654,19 +1721,20 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(4),
+      borderRadius: BorderRadius.circular(8),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        margin: const EdgeInsets.only(top: 2),
         decoration: BoxDecoration(
           color: isSelected
-              ? (isDark ? const Color(0xFF2C3854) : const Color(0xFFD6DBE4))
-              : (isDark ? const Color(0xFF1E2638) : const Color(0xFFE4E7ED)),
-          borderRadius: BorderRadius.circular(4),
+              ? (isDark ? const Color(0xFF2C3854) : const Color(0xFFE8EEF8))
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: isSelected
-                ? (isDark ? const Color(0xFF82B1FF) : const Color(0xFF3949AB))
-                : (isDark ? Colors.grey.shade700 : Colors.grey.shade400),
-            width: isSelected ? 1.5 : 1.0,
+                ? (isDark ? const Color(0xFF82B1FF) : const Color(0xFF1A237E))
+                : (isDark ? Colors.white12 : const Color(0xFFD6DBE4)),
+            width: isSelected ? 1.4 : 1.0,
           ),
         ),
         child: Row(
@@ -1674,7 +1742,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
             Icon(
               isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
               color: isSelected
-                  ? (isDark ? const Color(0xFF82B1FF) : const Color(0xFF3949AB))
+                  ? (isDark ? const Color(0xFF82B1FF) : const Color(0xFF1A237E))
                   : Colors.grey,
               size: 20,
             ),
@@ -1696,163 +1764,6 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                 color: highlightColor,
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPeriodSelector(bool isDark) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF263248) : const Color(0xFFD6DBE4),
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: isDark ? Colors.blueGrey.shade700 : Colors.grey.shade500),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: selectedPeriod,
-          isExpanded: true,
-          itemHeight: 38.0,
-          dropdownColor: isDark ? const Color(0xFF1E2638) : Colors.white,
-          icon: const Icon(Icons.arrow_drop_down),
-          style: TextStyle(
-              color: isDark ? Colors.white : Colors.black87,
-              fontWeight: FontWeight.bold,
-              fontSize: 13),
-          items: salaryPeriods.keys
-              .map((p) => DropdownMenuItem(value: p, child: Text(p)))
-              .toList(),
-          onChanged: (val) {
-            _playClickFeedback();
-            setState(() => selectedPeriod = val!);
-            StorageService.set('dd_period', val);
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDropdownItem(
-    String label,
-    String value,
-    List<String> items,
-    ValueChanged<String?> onChanged,
-    bool isDark,
-  ) {
-    String effectiveValue = items.contains(value) ? value : items.first;
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label,
-              style: TextStyle(
-                  fontSize: 12,
-                  color: isDark ? Colors.grey.shade300 : Colors.black87)),
-          const SizedBox(height: 2),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF1E2638) : const Color(0xFFE4E7ED),
-              borderRadius: BorderRadius.circular(4),
-              border: Border.all(
-                  color: isDark ? Colors.grey.shade700 : Colors.grey.shade400),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: effectiveValue,
-                isExpanded: true,
-                itemHeight: 38.0,
-                dropdownColor: isDark ? const Color(0xFF1E2638) : Colors.white,
-                items: items.map((item) {
-                  final bool isSelected = item == effectiveValue;
-                  return DropdownMenuItem<String>(
-                    value: item,
-                    child: Container(
-                      width: double.infinity,
-                      alignment: Alignment.centerLeft,
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? (isDark ? const Color(0xFF2C3854) : const Color(0xFFD0D7DE))
-                            : Colors.transparent,
-                        border: Border(
-                          bottom: BorderSide(
-                            color: isDark ? Colors.white12 : Colors.black12,
-                            width: 0.5,
-                          ),
-                        ),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-                      child: Text(
-                        item,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                          color: isSelected
-                              ? (isDark ? const Color(0xFFFFD54F) : const Color(0xFF1A237E))
-                              : (isDark ? Colors.white : Colors.black87),
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  );
-                }).toList(),
-                onChanged: onChanged,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCheckboxTile(
-      String label, bool value, ValueChanged<bool?> onChanged, bool isDark) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E2638) : const Color(0xFFE4E7ED),
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(
-            color: isDark ? Colors.grey.shade700 : Colors.grey.shade400),
-      ),
-      child: CheckboxListTile(
-        title: Text(label,
-            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
-        value: value,
-        dense: true,
-        controlAffinity: ListTileControlAffinity.leading,
-        onChanged: onChanged,
-      ),
-    );
-  }
-
-  Widget _buildCardSection({
-    required String title,
-    required Widget child,
-    required bool isDark,
-  }) {
-    return Card(
-      elevation: 1,
-      margin: const EdgeInsets.only(bottom: 10),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-      child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title,
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                    color: isDark ? const Color(0xFF82B1FF) : const Color(0xFF1A237E))),
-            const SizedBox(height: 8),
-            child,
           ],
         ),
       ),
@@ -1993,16 +1904,30 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
       ),
       body: Column(
         children: [
+          // ВАРИАНТ 1: Компактный гармоничный виджет пенсии
           Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-            color: isDark ? const Color(0xFF1E2638) : Colors.white,
+            margin: const EdgeInsets.fromLTRB(12, 10, 12, 6),
+            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1C2438) : Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isDark ? Colors.white12 : const Color(0xFFD6DBE4),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(isDark ? 0.3 : 0.04),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
             child: Column(
               children: [
                 const Text('РАЗМЕР ВОЕННОЙ ПЕНСИИ',
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Colors.grey)),
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12.5, color: Colors.grey)),
                 const SizedBox(height: 4),
-                Text('${totalPension.toStringAsFixed(2)} руб./мес.',
+                Text('${totalPension.toStringAsFixed(2)} ₽/мес.',
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 22,
@@ -2013,13 +1938,12 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
               ],
             ),
           ),
-          const Divider(height: 1),
 
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               children: [
-                _buildDropdown(
+                _buildPensionCardDropdown(
                   'Воинское звание:',
                   selectedRank,
                   militaryRanks.keys.toList(),
@@ -2029,9 +1953,10 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
                     StorageService.set('pension_rank', val);
                   },
                   isDark,
+                  highlightColor,
                 ),
 
-                _buildDropdown(
+                _buildPensionCardDropdown(
                   'Тарифный разряд:',
                   selectedTariff,
                   militaryTariffRanks.keys.toList(),
@@ -2041,17 +1966,24 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
                     StorageService.set('pension_tariff', val);
                   },
                   isDark,
+                  highlightColor,
                 ),
 
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0),
+                Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF1C2438) : Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: isDark ? Colors.white10 : const Color(0xFFD6DBE4)),
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('Выслуга лет (в льготном исчислении):', style: TextStyle(fontSize: 12)),
+                          const Text('Выслуга лет (в льготном исчислении):', style: TextStyle(fontSize: 12.5)),
                           Text('$serviceYears лет',
                               style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
                         ],
@@ -2073,65 +2005,63 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
                   ),
                 ),
 
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 10.0),
+                Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF1C2438) : Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: isDark ? Colors.white10 : const Color(0xFFD6DBE4)),
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Районный коэффициент:',
-                          style: TextStyle(fontSize: 12, color: isDark ? Colors.grey.shade300 : Colors.black87)),
-                      const SizedBox(height: 2),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF1E2638) : const Color(0xFFE4E7ED),
-                          borderRadius: BorderRadius.circular(4),
-                          border: Border.all(color: isDark ? Colors.grey.shade700 : Colors.grey.shade400),
-                        ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<double>(
-                            value: pensionDistrictOptions.contains(selectedDistrictVal) ? selectedDistrictVal : 1.0,
-                            isExpanded: true,
-                            itemHeight: 38.0,
-                            dropdownColor: isDark ? const Color(0xFF1E2638) : Colors.white,
-                            items: pensionDistrictOptions.map((k) {
-                              String labelText = k == 1.0 || k == 2.0 ? k.toStringAsFixed(0) : k.toString();
-                              final bool isSelected = k == selectedDistrictVal;
-                              return DropdownMenuItem<double>(
-                                value: k,
-                                child: Container(
-                                  width: double.infinity,
-                                  alignment: Alignment.centerLeft,
-                                  decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? (isDark ? const Color(0xFF2C3854) : const Color(0xFFD0D7DE))
-                                        : Colors.transparent,
-                                    border: Border(
-                                      bottom: BorderSide(
-                                        color: isDark ? Colors.white12 : Colors.black12,
-                                        width: 0.5,
-                                      ),
-                                    ),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-                                  child: Text(
-                                    labelText,
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                      color: isSelected ? highlightColor : (isDark ? Colors.white : Colors.black87),
+                          style: TextStyle(fontSize: 12.5, color: isDark ? Colors.grey.shade300 : Colors.black87)),
+                      const SizedBox(height: 4),
+                      DropdownButtonHideUnderline(
+                        child: DropdownButton<double>(
+                          value: pensionDistrictOptions.contains(selectedDistrictVal) ? selectedDistrictVal : 1.0,
+                          isExpanded: true,
+                          itemHeight: 38.0,
+                          dropdownColor: isDark ? const Color(0xFF1C2438) : Colors.white,
+                          items: pensionDistrictOptions.map((k) {
+                            String labelText = k == 1.0 || k == 2.0 ? k.toStringAsFixed(0) : k.toString();
+                            final bool isSelected = k == selectedDistrictVal;
+                            return DropdownMenuItem<double>(
+                              value: k,
+                              child: Container(
+                                width: double.infinity,
+                                alignment: Alignment.centerLeft,
+                                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? (isDark ? const Color(0xFF2C3854) : const Color(0xFFE8EEF8))
+                                      : Colors.transparent,
+                                  border: Border(
+                                    bottom: BorderSide(
+                                      color: isDark ? Colors.white10 : Colors.black12,
+                                      width: 0.5,
                                     ),
                                   ),
                                 ),
-                              );
-                            }).toList(),
-                            onChanged: (val) {
-                              _playClickFeedback();
-                              final newVal = val ?? 1.0;
-                              setState(() => selectedDistrictVal = newVal);
-                              StorageService.set('pension_district', newVal);
-                            },
-                          ),
+                                child: Text(
+                                  labelText,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                    color: isSelected ? highlightColor : (isDark ? Colors.white : Colors.black87),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (val) {
+                            _playClickFeedback();
+                            final newVal = val ?? 1.0;
+                            setState(() => selectedDistrictVal = newVal);
+                            StorageService.set('pension_district', newVal);
+                          },
                         ),
                       ),
                     ],
@@ -2139,12 +2069,15 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
                 ),
 
                 Container(
-                  margin: const EdgeInsets.only(bottom: 12),
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF1E2638) : const Color(0xFFE4E7ED),
-                    borderRadius: BorderRadius.circular(4),
+                    color: isDark ? const Color(0xFF1C2438) : Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: isDark ? Colors.white10 : const Color(0xFFD6DBE4)),
                   ),
                   child: CheckboxListTile(
+                    contentPadding: EdgeInsets.zero,
                     title: const Text('Ветеран боевых действий (ЕДВ / надбавка)',
                         style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
                     value: isVbd,
@@ -2158,26 +2091,28 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
                   ),
                 ),
 
-                Card(
-                  elevation: 1,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Нормативы расчета пенсии (Законы № 4468-1 и № 433-ФЗ):',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
-                                color: isDark ? const Color(0xFF82B1FF) : const Color(0xFF1A237E))),
-                        const SizedBox(height: 6),
-                        const Text('• 20 лет выслуги дают 50% от окладов денежного содержания.', style: TextStyle(fontSize: 12)),
-                        const Text('• За каждый год свыше 20 лет начисляется +3% (но не более 85%).', style: TextStyle(fontSize: 12)),
-                        Text('• Понижающий коэффициент (№ 433-ФЗ): 93,59% (0,9359).',
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                      ],
-                    ),
+                Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF182234) : const Color(0xFFE8EEF8),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: isDark ? Colors.white10 : const Color(0xFFD6DBE4)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Нормативы расчета пенсии (Законы № 4468-1 и № 433-ФЗ):',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12.5,
+                              color: isDark ? const Color(0xFF82B1FF) : const Color(0xFF1A237E))),
+                      const SizedBox(height: 6),
+                      const Text('• 20 лет выслуги дают 50% от окладов денежного содержания.', style: TextStyle(fontSize: 12)),
+                      const Text('• За каждый год свыше 20 лет начисляется +3% (но не более 85%).', style: TextStyle(fontSize: 12)),
+                      const Text('• Понижающий коэффициент (№ 433-ФЗ): 93,59% (0,9359).',
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                    ],
                   ),
                 ),
               ],
@@ -2188,70 +2123,67 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
     );
   }
 
-  Widget _buildDropdown(
+  Widget _buildPensionCardDropdown(
     String label,
     String value,
     List<String> items,
     ValueChanged<String?> onChanged,
     bool isDark,
+    Color highlightColor,
   ) {
     String effectiveValue = items.contains(value) ? value : items.first;
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10.0),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1C2438) : Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: isDark ? Colors.white10 : const Color(0xFFD6DBE4)),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: TextStyle(fontSize: 12, color: isDark ? Colors.grey.shade300 : Colors.black87)),
-          const SizedBox(height: 2),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF1E2638) : const Color(0xFFE4E7ED),
-              borderRadius: BorderRadius.circular(4),
-              border: Border.all(color: isDark ? Colors.grey.shade700 : Colors.grey.shade400),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: effectiveValue,
-                isExpanded: true,
-                itemHeight: 38.0,
-                dropdownColor: isDark ? const Color(0xFF1E2638) : Colors.white,
-                items: items.map((item) {
-                  final bool isSelected = item == effectiveValue;
-                  return DropdownMenuItem(
-                    value: item,
-                    child: Container(
-                      width: double.infinity,
-                      alignment: Alignment.centerLeft,
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? (isDark ? const Color(0xFF2C3854) : const Color(0xFFD0D7DE))
-                            : Colors.transparent,
-                        border: Border(
-                          bottom: BorderSide(
-                            color: isDark ? Colors.white12 : Colors.black12,
-                            width: 0.5,
-                          ),
+          Text(label, style: TextStyle(fontSize: 12.5, color: isDark ? Colors.grey.shade300 : Colors.black87)),
+          const SizedBox(height: 4),
+          DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: effectiveValue,
+              isExpanded: true,
+              itemHeight: 38.0,
+              dropdownColor: isDark ? const Color(0xFF1C2438) : Colors.white,
+              items: items.map((item) {
+                final bool isSelected = item == effectiveValue;
+                return DropdownMenuItem(
+                  value: item,
+                  child: Container(
+                    width: double.infinity,
+                    alignment: Alignment.centerLeft,
+                    padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? (isDark ? const Color(0xFF2C3854) : const Color(0xFFE8EEF8))
+                          : Colors.transparent,
+                      border: Border(
+                        bottom: BorderSide(
+                          color: isDark ? Colors.white10 : Colors.black12,
+                          width: 0.5,
                         ),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-                      child: Text(
-                        item,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                          color: isSelected
-                              ? (isDark ? const Color(0xFFFFD54F) : const Color(0xFF1A237E))
-                              : (isDark ? Colors.white : Colors.black87),
-                        ),
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                  );
-                }).toList(),
-                onChanged: onChanged,
-              ),
+                    child: Text(
+                      item,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        color: isSelected ? highlightColor : (isDark ? Colors.white : Colors.black87),
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                );
+              }).toList(),
+              onChanged: onChanged,
             ),
           ),
         ],
