@@ -502,6 +502,14 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     if (secrecyAmount > 0) sb.writeln('• Гос. тайна ($selectedSecrecy): +${secrecyAmount.toStringAsFixed(2)} руб.');
     if (ouvsAmount > 0) sb.writeln('• НАДБАВКА ЗА ОУС + Командование ($selectedOuvs): +${ouvsAmount.toStringAsFixed(2)} руб.');
     if (classAmount > 0) sb.writeln('• Классная квалификация ($selectedClass): +${classAmount.toStringAsFixed(2)} руб.');
+    if (combatDutyAmount > 0) {
+      String desc = combatDutyPercent == 0.30
+          ? '5 и более суток в месяц (30% от ОВД)'
+          : combatDutyPercent == 0.15
+              ? 'от 3 до 4 суток в месяц (15% от ОВД)'
+              : 'от 1 до 2 суток в месяц (5% от ОВД)';
+      sb.writeln('• Боевое дежурство ($desc): +${combatDutyAmount.toStringAsFixed(2)} руб.');
+    }
     if (rkAmount > 0) sb.writeln('• Районный коэф. (коэф. $selectedDistrictVal): +${rkAmount.toStringAsFixed(2)} руб.');
     if (northernAmount > 0) sb.writeln('• Северная надбавка (${(selectedNorthernVal * 100).toInt()}%): +${northernAmount.toStringAsFixed(2)} руб.');
     if (premiumAmount > 0) sb.writeln('• Премия ($selectedPremium): +${premiumAmount.toStringAsFixed(2)} руб.');
@@ -516,14 +524,6 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     if (matHelpAmount > 0) sb.writeln('• Материальная помощь (1 ОДС): +${matHelpAmount.toStringAsFixed(2)} руб.');
     if (comp844Amount > 0) sb.writeln('• Дополнительные сутки отдыха (пр. № 492, $days844 дн.): +${comp844Amount.toStringAsFixed(2)} руб.');
     if (riskAmount > 0) sb.writeln('• Риск для жизни (пр. № 727 / № 844, $riskDays дн.): +${riskAmount.toStringAsFixed(2)} руб.');
-    if (combatDutyAmount > 0) {
-      String desc = combatDutyPercent == 0.30
-          ? '5 и более суток в месяц (30%)'
-          : combatDutyPercent == 0.15
-              ? 'от 3 до 4 суток в месяц (15%)'
-              : 'от 1 до 2 суток в месяц (5%)';
-      sb.writeln('• Боевое дежурство ($desc): +${combatDutyAmount.toStringAsFixed(2)} руб.');
-    }
 
     sb.writeln('--------------------------------');
     sb.writeln('💵 ИТОГО НАЧИСЛЕНО: ${totalGross.toStringAsFixed(2)} руб.');
@@ -629,6 +629,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     if (selectedClass.contains('20%')) classPercent = 0.20;
     if (selectedClass.contains('30%')) classPercent = 0.30;
 
+    // Надбавка за боевое дежурство: строго процент от ОВД
     double combatDutyAmount = ovd * combatDutyPercent;
     double premiumPercent = double.parse(selectedPremium.replaceAll('%', '')) / 100.0;
 
@@ -690,6 +691,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     double classAmount = ovd * classPercent;
     double flightAmount = ovd * flightBonusPercent;
 
+    // База для РК и СН (включает боевое дежурство ровно один раз)
     double baseRkSn = ods + nvlAmount + secrecyAmount + ouvsAmount + classAmount + flightAmount + combatDutyAmount;
     double rkAmount = baseRkSn * (selectedDistrictVal - 1.0);
     double northernAmount = baseRkSn * selectedNorthernVal;
@@ -703,6 +705,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     double riskPercent = (riskDays * 0.02).clamp(0.0, 1.0);
     double riskAmount = ovd * riskPercent;
 
+    // totalGross: baseRkSn уже содержит combatDutyAmount, дублирование исключено
     double totalGross = baseRkSn +
         rkAmount +
         northernAmount +
@@ -1054,7 +1057,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                                 padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
                                 decoration: BoxDecoration(
                                   color: isSelected
-                                      ? (isDark ? const Color(0xFF2C3854) : const Color(0xFFE8EEF8))
+                                  ? (isDark ? const Color(0xFF2C3854) : const Color(0xFFE8EEF8))
                                       : Colors.transparent,
                                   border: Border(
                                     bottom: BorderSide(
@@ -1463,7 +1466,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   ),
                 ),
 
-                // БОЕВОЕ ДЕЖУРСТВО
+                // БОЕВОЕ ДЕЖУРСТВО (СТРОГО % ОТ ОВД)
                 _buildCardWrapper(
                   isDark: isDark,
                   child: Column(
