@@ -629,7 +629,6 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     if (selectedClass.contains('20%')) classPercent = 0.20;
     if (selectedClass.contains('30%')) classPercent = 0.30;
 
-    // Надбавка за боевое дежурство: строго процент от ОВД
     double combatDutyAmount = ovd * combatDutyPercent;
     double premiumPercent = double.parse(selectedPremium.replaceAll('%', '')) / 100.0;
 
@@ -691,7 +690,6 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     double classAmount = ovd * classPercent;
     double flightAmount = ovd * flightBonusPercent;
 
-    // База для РК и СН (включает боевое дежурство ровно один раз)
     double baseRkSn = ods + nvlAmount + secrecyAmount + ouvsAmount + classAmount + flightAmount + combatDutyAmount;
     double rkAmount = baseRkSn * (selectedDistrictVal - 1.0);
     double northernAmount = baseRkSn * selectedNorthernVal;
@@ -705,7 +703,6 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     double riskPercent = (riskDays * 0.02).clamp(0.0, 1.0);
     double riskAmount = ovd * riskPercent;
 
-    // totalGross: baseRkSn уже содержит combatDutyAmount, дублирование исключено
     double totalGross = baseRkSn +
         rkAmount +
         northernAmount +
@@ -764,6 +761,17 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
       appBar: AppBar(
         title: const Text('Калькулятор ДД', style: TextStyle(fontWeight: FontWeight.bold)),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.menu_book),
+            tooltip: 'Документы и приказы',
+            onPressed: () {
+              _playClickFeedback();
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const DocumentsScreen()),
+              );
+            },
+          ),
           IconButton(
             icon: Icon(widget.isDarkMode ? Icons.light_mode : Icons.dark_mode),
             tooltip: 'Переключить тему',
@@ -937,7 +945,6 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   highlightColor: highlightColor,
                 ),
 
-                // РАЙОННЫЙ КОЭФФИЦИЕНТ
                 _buildCardWrapper(
                   isDark: isDark,
                   child: Column(
@@ -1012,7 +1019,6 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   ),
                 ),
 
-                // СЕВЕРНАЯ НАДБАВКА
                 _buildCardWrapper(
                   isDark: isDark,
                   child: Column(
@@ -1057,7 +1063,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                                 padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
                                 decoration: BoxDecoration(
                                   color: isSelected
-                                  ? (isDark ? const Color(0xFF2C3854) : const Color(0xFFE8EEF8))
+                                      ? (isDark ? const Color(0xFF2C3854) : const Color(0xFFE8EEF8))
                                       : Colors.transparent,
                                   border: Border(
                                     bottom: BorderSide(
@@ -1199,7 +1205,6 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   highlightColor: highlightColor,
                 ),
 
-                // ЛЕТНЫЙ СОСТАВ СРАЗУ ПОСЛЕ ВОДИТЕЛЯ
                 _buildUnifiedCardDropdown(
                   title: 'Надбавка за летный состав:',
                   highlightAmount: flightAmount > 0 ? '+${flightAmount.toStringAsFixed(1)} руб.' : '0.0 руб.',
@@ -1335,7 +1340,6 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   highlightColor: highlightColor,
                 ),
 
-                // ДОПОЛНИТЕЛЬНЫЕ СУТКИ ОТДЫХА
                 _buildCardWrapper(
                   isDark: isDark,
                   child: Column(
@@ -1401,7 +1405,6 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   ),
                 ),
 
-                // РИСК ДЛЯ ЖИЗНИ
                 _buildCardWrapper(
                   isDark: isDark,
                   child: Column(
@@ -1466,7 +1469,6 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   ),
                 ),
 
-                // БОЕВОЕ ДЕЖУРСТВО (СТРОГО % ОТ ОВД)
                 _buildCardWrapper(
                   isDark: isDark,
                   child: Column(
@@ -1546,7 +1548,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
   }
 
   // =============================================================
-  // ХЕЛПЕРЫ ДИЗАЙНА КАРТОЧЕК (ВАРИАНТ 1)
+  // ХЕЛПЕРЫ ДИЗАЙНА КАРТОЧЕК
   // =============================================================
   Widget _buildCardWrapper({required Widget child, required bool isDark}) {
     return Container(
@@ -1890,6 +1892,17 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
         title: const Text('Военная пенсия', style: TextStyle(fontWeight: FontWeight.bold)),
         actions: [
           IconButton(
+            icon: const Icon(Icons.menu_book),
+            tooltip: 'Документы и приказы',
+            onPressed: () {
+              _playClickFeedback();
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const DocumentsScreen()),
+              );
+            },
+          ),
+          IconButton(
             icon: Icon(widget.isDarkMode ? Icons.light_mode : Icons.dark_mode),
             tooltip: 'Переключить тему',
             onPressed: () {
@@ -2185,6 +2198,295 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
                 );
               }).toList(),
               onChanged: onChanged,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// -------------------------------------------------------------
+// ЭКРАН 3: ДОКУМЕНТЫ И ПРИКАЗЫ С ПОИСКОМ (ВАРИАНТ А)
+// -------------------------------------------------------------
+class DocumentsScreen extends StatefulWidget {
+  const DocumentsScreen({super.key});
+
+  @override
+  State<DocumentsScreen> createState() => _DocumentsScreenState();
+}
+
+class _DocumentsScreenState extends State<DocumentsScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  int _selectedDocIndex = 0;
+  String _searchQuery = '';
+
+  final List<Map<String, String>> _docs = [
+    {
+      'title': 'Приказ МО РФ № 727',
+      'subtitle': 'Порядок обеспечения ДД и отдельных выплат',
+      'text': '''МИНИСТР ОБОРОНЫ РОССИЙСКОЙ ФЕДЕРАЦИИ
+ПРИКАЗ от 6 декабря 2019 г. N 727
+
+ОБ ОПРЕДЕЛЕНИИ ПОРЯДКА ОБЕСПЕЧЕНИЯ ДЕНЕЖНЫМ ДОВОЛЬСТВИЕМ ВОЕННОСЛУЖАЩИХ ВООРУЖЕННЫХ СИЛ РОССИЙСКОЙ ФЕДЕРАЦИИ И ПРЕДОСТАВЛЕНИЯ ИМ И ЧЛЕНАМ ИХ СЕМЕЙ ОТДЕЛЬНЫХ ВЫПЛАТ
+
+I. Общие положения
+1. Настоящий Порядок устанавливает правила и условия выплаты денежного довольствия военнослужащим Вооруженных Сил Российской Федерации и предоставления им и членам их семей отдельных выплат.
+2. Денежное довольствие военнослужащих состоит:
+- проходящих военную службу по контракту: из оклада по воинскому званию, оклада по воинской должности (оклад месячного денежного содержания - ОДС) и ежемесячных и иных дополнительных выплат;
+- проходящих военную службу по призыву: из оклада по воинской должности и дополнительных выплат.
+7. Выплата денежного довольствия производится с 10 по 20 число каждого месяца за истекший месяц, а за декабрь календарного года - до 25 декабря.
+
+II. Оклады денежного содержания
+15. Военнослужащим по контракту оклады по типовым и нетиповым воинским должностям выплачиваются в зависимости от тарифного разряда (с 1 по 50 т.р.).
+16. Со дня вступления в силу контракта и до дня вступления в исполнение обязанностей по воинским должностям выплачиваются оклады:
+- солдатам, матросам, сержантам, старшинам, прапорщикам - по 1 тарифному разряду;
+- офицерам - по 10 тарифному разряду.
+
+III. Ежемесячные дополнительные выплаты
+36. Выслуга лет к окладу денежного содержания:
+- от 2 до 5 лет - 10%;
+- от 5 до 10 лет - 15%;
+- от 10 до 15 лет - 20%;
+- от 15 до 20 лет - 25%;
+- от 20 до 25 лет - 30%;
+- 25 лет и более - 40%.
+40. Классная квалификация к окладу по воинской должности:
+- 3 класс - 5%;
+- 2 класс - 10%;
+- 1 класс - 20%;
+- мастер - 30%.
+46. Государственная тайна:
+- особая важность - 25%;
+- совершенно секретно - 20%;
+- секретно - 10%.
+49. Особые условия военной службы (ОУС):
+- центральный аппарат МО РФ - 100%;
+- экипажи подводных лодок, глубоководных аппаратов, летный состав - 70%;
+- экипажи надводных кораблей, водолазы, подразделения СпН, парашютные должности - 50%;
+- несущим боевое дежурство (суммарно в месяц):
+  • 5 и более суток в месяц - 30%;
+  • от 3 до 5 суток в месяц - 15%;
+  • от 1 до 3 суток в месяц - 5%;
+- экипажи боевой колесной и гусеничной техники - 20%;
+- г. Москва, Московская область, г. Санкт-Петербург и Ленинградская область - 10%.
+53. Риск для жизни в мирное время:
+- выполнение водолазных работ - до 100%;
+- участие в учениях, походах кораблей, боевая подготовка в полевых условиях - 2% за каждый день (до 60% в месяц);
+- прыжки с парашютом - до 50%;
+- взрывотехнические работы и разминирование - до 50%;
+- летный состав тушение пожаров - 2% за день (до 50% в месяц);
+- работа с шифрами и кодами - до 30%.
+67. Подразделения по защите государственной тайны (ЗГТ): процентная надбавка за стаж работы от 10% до 20%.
+73. Премия за добросовестное исполнение обязанностей: в размере до 25% от оклада денежного содержания в месяц.
+79. Ежегодная материальная помощь: выплачивается в размере одного оклада денежного содержания (ОДС).'''
+    },
+    {
+      'title': 'Приказ МО РФ № 492',
+      'subtitle': 'Мероприятия без ограничения служебного времени',
+      'text': '''МИНИСТР ОБОРОНЫ РОССИЙСКОЙ ФЕДЕРАЦИИ
+ПРИКАЗ от 10 ноября 1998 г. N 492
+
+Перечень мероприятий, которые проводятся при необходимости без ограничения общей продолжительности еженедельного служебного времени военнослужащих:
+
+1. Мероприятия, связанные с введением высших степеней боевой готовности или с объявлением мобилизации, в том числе с учебными целями.
+2. Боевое дежурство (боевая служба).
+3. Мероприятия оперативной и боевой подготовки органов военного управления и войск (сил):
+- оперативные и тактические учения (в том числе с боевой стрельбой);
+- командно-штабные учения и тренировки;
+- тактико-специальные, исследовательские и мобилизационные учения;
+- летно-тактические учения, военные игры и маневры войск;
+- выходы в море кораблей, судов и подводных лодок;
+- вылеты авиации по планам боевой подготовки и межбазовых переходов.
+4. Проверки состояния боевой и мобилизационной готовности (плановые, внезапные, итоговые).
+5. Инспектирование войск (сил).
+6. Проведение государственных, заводских и ходовых испытаний вооружения и военной техники.
+10. Выполнение мероприятий в зонах чрезвычайного положения.
+11. Ликвидация аварий, катастроф и стихийных бедствий, проведение карантинных мероприятий.
+13. Погрузка и выгрузка оружия и боеприпасов на носители, производство которых не может быть остановлено.
+14. Участие в деятельности по поддержанию или восстановлению международного мира и безопасности.
+15. Выполнение боевых и специальных задач, определенных законодательными и нормативными правовыми актами РФ.
+16. Выполнение полетов воздушных судов и их обеспечение в выходные и праздничные дни.'''
+    },
+    {
+      'title': 'Постановление Правительства РФ № 1122',
+      'subtitle': 'Надбавка за выполнение задач с риском для жизни',
+      'text': '''ПРАВИТЕЛЬСТВО РОССИЙСКОЙ ФЕДЕРАЦИИ
+ПОСТАНОВЛЕНИЕ от 24 декабря 2011 г. N 1122
+
+О ДОПОЛНИТЕЛЬНЫХ ВЫПЛАТАХ ВОЕННОСЛУЖАЩИМ ЗА ВЫПОЛНЕНИЕ ЗАДАЧ, СВЯЗАННЫХ С РИСКОМ ДЛЯ ЖИЗНИ И ЗДОРОВЬЯ В МИРНОЕ ВРЕМЯ
+
+Правила выплаты ежемесячной надбавки:
+1. Надбавка выплачивается военнослужащим по контракту в составе их денежного довольствия.
+3. Размеры надбавки к окладу по воинской должности:
+а) до 100% - за выполнение водолазных работ;
+б) до 60% - за период непосредственного участия в учениях, походах кораблей, боевой подготовке в полевых условиях вне пункта постоянной дислокации;
+в) до 50%:
+- прыжки с парашютом (десантирование с техникой);
+- взрывотехнические работы, обнаружение, обезвреживание и уничтожение взрывных устройств;
+- производство взрывотехнических или баллистических экспертиз;
+- полеты с палубы кораблей или наземно-тренировочных комплексов;
+- тушение природных и техногенных пожаров;
+- работа с лицами на конфиденциальной основе;
+г) до 30%:
+- служба в районах экологического кризиса (Байконур);
+- диагностика и лечение ВИЧ-инфицированных, работы с вирусом иммунодефицита, противочумные учреждения;
+- медицинский персонал с вредными или опасными условиями труда;
+- исследования трупного материала, источников ионизирующих излучений, токсических и ядовитых веществ;
+д) до 20% - за работы по перезарядке ядерных реакторов кораблей и обращение с ядерным топливом и радиоактивными отходами.
+6. При возникновении права на надбавку одновременно по нескольким основаниям размер надбавки суммируется, но не может превышать 100% оклада по воинской должности.'''
+    },
+  ];
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  List<TextSpan> _highlightOccurrences(String text, String query, bool isDark) {
+    if (query.isEmpty) {
+      return [TextSpan(text: text)];
+    }
+    List<TextSpan> spans = [];
+    int start = 0;
+    int indexOfHighlight;
+    String lowerCaseText = text.toLowerCase();
+    String lowerCaseQuery = query.toLowerCase();
+
+    while ((indexOfHighlight = lowerCaseText.indexOf(lowerCaseQuery, start)) != -1) {
+      if (indexOfHighlight > start) {
+        spans.add(TextSpan(text: text.substring(start, indexOfHighlight)));
+      }
+      spans.add(
+        TextSpan(
+          text: text.substring(indexOfHighlight, indexOfHighlight + query.length),
+          style: TextStyle(
+            backgroundColor: isDark ? const Color(0xFFFBC02D) : const Color(0xFFFFEB3B),
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      );
+      start = indexOfHighlight + query.length;
+    }
+    if (start < text.length) {
+      spans.add(TextSpan(text: text.substring(start)));
+    }
+    return spans;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    bool isDark = Theme.of(context).brightness == Brightness.dark;
+    Color primaryBar = isDark ? const Color(0xFF151D30) : const Color(0xFF1A237E);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Приказы и документы', style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: primaryBar,
+      ),
+      body: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
+            color: isDark ? const Color(0xFF1C2438) : Colors.white,
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Поиск по тексту документов...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          setState(() {
+                            _searchController.clear();
+                            _searchQuery = '';
+                          });
+                        },
+                      )
+                    : null,
+                isDense: true,
+                filled: true,
+                fillColor: isDark ? const Color(0xFF111726) : const Color(0xFFF0F3F8),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              onChanged: (val) {
+                setState(() => _searchQuery = val.trim());
+              },
+            ),
+          ),
+          Container(
+            height: 48,
+            color: isDark ? const Color(0xFF1C2438) : Colors.white,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              itemCount: _docs.length,
+              itemBuilder: (context, index) {
+                final isSelected = index == _selectedDocIndex;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                  child: ChoiceChip(
+                    label: Text(
+                      _docs[index]['title']!,
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        color: isSelected
+                            ? Colors.white
+                            : (isDark ? Colors.grey.shade300 : Colors.black87),
+                      ),
+                    ),
+                    selected: isSelected,
+                    selectedColor: isDark ? const Color(0xFF3F51B5) : const Color(0xFF1A237E),
+                    backgroundColor: isDark ? const Color(0xFF111726) : const Color(0xFFE8EEF8),
+                    onSelected: (selected) {
+                      if (selected) {
+                        setState(() => _selectedDocIndex = index);
+                      }
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+          const Divider(height: 1),
+          Expanded(
+            child: Container(
+              color: isDark ? const Color(0xFF111726) : const Color(0xFFF0F3F8),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(14.0),
+                child: Container(
+                  padding: const EdgeInsets.all(14.0),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF1C2438) : Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isDark ? Colors.white12 : const Color(0xFFD6DBE4),
+                    ),
+                  ),
+                  child: SelectableText.rich(
+                    TextSpan(
+                      children: _highlightOccurrences(
+                        _docs[_selectedDocIndex]['text']!,
+                        _searchQuery,
+                        isDark,
+                      ),
+                      style: TextStyle(
+                        fontSize: 13.5,
+                        height: 1.5,
+                        color: isDark ? Colors.grey.shade200 : Colors.black87,
+                        fontFamily: 'sans-serif',
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         ],
