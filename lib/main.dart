@@ -502,6 +502,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     if (secrecyAmount > 0) sb.writeln('• Гос. тайна ($selectedSecrecy): +${secrecyAmount.toStringAsFixed(2)} руб.');
     if (ouvsAmount > 0) sb.writeln('• НАДБАВКА ЗА ОУС + Командование ($selectedOuvs): +${ouvsAmount.toStringAsFixed(2)} руб.');
     if (classAmount > 0) sb.writeln('• Классная квалификация ($selectedClass): +${classAmount.toStringAsFixed(2)} руб.');
+    if (flightAmount > 0) sb.writeln('• Летный состав ($selectedFlight): +${flightAmount.toStringAsFixed(2)} руб.');
     if (combatDutyAmount > 0) {
       String desc = combatDutyPercent == 0.30
           ? '5 и более суток в месяц (30% от ОВД)'
@@ -517,7 +518,6 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     if (otherAchievementsAmount > 0) sb.writeln('• Особые достижения ($selectedOtherAchievements): +${otherAchievementsAmount.toStringAsFixed(2)} руб.');
     if (contractAmount > 0) sb.writeln('• Контракт 1-4 т.р. (50%): +${contractAmount.toStringAsFixed(2)} руб.');
     if (driverAmount > 0) sb.writeln('• Должность водителя (30%): +${driverAmount.toStringAsFixed(2)} руб.');
-    if (flightAmount > 0) sb.writeln('• Летный состав ($selectedFlight): +${flightAmount.toStringAsFixed(2)} руб.');
     if (medalsAmount > 0) sb.writeln('• Знаки отличия МО РФ ($selectedMedals): +${medalsAmount.toStringAsFixed(2)} руб.');
     if (zgtAmount > 0) sb.writeln('• Подразделения ЗГТ ($selectedZgt): +${zgtAmount.toStringAsFixed(2)} руб.');
     if (cipherAmount > 0) sb.writeln('• Работа с шифрами ($selectedCipher): +${cipherAmount.toStringAsFixed(2)} руб.');
@@ -629,7 +629,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     if (selectedClass.contains('20%')) classPercent = 0.20;
     if (selectedClass.contains('30%')) classPercent = 0.30;
 
-    // Надбавка за боевое дежурство: фиксированный процент от ОВД
+    // Надбавка за боевое дежурство: строго процент от ОВД
     double combatDutyAmount = ovd * combatDutyPercent;
     double premiumPercent = double.parse(selectedPremium.replaceAll('%', '')) / 100.0;
 
@@ -705,7 +705,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     double riskPercent = (riskDays * 0.02).clamp(0.0, 1.0);
     double riskAmount = ovd * riskPercent;
 
-    // Итого начислено: боевое дежурство прибавляется строго 1 раз
+    // Итого начислено: combatDutyAmount прибавляется строго 1 раз
     double totalGross = baseRkSn +
         rkAmount +
         northernAmount +
@@ -787,6 +787,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
       ),
       body: Column(
         children: [
+          // 3. ЗАКРЕПЛЕННЫЙ HEADER ИТОГОВ
           Container(
             margin: const EdgeInsets.fromLTRB(12, 10, 12, 6),
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
@@ -897,7 +898,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                 ),
 
                 _buildUnifiedCardDropdown(
-                  title: 'Надбавка за допуск к сведениям, составляющим гос. тайну:',
+                  title: 'Надбавка за допуск к сведениям (гос. тайна):',
                   highlightAmount: secrecyAmount > 0 ? '+${secrecyAmount.toStringAsFixed(1)} руб.' : '0.0 руб.',
                   value: selectedSecrecy,
                   items: ['нет - 0%', 'секретно - 10%', 'сов. секретно - 20%', 'особая важность - 25%'],
@@ -911,7 +912,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                 ),
 
                 _buildUnifiedCardDropdown(
-                  title: 'НАДБАВКА ЗА ОУС + Командование подразделением:',
+                  title: 'НАДБАВКА ЗА ОУС + Руководство:',
                   highlightAmount: '+${ouvsAmount.toStringAsFixed(1)} руб.',
                   value: selectedOuvs,
                   items: ouvsOptions,
@@ -925,7 +926,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                 ),
 
                 _buildUnifiedCardDropdown(
-                  title: 'Надбавка за классную квалификацию:',
+                  title: 'Классная квалификация:',
                   highlightAmount: '+${classAmount.toStringAsFixed(1)} руб.',
                   value: selectedClass,
                   items: ['без класса - 0%', '3 класс - 5%', '2 класс - 10%', '1 класс - 20%', 'мастер - 30%'],
@@ -944,24 +945,26 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      RichText(
-                        text: TextSpan(
-                          text: 'Районный коэффициент: ',
-                          style: TextStyle(
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Районный коэффициент:',
+                            style: TextStyle(
+                                fontSize: 12.5,
+                                color: isDark ? Colors.grey.shade300 : Colors.black87),
+                          ),
+                          Text(
+                            rkAmount > 0 ? '+${rkAmount.toStringAsFixed(2)} руб.' : '0.0 руб.',
+                            style: TextStyle(
                               fontSize: 12.5,
-                              color: isDark ? Colors.grey.shade300 : Colors.black87),
-                          children: [
-                            TextSpan(
-                              text: rkAmount > 0 ? '+${rkAmount.toStringAsFixed(2)} руб.' : '0.0 руб.',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: highlightColor,
-                              ),
+                              fontWeight: FontWeight.bold,
+                              color: highlightColor,
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 4),
                       DropdownButtonHideUnderline(
                         child: DropdownButton<double>(
                           value: districtOptions.contains(selectedDistrictVal) ? selectedDistrictVal : 1.0,
@@ -1019,24 +1022,26 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      RichText(
-                        text: TextSpan(
-                          text: 'Северная надбавка: ',
-                          style: TextStyle(
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Северная надбавка:',
+                            style: TextStyle(
+                                fontSize: 12.5,
+                                color: isDark ? Colors.grey.shade300 : Colors.black87),
+                          ),
+                          Text(
+                            northernAmount > 0 ? '+${northernAmount.toStringAsFixed(2)} руб.' : '0.0 руб.',
+                            style: TextStyle(
                               fontSize: 12.5,
-                              color: isDark ? Colors.grey.shade300 : Colors.black87),
-                          children: [
-                            TextSpan(
-                              text: northernAmount > 0 ? '+${northernAmount.toStringAsFixed(2)} руб.' : '0.0 руб.',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: highlightColor,
-                              ),
+                              fontWeight: FontWeight.bold,
+                              color: highlightColor,
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 4),
                       DropdownButtonHideUnderline(
                         child: DropdownButton<double>(
                           value: northernOptions.any((opt) => (opt['val'] as double) == selectedNorthernVal)
@@ -1106,7 +1111,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                 ),
 
                 _buildUnifiedCardDropdown(
-                  title: 'Надбавка подразделениям (ВКС, ВМФ, РВСН, ГУ ГШ):',
+                  title: 'Подразделения (ВКС, ВМФ, РВСН, ГУ ГШ):',
                   highlightAmount: specialUnitsAmount > 0 ? '+${specialUnitsAmount.toStringAsFixed(1)} руб.' : '0.0 руб.',
                   value: selectedSpecialUnits,
                   items: [
@@ -1173,7 +1178,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                 ),
 
                 _buildUnifiedCardCheckbox(
-                  title: 'Надбавка за особые достижения (- контракт 1-4 т.р.):',
+                  title: 'Особые достижения (- контракт 1-4 т.р.):',
                   highlightAmount: '${(ovd * 0.50).toStringAsFixed(1)} руб.',
                   value: hasContractBonus,
                   onChanged: (val) {
@@ -1200,9 +1205,8 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   highlightColor: highlightColor,
                 ),
 
-                // ЛЕТНЫЙ СОСТАВ СРАЗУ ПОСЛЕ ВОДИТЕЛЯ
                 _buildUnifiedCardDropdown(
-                  title: 'Надбавка за летный состав:',
+                  title: 'Летный состав:',
                   highlightAmount: flightAmount > 0 ? '+${flightAmount.toStringAsFixed(1)} руб.' : '0.0 руб.',
                   value: selectedFlight,
                   items: ['нет', '40% - 3 класс', '50% - 2 класс', '60% - 1 класс', '70% - снайпер'],
@@ -1216,7 +1220,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                 ),
 
                 _buildUnifiedCardDropdown(
-                  title: 'Ежемесячная надбавка при награждении знаками отличия МО РФ:',
+                  title: 'Знаки отличия МО РФ:',
                   highlightAmount: medalsAmount > 0 ? '+${medalsAmount.toStringAsFixed(1)} руб.' : '0.0 руб.',
                   value: selectedMedals,
                   items: [
@@ -1235,7 +1239,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                 ),
 
                 _buildUnifiedCardDropdown(
-                  title: 'Надбавка за работу в структурных подразделениях по ЗГТ:',
+                  title: 'Служба в подразделениях ЗГТ:',
                   highlightAmount: zgtAmount > 0 ? '+${zgtAmount.toStringAsFixed(1)} руб.' : '0.0 руб.',
                   value: selectedZgt,
                   items: ['0%', '10% - от 1 до 5 лет', '15% - от 5 до 10 лет', '20% - от 10 лет и выше'],
@@ -1249,7 +1253,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                 ),
 
                 _buildUnifiedCardDropdown(
-                  title: 'Надбавка за работу с шифрами:',
+                  title: 'Работа с шифрами:',
                   highlightAmount: cipherAmount > 0 ? '+${cipherAmount.toStringAsFixed(1)} руб.' : '0.0 руб.',
                   value: selectedCipher,
                   items: [
@@ -1285,7 +1289,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                 ),
 
                 _buildUnifiedCardCheckbox(
-                  title: 'Материальная помощь:',
+                  title: 'Материальная помощь (1 ОДС):',
                   highlightAmount: '${ods.toStringAsFixed(1)} руб.',
                   value: hasMatHelp,
                   onChanged: (val) {
@@ -1317,7 +1321,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                 ),
 
                 _buildUnifiedCardDropdown(
-                  title: 'Налоговый вычет на детей (ст. 218 п.1 пп. 4):',
+                  title: 'Налоговый вычет на детей (ст. 218):',
                   highlightAmount: childDeduction > 0 ? '${childDeduction.toStringAsFixed(0)} руб.' : '0.0 руб.',
                   value: selectedChildDeduction,
                   items: [
@@ -1380,23 +1384,25 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                         ],
                       ),
                       const SizedBox(height: 6),
-                      RichText(
-                        text: TextSpan(
-                          text: 'Положено суток отдыха: $extraRestDays дн. | Компенсация: ',
-                          style: TextStyle(
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Положено суток: $extraRestDays дн.',
+                            style: TextStyle(
+                                fontSize: 12,
+                                color: isDark ? Colors.grey.shade300 : Colors.blueGrey,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            '${comp844Amount.toStringAsFixed(2)} руб.',
+                            style: TextStyle(
                               fontSize: 12,
-                              color: isDark ? Colors.grey.shade300 : Colors.blueGrey,
-                              fontWeight: FontWeight.bold),
-                          children: [
-                            TextSpan(
-                              text: '${comp844Amount.toStringAsFixed(2)} руб.',
-                              style: TextStyle(
-                                color: highlightColor,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              color: highlightColor,
+                              fontWeight: FontWeight.bold,
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -1445,52 +1451,56 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                         ],
                       ),
                       const SizedBox(height: 6),
-                      RichText(
-                        text: TextSpan(
-                          text: 'Надбавка: ${(riskPercent * 100).toInt()}% от ОВД | Сумма: ',
-                          style: TextStyle(
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Надбавка: ${(riskPercent * 100).toInt()}% от ОВД',
+                            style: TextStyle(
+                                fontSize: 12,
+                                color: isDark ? Colors.grey.shade300 : Colors.blueGrey,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            '${riskAmount.toStringAsFixed(2)} руб.',
+                            style: TextStyle(
                               fontSize: 12,
-                              color: isDark ? Colors.grey.shade300 : Colors.blueGrey,
-                              fontWeight: FontWeight.bold),
-                          children: [
-                            TextSpan(
-                              text: '${riskAmount.toStringAsFixed(2)} руб.',
-                              style: TextStyle(
-                                color: highlightColor,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              color: highlightColor,
+                              fontWeight: FontWeight.bold,
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
 
-                // БОЕВОЕ ДЕЖУРСТВО (СТРОГО % ОТ ОВД)
+                // БОЕВОЕ ДЕЖУРСТВО
                 _buildCardWrapper(
                   isDark: isDark,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      RichText(
-                        text: TextSpan(
-                          text: 'Надбавка за боевое дежурство (от ОВД): ',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                            color: isDark ? const Color(0xFF82B1FF) : const Color(0xFF1A237E),
-                          ),
-                          children: [
-                            TextSpan(
-                              text: combatDutyAmount > 0 ? '+${combatDutyAmount.toStringAsFixed(1)} руб.' : '0.0 руб.',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: highlightColor,
-                              ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Боевое дежурство (от ОВД):',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              color: isDark ? const Color(0xFF82B1FF) : const Color(0xFF1A237E),
                             ),
-                          ],
-                        ),
+                          ),
+                          Text(
+                            combatDutyAmount > 0 ? '+${combatDutyAmount.toStringAsFixed(1)} руб.' : '0.0 руб.',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              color: highlightColor,
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 8),
                       _buildRadioOptionTile(
@@ -1613,24 +1623,30 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          RichText(
-            text: TextSpan(
-              text: '$title ',
-              style: TextStyle(
-                  fontSize: 12.5,
-                  color: isDark ? Colors.grey.shade300 : Colors.black87),
-              children: [
-                TextSpan(
-                  text: highlightAmount,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  title,
                   style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: highlightColor,
-                  ),
+                      fontSize: 12.5,
+                      color: isDark ? Colors.grey.shade300 : Colors.black87),
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                highlightAmount,
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.bold,
+                  color: highlightColor,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               value: effectiveValue,
@@ -1688,23 +1704,28 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
       isDark: isDark,
       child: CheckboxListTile(
         contentPadding: EdgeInsets.zero,
-        title: RichText(
-          text: TextSpan(
-            text: '$title ',
-            style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: isDark ? Colors.white : Colors.black87),
-            children: [
-              TextSpan(
-                text: highlightAmount,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Text(
+                title,
                 style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: highlightColor,
-                ),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: isDark ? Colors.white : Colors.black87),
               ),
-            ],
-          ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              highlightAmount,
+              style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.bold,
+                color: highlightColor,
+              ),
+            ),
+          ],
         ),
         value: value,
         dense: true,
@@ -1907,6 +1928,7 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
       ),
       body: Column(
         children: [
+          // ЗАКРЕПЛЕННЫЙ HEADER ПЕНСИИ
           Container(
             margin: const EdgeInsets.fromLTRB(12, 10, 12, 6),
             padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
