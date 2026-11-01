@@ -338,7 +338,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
 
   bool hasContractBonus = false;
   bool isDriver = false;
-  bool hasMatHelp = false; // <-- ИСПРАВЛЕНО
+  bool hasMatHelp = false;
   bool isVbd = false;
 
   String selectedMedals = 'нет надбавки - 0%';
@@ -517,7 +517,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Надбавка положена контрактникам, проходящим службу в подразделениях: ВКС (летный состав), ВМФ (экипажи боевых кораблей/судов), РВСН и ГУ ГШ:[span_1](start_span)[span_1](end_span)',
+                'Надбавка положена контрактникам, проходящим службу в подразделениях: ВКС (летный состав), ВМФ (экипажи боевых кораблей/судов), РВСН и ГУ ГШ:',
                 style: TextStyle(fontSize: 13, height: 1.4),
               ),
               SizedBox(height: 10),
@@ -594,7 +594,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
       sb.writeln('• Боевое дежурство ($desc): +${combatDutyAmount.toStringAsFixed(2)} руб.');
     }
     if (rkAmount > 0) sb.writeln('• Районный коэф. (коэф. $selectedDistrictVal): +${rkAmount.toStringAsFixed(2)} руб.');
-    if (northernAmount > 0) sb.writeln('• Северная надбавка (${(selectedNorthernVal * 100).toInt()}%): +${northernAmount.toStringAsFixed(2)} руб.');
+    if (northernAmount > 0) sb.writeln('• Северная надбавка (${(selectedNorthernVal * 100).toInt()}\%): +${northernAmount.toStringAsFixed(2)} руб.');
     if (premiumAmount > 0) sb.writeln('• Премия ($selectedPremium): +${premiumAmount.toStringAsFixed(2)} руб.');
     if (specialUnitsAmount > 0) sb.writeln('• Подразделения ($selectedSpecialUnits): +${specialUnitsAmount.toStringAsFixed(2)} руб.');
     if (otherAchievementsAmount > 0) sb.writeln('• Особые достижения ($selectedOtherAchievements): +${otherAchievementsAmount.toStringAsFixed(2)} руб.');
