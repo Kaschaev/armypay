@@ -338,7 +338,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
 
   bool hasContractBonus = false;
   bool isDriver = false;
-  bool hasMatHelp = false;
+  bool hasMatHelp = false; // <-- ИСПРАВЛЕНО
   bool isVbd = false;
 
   String selectedMedals = 'нет надбавки - 0%';
@@ -2183,7 +2183,7 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
                             _playClickFeedback();
                             final newVal = val ?? 1.0;
                             setState(() => selectedDistrictVal = newVal);
-                            StorageService.set('dd_district', newVal);
+                            StorageService.set('pension_district', newVal);
                           },
                         ),
                       ),
