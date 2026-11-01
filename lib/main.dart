@@ -357,7 +357,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     1.0, 1.15, 1.2, 1.25, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 2.0
   ];
 
-  final List<Map<String, dynamic>> northernOptions = [
+  final List> northernOptions = [
     {'val': 0.0, 'label': '0 %'},
     {'val': 0.10, 'label': '10 %'},
     {'val': 0.20, 'label': '20 %'},
@@ -417,7 +417,6 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     super.dispose();
   }
 
-  // 5. ДИАЛОГ ПОДТВЕРЖДЕНИЯ СБРОСА
   Future<void> _confirmReset() async {
     _playClickFeedback();
     final bool? shouldReset = await showDialog<bool>(
@@ -500,7 +499,6 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     }
   }
 
-  // 3 (Вариант А). ДИАЛОГ ПОДСКАЗКИ ДЛЯ ПОДРАЗДЕЛЕНИЙ
   void _showSpecialUnitsInfo() {
     _playClickFeedback();
     showDialog(
@@ -519,7 +517,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Надбавка положена контрактникам, проходящим службу в подразделениях: ВКС (летный состав), ВМФ (экипажи боевых кораблей/судов), РВСН и ГУ ГШ:',
+                'Надбавка положена контрактникам, проходящим службу в подразделениях: ВКС (летный состав), ВМФ (экипажи боевых кораблей/судов), РВСН и ГУ ГШ:[span_1](start_span)[span_1](end_span)',
                 style: TextStyle(fontSize: 13, height: 1.4),
               ),
               SizedBox(height: 10),
@@ -600,7 +598,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     if (premiumAmount > 0) sb.writeln('• Премия ($selectedPremium): +${premiumAmount.toStringAsFixed(2)} руб.');
     if (specialUnitsAmount > 0) sb.writeln('• Подразделения ($selectedSpecialUnits): +${specialUnitsAmount.toStringAsFixed(2)} руб.');
     if (otherAchievementsAmount > 0) sb.writeln('• Особые достижения ($selectedOtherAchievements): +${otherAchievementsAmount.toStringAsFixed(2)} руб.');
-    if (contractAmount > 0) sb.writeln('• Контракт 1-4 т.р. (50%): +${contractAmount.toStringAsFixed(2)} руб.');
+    if (contractAmount > 0) sb.writeln('• Контракт 1-4 т.р. (50% от ОВД): +${contractAmount.toStringAsFixed(2)} руб.');
     if (driverAmount > 0) sb.writeln('• Должность водителя (30%): +${driverAmount.toStringAsFixed(2)} руб.');
     if (medalsAmount > 0) sb.writeln('• Знаки отличия МО РФ ($selectedMedals): +${medalsAmount.toStringAsFixed(2)} руб.');
     if (zgtAmount > 0) sb.writeln('• Служба в подразделениях ЗГТ ($selectedZgt): +${zgtAmount.toStringAsFixed(2)} руб.');
@@ -860,7 +858,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
           IconButton(
             icon: const Icon(Icons.restart_alt),
             tooltip: 'Сбросить все поля',
-            onPressed: _confirmReset, // 5. Подтверждение сброса
+            onPressed: _confirmReset,
           ),
           IconButton(
             icon: const Icon(Icons.share),
@@ -927,7 +925,6 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
 
           Expanded(
             child: ListView(
-              // 2. ОТСТУП СВЕРХУ ДЛЯ СПИСКА
               padding: const EdgeInsets.only(left: 12, right: 12, top: 8, bottom: 20),
               children: [
                 _buildCardPeriodSelector(isDark),
@@ -1173,7 +1170,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   highlightColor: highlightColor,
                 ),
 
-                // 3 (Вариант А). ПОДРАЗДЕЛЕНИЯ С ИНТЕРАКТИВНОЙ КНОПКОЙ-ИНФОРМАЦИЕЙ
+                // ПОДРАЗДЕЛЕНИЯ С ИНТЕРАКТИВНОЙ КНОПКОЙ-ИНФОРМАЦИЕЙ
                 _buildCardWrapper(
                   isDark: isDark,
                   child: Column(
@@ -1292,8 +1289,9 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   highlightColor: highlightColor,
                 ),
 
+                // ВАРИАНТ 2А: Лаконичная и чистая формулировка
                 _buildUnifiedCardCheckbox(
-                  title: 'Особые достижения (- контракт 1-4 т.р.):',
+                  title: 'Контракт 1-4 т.р. (50% от ОВД):',
                   highlightAmount: '${(ovd * 0.50).toStringAsFixed(1)} руб.',
                   value: hasContractBonus,
                   onChanged: (val) {
@@ -1672,7 +1670,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
   }
 
   // =============================================================
-  // ХЕЛПЕРЫ ДИЗАЙНА КАРТОЧЕК БЕЗ СЕРЫХ ПОЛОС
+  // ХЕЛПЕРЫ ДИЗАЙНА КАРТОЧЕК
   // =============================================================
   Widget _buildCardWrapper({required Widget child, required bool isDark}) {
     return Container(
@@ -2032,7 +2030,6 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
       ),
       body: Column(
         children: [
-          // ЗАКРЕПЛЕННЫЙ HEADER ПЕНСИИ
           Container(
             margin: const EdgeInsets.fromLTRB(12, 10, 12, 6),
             padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
@@ -2186,7 +2183,7 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
                             _playClickFeedback();
                             final newVal = val ?? 1.0;
                             setState(() => selectedDistrictVal = newVal);
-                            StorageService.set('pension_district', newVal);
+                            StorageService.set('dd_district', newVal);
                           },
                         ),
                       ),
