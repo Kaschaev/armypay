@@ -787,7 +787,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     double riskPercent = (riskDays * 0.02).clamp(0.0, 1.0);
     double riskAmount = ovd * riskPercent;
 
-    // Итого начислено: боевое дежурство прибавляется строго 1 раз
+    // Итого начислено: combatDutyAmount прибавляется строго 1 раз
     double totalGross = baseRkSn +
         rkAmount +
         northernAmount +
@@ -2175,6 +2175,7 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
                                     fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                                     color: isSelected ? highlightColor : (isDark ? Colors.white : Colors.black87),
                                   ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             );
