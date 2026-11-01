@@ -357,7 +357,8 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     1.0, 1.15, 1.2, 1.25, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 2.0
   ];
 
-  final List> northernOptions = [
+  // Чистое объявление списка без сложных вложенных дженериков
+  final northernOptions = [
     {'val': 0.0, 'label': '0 %'},
     {'val': 0.10, 'label': '10 %'},
     {'val': 0.20, 'label': '20 %'},
@@ -787,7 +788,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     double riskPercent = (riskDays * 0.02).clamp(0.0, 1.0);
     double riskAmount = ovd * riskPercent;
 
-    // Итого начислено: combatDutyAmount прибавляется строго 1 раз
+    // Итого начислено: боевое дежурство прибавляется строго 1 раз
     double totalGross = baseRkSn +
         rkAmount +
         northernAmount +
@@ -2175,7 +2176,6 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
                                     fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                                     color: isSelected ? highlightColor : (isDark ? Colors.white : Colors.black87),
                                   ),
-                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             );
