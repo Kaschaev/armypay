@@ -311,20 +311,7 @@ class SalaryCalculatorScreen extends StatefulWidget {
   State<SalaryCalculatorScreen> createState() => _SalaryCalculatorScreenState();
 }
 
-class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _shimmerController;
-
-  @override
-  void initState() {
-    super.initState();
-    _shimmerController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 3),
-    )..repeat();
-    _loadSavedData();
-  }
-
+class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
   void _playClickFeedback() {
     HapticFeedback.mediumImpact();
   }
@@ -388,6 +375,12 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen>
 
   final List<String> ouvsOptions = List.generate(21, (i) => '${i * 5}%');
 
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedData();
+  }
+
   void _loadSavedData() {
     selectedPeriod = StorageService.get('dd_period', 'Оклады с 01.10.2025 г.');
     selectedRank = StorageService.get('dd_rank', 'Не выбрано');
@@ -421,7 +414,6 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen>
 
   @override
   void dispose() {
-    _shimmerController.dispose();
     _days844Controller.dispose();
     _riskDaysController.dispose();
     super.dispose();
@@ -902,100 +894,103 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen>
       ),
       body: Column(
         children: [
-          // СТЕКЛЯННЫЙ HEADER ИТОГОВ С АНИМАЦИЕЙ БЛЕСКА (Мелкие блики/переливы)
-          AnimatedBuilder(
-            animation: _shimmerController,
-            builder: (context, child) {
-              double val = _shimmerController.value;
-              return Container(
-                margin: const EdgeInsets.fromLTRB(12, 10, 12, 6),
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment(-1.0 + val * 2, -1.0),
-                    end: Alignment(1.0 + val * 2, 1.0),
-                    colors: isDark
-                        ? [
-                            const Color(0xFF1E284A).withOpacity(0.85),
-                            const Color(0xFF2C3E6B).withOpacity(0.95), // Бликовый перелив
-                            const Color(0xFF141C33).withOpacity(0.70),
-                          ]
-                        : [
-                            Colors.white.withOpacity(0.92),
-                            const Color(0xFFFFFFFF).withOpacity(0.99), // Бликовый перелив
-                            const Color(0xFFF3F6FD).withOpacity(0.80),
-                          ],
-                  ),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: isDark
-                        ? Colors.white.withOpacity(0.25)
-                        : Colors.white.withOpacity(0.95),
-                    width: 1.5,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: isDark
-                          ? Colors.black.withOpacity(0.55)
-                          : const Color(0xFF9EAEC7).withOpacity(0.30),
-                      blurRadius: 12,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: child,
-              );
-            },
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Начислено: ${totalGross.toStringAsFixed(2)} ₽',
-                        style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: isDark ? Colors.grey.shade300 : Colors.black87)),
-                    Text('Удержано: ${totalHold.toStringAsFixed(2)} ₽',
-                        style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: heldTextColor)),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Divider(
-                  height: 1,
+          // СТЕКЛЯННЫЙ HEADER ИТОГОВ С МЕЛКИМИ ПЕРЕЛИВАЮЩИМИСЯ БЛЕСТКАМИ (ЗВЕЗДНАЯ ПЫЛЬ)
+          Container(
+            margin: const EdgeInsets.fromLTRB(12, 10, 12, 6),
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: isDark
+                    ? [
+                        const Color(0xFF1E284A).withOpacity(0.90),
+                        const Color(0xFF25335D).withOpacity(0.85),
+                        const Color(0xFF141C33).withOpacity(0.75),
+                      ]
+                    : [
+                        Colors.white.withOpacity(0.95),
+                        const Color(0xFFF7F9FC).withOpacity(0.90),
+                        const Color(0xFFE6ECF8).withOpacity(0.82),
+                      ],
+              ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isDark
+                    ? Colors.white.withOpacity(0.30)
+                    : Colors.white.withOpacity(0.95),
+                width: 1.8,
+              ),
+              boxShadow: [
+                BoxShadow(
                   color: isDark
-                      ? Colors.white.withOpacity(0.12)
-                      : Colors.black.withOpacity(0.08),
+                      ? Colors.black.withOpacity(0.60)
+                      : const Color(0xFF9EAEC7).withOpacity(0.35),
+                  blurRadius: 14,
+                  offset: const Offset(0, 5),
                 ),
-                const SizedBox(height: 10),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? const Color(0xFF132A1F).withOpacity(0.65)
-                        : const Color(0xFFE8F8F0).withOpacity(0.85),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: const Color(0xFF2E7D32),
-                      width: 2.0,
+              ],
+            ),
+            child: Stack(
+              children: [
+                // Мелкие переливающиеся блестки (декоративные точки)
+                Positioned(top: 4, right: 30, child: Icon(Icons.star, size: 8, color: isDark ? Colors.amberAccent.withOpacity(0.6) : Colors.blue.withOpacity(0.3))),
+                Positioned(top: 25, right: 90, child: Icon(Icons.circle, size: 5, color: isDark ? Colors.white.withOpacity(0.5) : Colors.amber.withOpacity(0.5))),
+                Positioned(bottom: 8, left: 50, child: Icon(Icons.star, size: 7, color: isDark ? Colors.cyanAccent.withOpacity(0.5) : Colors.indigo.withOpacity(0.3))),
+                Positioned(top: 15, left: 120, child: Icon(Icons.circle, size: 4, color: isDark ? Colors.amber.withOpacity(0.4) : Colors.blue.withOpacity(0.4))),
+                
+                Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Начислено: ${totalGross.toStringAsFixed(2)} ₽',
+                            style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: isDark ? Colors.grey.shade300 : Colors.black87)),
+                        Text('Удержано: ${totalHold.toStringAsFixed(2)} ₽',
+                            style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: heldTextColor)),
+                      ],
                     ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('На руки:',
-                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-                      Text('${netPay.toStringAsFixed(2)} ₽',
-                          style: TextStyle(
-                              fontSize: 19,
-                              fontWeight: FontWeight.bold,
-                              color: isDark ? const Color(0xFF66BB6A) : const Color(0xFF1B5E20))),
-                    ],
-                  ),
+                    const SizedBox(height: 6),
+                    Divider(
+                      height: 1,
+                      color: isDark
+                          ? Colors.white.withOpacity(0.12)
+                          : Colors.black.withOpacity(0.08),
+                    ),
+                    const SizedBox(height: 10),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? const Color(0xFF132A1F).withOpacity(0.65)
+                            : const Color(0xFFE8F8F0).withOpacity(0.85),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: const Color(0xFF2E7D32),
+                          width: 2.0,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('На руки:',
+                              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                          Text('${netPay.toStringAsFixed(2)} ₽',
+                              style: TextStyle(
+                                  fontSize: 19,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDark ? const Color(0xFF66BB6A) : const Color(0xFF1B5E20))),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -1469,7 +1464,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen>
                   highlightColor: highlightColor,
                 ),
 
-                // ДОПОЛНИТЕЛЬНЫЕ СУТКИ ОТДЫХА (КРЕСТИК СЛЕВА ОТ ПОЛЯ)
+                // ДОПОЛНИТЕЛЬНЫЕ СУТКИ ОТДЫХА (КРЕСТИК СЛЕВА ОТ ПОЛЯ ВВОДА)
                 _buildCardWrapper(
                   isDark: isDark,
                   child: Column(
@@ -1490,10 +1485,10 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen>
                             child: Text('Дней мероприятий (без ограничения времени):',
                                 style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w500)),
                           ),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 6),
                           if (days844 > 0)
                             Padding(
-                              padding: const EdgeInsets.only(right: 6),
+                              padding: const EdgeInsets.only(right: 4),
                               child: InkWell(
                                 onTap: () {
                                   _days844Controller.clear();
@@ -1511,8 +1506,8 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen>
                                 ),
                               ),
                             ),
-                          Expanded(
-                            flex: 1,
+                          SizedBox(
+                            width: 60,
                             child: TextField(
                               controller: _days844Controller,
                               keyboardType: TextInputType.number,
@@ -1565,7 +1560,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen>
                   ),
                 ),
 
-                // РИСК ДЛЯ ЖИЗНИ (КРЕСТИК СЛЕВА ОТ ПОЛЯ)
+                // РИСК ДЛЯ ЖИЗНИ (КРЕСТИК СЛЕВА ОТ ПОЛЯ ВВОДА)
                 _buildCardWrapper(
                   isDark: isDark,
                   child: Column(
@@ -1586,10 +1581,10 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen>
                             child: Text('Дней участия с риском для жизни:',
                                 style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w500)),
                           ),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 6),
                           if (riskDays > 0)
                             Padding(
-                              padding: const EdgeInsets.only(right: 6),
+                              padding: const EdgeInsets.only(right: 4),
                               child: InkWell(
                                 onTap: () {
                                   _riskDaysController.clear();
@@ -1607,8 +1602,8 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen>
                                 ),
                               ),
                             ),
-                          Expanded(
-                            flex: 1,
+                          SizedBox(
+                            width: 60,
                             child: TextField(
                               controller: _riskDaysController,
                               keyboardType: TextInputType.number,
