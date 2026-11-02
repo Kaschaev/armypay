@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -195,30 +196,38 @@ class _MilPayCalculatorAppState extends State<MilPayCalculatorApp> {
         brightness: Brightness.light,
         scaffoldBackgroundColor: const Color(0xFFE5ECF6),
         cardColor: Colors.white,
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF1E284A),
+        textTheme: GoogleFonts.montserratTextTheme(ThemeData.light().textTheme),
+        appBarTheme: AppBarTheme(
+          backgroundColor: const Color(0xFF1E284A),
           foregroundColor: Colors.white,
           elevation: 0,
+          titleTextStyle: GoogleFonts.montserrat(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
         ),
-        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
           backgroundColor: Colors.white,
-          selectedItemColor: Color(0xFF1A237E),
+          selectedItemColor: const Color(0xFF1A237E),
           unselectedItemColor: Colors.grey,
+          selectedLabelStyle: GoogleFonts.montserrat(fontSize: 12, fontWeight: FontWeight.w600),
+          unselectedLabelStyle: GoogleFonts.montserrat(fontSize: 12),
         ),
       ),
       darkTheme: ThemeData(
         brightness: Brightness.dark,
         scaffoldBackgroundColor: const Color(0xFF090E1A),
         cardColor: const Color(0xFF131A2D),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF0D1322),
+        textTheme: GoogleFonts.montserratTextTheme(ThemeData.dark().textTheme),
+        appBarTheme: AppBarTheme(
+          backgroundColor: const Color(0xFF0D1322),
           foregroundColor: Colors.white,
           elevation: 0,
+          titleTextStyle: GoogleFonts.montserrat(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
         ),
-        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          backgroundColor: Color(0xFF0D1322),
-          selectedItemColor: Color(0xFFFFD54F),
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          backgroundColor: const Color(0xFF0D1322),
+          selectedItemColor: const Color(0xFFFFD54F),
           unselectedItemColor: Colors.grey,
+          selectedLabelStyle: GoogleFonts.montserrat(fontSize: 12, fontWeight: FontWeight.w600),
+          unselectedLabelStyle: GoogleFonts.montserrat(fontSize: 12),
         ),
       ),
       home: MainNavigationHolder(
@@ -469,7 +478,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
       combatDutyPercent = 0.0;
       selectedDistrictVal = 1.0;
       selectedNorthernVal = 0.0;
-      selectedPremium = '0%S';
+      selectedPremium = '0%';
       selectedSpecialUnits = 'нет (0%)';
       selectedOtherAchievements = '0%';
       hasContractBonus = false;
@@ -584,6 +593,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     if (secrecyAmount > 0) sb.writeln('• Гос. тайна ($selectedSecrecy): +${secrecyAmount.toStringAsFixed(2)} руб.');
     if (ouvsAmount > 0) sb.writeln('• НАДБАВКА ЗА ОУС + Руководство ($selectedOuvs): +${ouvsAmount.toStringAsFixed(2)} руб.');
     if (classAmount > 0) sb.writeln('• Классная квалификация ($selectedClass): +${classAmount.toStringAsFixed(2)} руб.');
+    if (flightAmount > 0) sb.writeln('• Летный состав ($selectedFlight): +${flightAmount.toStringAsFixed(2)} руб.');
     if (combatDutyAmount > 0) {
       String desc = combatDutyPercent == 0.30
           ? '5 и более суток в месяц (30% от ОВД)'
@@ -593,19 +603,18 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
       sb.writeln('• Боевое дежурство ($desc): +${combatDutyAmount.toStringAsFixed(2)} руб.');
     }
     if (rkAmount > 0) sb.writeln('• Районный коэф. (коэф. $selectedDistrictVal): +${rkAmount.toStringAsFixed(2)} руб.');
-    if (northernAmount > 0) sb.writeln('• Северная надбавка (${(selectedNorthernVal * 100).toInt()}\%): +${northernAmount.toStringAsFixed(2)} руб.');
+    if (northernAmount > 0) sb.writeln('• Северная надбавка (${(selectedNorthernVal * 100).toInt()}%): +${northernAmount.toStringAsFixed(2)} руб.');
     if (premiumAmount > 0) sb.writeln('• Премия ($selectedPremium): +${premiumAmount.toStringAsFixed(2)} руб.');
     if (specialUnitsAmount > 0) sb.writeln('• Подразделения ($selectedSpecialUnits): +${specialUnitsAmount.toStringAsFixed(2)} руб.');
     if (otherAchievementsAmount > 0) sb.writeln('• Прочие достижения ($selectedOtherAchievements): +${otherAchievementsAmount.toStringAsFixed(2)} руб.');
     if (contractAmount > 0) sb.writeln('• Контракт 1-4 т.р. (50% от ОВД): +${contractAmount.toStringAsFixed(2)} руб.');
-    if (matHelpAmount > 0) sb.writeln('• Материальная помощь (1 ОДС): +${matHelpAmount.toStringAsFixed(2)} руб.');
-    if (comp844Amount > 0) sb.writeln('• Дополнительные сутки отдыха (пр. № 492, $days844 дн.): +${comp844Amount.toStringAsFixed(2)} руб.');
-    if (riskAmount > 0) sb.writeln('• Риск для жизни (пр. № 727, ПП РФ № 1122, $riskDays дн.): +${riskAmount.toStringAsFixed(2)} руб.');
     if (driverAmount > 0) sb.writeln('• Должность водителя (30%): +${driverAmount.toStringAsFixed(2)} руб.');
-    if (flightAmount > 0) sb.writeln('• Летный состав ($selectedFlight): +${flightAmount.toStringAsFixed(2)} руб.');
     if (medalsAmount > 0) sb.writeln('• Знаки отличия МО РФ ($selectedMedals): +${medalsAmount.toStringAsFixed(2)} руб.');
     if (zgtAmount > 0) sb.writeln('• Служба в подразделениях ЗГТ ($selectedZgt): +${zgtAmount.toStringAsFixed(2)} руб.');
     if (cipherAmount > 0) sb.writeln('• Работа с шифрами ($selectedCipher): +${cipherAmount.toStringAsFixed(2)} руб.');
+    if (matHelpAmount > 0) sb.writeln('• Материальная помощь (1 ОДС): +${matHelpAmount.toStringAsFixed(2)} руб.');
+    if (comp844Amount > 0) sb.writeln('• Дополнительные сутки отдыха (пр. № 492, $days844 дн.): +${comp844Amount.toStringAsFixed(2)} руб.');
+    if (riskAmount > 0) sb.writeln('• Риск для жизни (пр. № 727, ПП РФ № 1122, $riskDays дн.): +${riskAmount.toStringAsFixed(2)} руб.');
     if (alimonyAmount > 0) sb.writeln('• Алименты ($selectedAlimony): -${alimonyAmount.toStringAsFixed(2)} руб.');
 
     sb.writeln('--------------------------------');
@@ -696,7 +705,6 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     bool isDark = Theme.of(context).brightness == Brightness.dark;
     Color highlightColor = isDark ? const Color(0xFFFFD54F) : const Color(0xFF1A237E);
 
-    // Изменение цвета "Удержано" на красный в темной теме
     Color heldTextColor = isDark ? const Color(0xFFEF5350) : Colors.red.shade700;
 
     double indexCoeff = salaryPeriods[selectedPeriod] ?? 1.0;
@@ -738,7 +746,6 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     if (selectedClass.contains('20%')) classPercent = 0.20;
     if (selectedClass.contains('30%')) classPercent = 0.30;
 
-    // Надбавка за боевое дежурство: строго процент от ОВД
     double combatDutyAmount = ovd * combatDutyPercent;
     double premiumPercent = double.parse(selectedPremium.replaceAll('%', '')) / 100.0;
 
@@ -800,7 +807,6 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     double classAmount = ovd * classPercent;
     double flightAmount = ovd * flightBonusPercent;
 
-    // База для РК и СН без боевого дежурства
     double baseRkSn = ods + nvlAmount + secrecyAmount + ouvsAmount + classAmount + flightAmount;
     double rkAmount = baseRkSn * (selectedDistrictVal - 1.0);
     double northernAmount = baseRkSn * selectedNorthernVal;
@@ -814,7 +820,6 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     double riskPercent = (riskDays * 0.02).clamp(0.0, 1.0);
     double riskAmount = ovd * riskPercent;
 
-    // Итого начислено: combatDutyAmount прибавляется строго 1 раз
     double totalGross = baseRkSn +
         rkAmount +
         northernAmount +
@@ -896,7 +901,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
       ),
       body: Column(
         children: [
-          // ЗАКРЕПЛЕННЫЙ HEADER ИТОГОВ
+          // СТЕКЛЯННЫЙ HEADER ИТОГОВ
           Container(
             margin: const EdgeInsets.fromLTRB(12, 10, 12, 6),
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
@@ -945,7 +950,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                         style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: heldTextColor)), // Красный цвет для удержано в темной теме
+                            color: heldTextColor)),
                   ],
                 ),
                 const SizedBox(height: 6),
@@ -1042,32 +1047,132 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   highlightColor: highlightColor,
                 ),
 
-                _buildUnifiedCardDropdown(
-                  title: 'Надбавка за допуск к сведениям (гос. тайна):',
-                  highlightAmount: secrecyAmount > 0 ? '+${secrecyAmount.toStringAsFixed(1)} руб.' : '0.0 руб.',
-                  value: selectedSecrecy,
-                  items: ['нет - 0%', 'секретно - 10%', 'сов. секретно - 20%', 'особая важность - 25%'],
-                  onChanged: (val) {
-                    _playClickFeedback();
-                    setState(() => selectedSecrecy = val!);
-                    StorageService.set('dd_secrecy', val);
-                  },
+                // 1. ИСПРАВЛЕННЫЙ ЗАГОЛОВОК ДОПУСКА К СВЕДЕНИЯМ
+                _buildCardWrapper(
                   isDark: isDark,
-                  highlightColor: highlightColor,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Надбавка за допуск к сведениям (гос. тайна):',
+                              style: TextStyle(
+                                  fontSize: 12.5,
+                                  color: isDark ? Colors.grey.shade300 : Colors.black87),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          _buildGreenBoxAmount(
+                            secrecyAmount > 0 ? '+${secrecyAmount.toStringAsFixed(1)} руб.' : '0.0 руб.',
+                            isDark,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: ['нет - 0%', 'секретно - 10%', 'сов. секретно - 20%', 'особая важность - 25%'].contains(selectedSecrecy)
+                              ? selectedSecrecy
+                              : 'нет - 0%',
+                          isExpanded: true,
+                          itemHeight: 38.0,
+                          dropdownColor: isDark ? const Color(0xFF131A2D) : Colors.white,
+                          items: ['нет - 0%', 'секретно - 10%', 'сов. секретно - 20%', 'особая важность - 25%'].map((item) {
+                            final bool isSelected = item == selectedSecrecy;
+                            return DropdownMenuItem<String>(
+                              value: item,
+                              child: Container(
+                                width: double.infinity,
+                                alignment: Alignment.centerLeft,
+                                padding: const EdgeInsets.symmetric(vertical: 4),
+                                child: Text(
+                                  item,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                    color: isSelected ? highlightColor : (isDark ? Colors.white : Colors.black87),
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (val) {
+                            _playClickFeedback();
+                            setState(() => selectedSecrecy = val!);
+                            StorageService.set('dd_secrecy', val);
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
 
-                _buildUnifiedCardDropdown(
-                  title: 'НАДБАВКА ЗА ОУС + Руководство:',
-                  highlightAmount: '+${ouvsAmount.toStringAsFixed(1)} руб.',
-                  value: selectedOuvs,
-                  items: ouvsOptions,
-                  onChanged: (val) {
-                    _playClickFeedback();
-                    setState(() => selectedOuvs = val!);
-                    StorageService.set('dd_ouvs', val);
-                  },
+                // 1. ИСПРАВЛЕННЫЙ ЗАГОЛОВОК ОУС + РУКОВОДСТВО
+                _buildCardWrapper(
                   isDark: isDark,
-                  highlightColor: highlightColor,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'НАДБАВКА ЗА ОУС + Руководство:',
+                              style: TextStyle(
+                                  fontSize: 12.5,
+                                  color: isDark ? Colors.grey.shade300 : Colors.black87),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          _buildGreenBoxAmount(
+                            '+${ouvsAmount.toStringAsFixed(1)} руб.',
+                            isDark,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: ouvsOptions.contains(selectedOuvs) ? selectedOuvs : '0%',
+                          isExpanded: true,
+                          itemHeight: 38.0,
+                          dropdownColor: isDark ? const Color(0xFF131A2D) : Colors.white,
+                          items: ouvsOptions.map((item) {
+                            final bool isSelected = item == selectedOuvs;
+                            return DropdownMenuItem<String>(
+                              value: item,
+                              child: Container(
+                                width: double.infinity,
+                                alignment: Alignment.centerLeft,
+                                padding: const EdgeInsets.symmetric(vertical: 4),
+                                child: Text(
+                                  item,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                    color: isSelected ? highlightColor : (isDark ? Colors.white : Colors.black87),
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (val) {
+                            _playClickFeedback();
+                            setState(() => selectedOuvs = val!);
+                            StorageService.set('dd_ouvs', val);
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
 
                 _buildUnifiedCardDropdown(
@@ -1354,20 +1459,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   highlightColor: highlightColor,
                 ),
 
-                _buildUnifiedCardCheckbox(
-                  title: 'На должности водителя (30% от ОВД):',
-                  highlightAmount: '${(ovd * 0.30).toStringAsFixed(1)} руб.',
-                  value: isDriver,
-                  onChanged: (val) {
-                    _playClickFeedback();
-                    final newVal = val ?? false;
-                    setState(() => isDriver = newVal);
-                    StorageService.set('dd_driver', newVal);
-                  },
-                  isDark: isDark,
-                  highlightColor: highlightColor,
-                ),
-
+                // ДОПОЛНИТЕЛЬНЫЕ СУТКИ ОТДЫХА (С КРАСНЫМ КОЛИЧЕСТВОМ ДНЕЙ)
                 _buildCardWrapper(
                   isDark: isDark,
                   child: Column(
@@ -1414,12 +1506,24 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            'Положено суток: $extraRestDays дн.',
-                            style: TextStyle(
-                                fontSize: 12,
-                                color: isDark ? Colors.grey.shade300 : Colors.blueGrey,
-                                fontWeight: FontWeight.bold),
+                          RichText(
+                            text: TextSpan(
+                              text: 'Положено суток: ',
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  color: isDark ? Colors.grey.shade300 : Colors.blueGrey,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: GoogleFonts.montserrat().fontFamily),
+                              children: [
+                                TextSpan(
+                                  text: '$extraRestDays дн.',
+                                  style: const TextStyle(
+                                    color: Colors.red, // Красный цвет для дней
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                           _buildGreenBoxAmount(
                             '${comp844Amount.toStringAsFixed(2)} руб.',
@@ -1431,7 +1535,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   ),
                 ),
 
-                // РИСК ДЛЯ ЖИЗНИ С ПОЯСНЕНИЕМ ПП РФ № 1122
+                // РИСК ДЛЯ ЖИЗНИ (С КРАСНЫМ ПРОЦЕНТОМ НАДБАВКИ)
                 _buildCardWrapper(
                   isDark: isDark,
                   child: Column(
@@ -1477,12 +1581,25 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            'Надбавка: ${(riskPercent * 100).toInt()}% от ОВД',
-                            style: TextStyle(
-                                fontSize: 12,
-                                color: isDark ? Colors.grey.shade300 : Colors.blueGrey,
-                                fontWeight: FontWeight.bold),
+                          RichText(
+                            text: TextSpan(
+                              text: 'Надбавка: ',
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  color: isDark ? Colors.grey.shade300 : Colors.blueGrey,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: GoogleFonts.montserrat().fontFamily),
+                              children: [
+                                TextSpan(
+                                  text: '${(riskPercent * 100).toInt()}%',
+                                  style: const TextStyle(
+                                    color: Colors.red, // Красный цвет для % надбавки
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const TextSpan(text: ' от ОВД'),
+                              ],
+                            ),
                           ),
                           _buildGreenBoxAmount(
                             '${riskAmount.toStringAsFixed(2)} руб.',
@@ -1563,7 +1680,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   ),
                 ),
 
-                // ПЕРЕНЕСЕННЫЕ ПУНКТЫ В КОНЕЦ СПИСКА
+                // ПЕРЕНЕСЕННЫЕ ПУНКТЫ В КОНЕЦ СПИСКА (ВКЛЮЧАЯ ВОДИТЕЛЯ СРАЗУ ПОСЛЕ ЛЕТНОГО СОСТАВА)
                 _buildUnifiedCardDropdown(
                   title: 'Летный состав:',
                   highlightAmount: flightAmount > 0 ? '+${flightAmount.toStringAsFixed(1)} руб.' : '0.0 руб.',
@@ -1573,6 +1690,20 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                     _playClickFeedback();
                     setState(() => selectedFlight = val!);
                     StorageService.set('dd_flight', val);
+                  },
+                  isDark: isDark,
+                  highlightColor: highlightColor,
+                ),
+
+                _buildUnifiedCardCheckbox(
+                  title: 'На должности водителя (30% от ОВД):',
+                  highlightAmount: '${(ovd * 0.30).toStringAsFixed(1)} руб.',
+                  value: isDriver,
+                  onChanged: (val) {
+                    _playClickFeedback();
+                    final newVal = val ?? false;
+                    setState(() => isDriver = newVal);
+                    StorageService.set('dd_driver', newVal);
                   },
                   isDark: isDark,
                   highlightColor: highlightColor,
