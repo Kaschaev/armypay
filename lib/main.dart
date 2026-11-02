@@ -311,7 +311,20 @@ class SalaryCalculatorScreen extends StatefulWidget {
   State<SalaryCalculatorScreen> createState() => _SalaryCalculatorScreenState();
 }
 
-class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
+class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _shimmerController;
+
+  @override
+  void initState() {
+    super.initState();
+    _shimmerController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    )..repeat();
+    _loadSavedData();
+  }
+
   void _playClickFeedback() {
     HapticFeedback.mediumImpact();
   }
@@ -375,12 +388,6 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
 
   final List<String> ouvsOptions = List.generate(21, (i) => '${i * 5}%');
 
-  @override
-  void initState() {
-    super.initState();
-    _loadSavedData();
-  }
-
   void _loadSavedData() {
     selectedPeriod = StorageService.get('dd_period', 'Оклады с 01.10.2025 г.');
     selectedRank = StorageService.get('dd_rank', 'Не выбрано');
@@ -414,6 +421,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
 
   @override
   void dispose() {
+    _shimmerController.dispose();
     _days844Controller.dispose();
     _riskDaysController.dispose();
     super.dispose();
@@ -894,41 +902,50 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
       ),
       body: Column(
         children: [
-          // СТЕКЛЯННЫЙ HEADER ИТОГОВ
-          Container(
-            margin: const EdgeInsets.fromLTRB(12, 10, 12, 6),
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: isDark
-                    ? [
-                        const Color(0xFF1E284A).withOpacity(0.85),
-                        const Color(0xFF141C33).withOpacity(0.70),
-                      ]
-                    : [
-                        Colors.white.withOpacity(0.92),
-                        const Color(0xFFF3F6FD).withOpacity(0.80),
-                      ],
-              ),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: isDark
-                    ? Colors.white.withOpacity(0.20)
-                    : Colors.white.withOpacity(0.95),
-                width: 1.5,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: isDark
-                      ? Colors.black.withOpacity(0.55)
-                      : const Color(0xFF9EAEC7).withOpacity(0.30),
-                  blurRadius: 12,
-                  offset: const Offset(0, 5),
+          // СТЕКЛЯННЫЙ HEADER ИТОГОВ С АНИМАЦИЕЙ БЛЕСКА (Мелкие блики/переливы)
+          AnimatedBuilder(
+            animation: _shimmerController,
+            builder: (context, child) {
+              double val = _shimmerController.value;
+              return Container(
+                margin: const EdgeInsets.fromLTRB(12, 10, 12, 6),
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment(-1.0 + val * 2, -1.0),
+                    end: Alignment(1.0 + val * 2, 1.0),
+                    colors: isDark
+                        ? [
+                            const Color(0xFF1E284A).withOpacity(0.85),
+                            const Color(0xFF2C3E6B).withOpacity(0.95), // Бликовый перелив
+                            const Color(0xFF141C33).withOpacity(0.70),
+                          ]
+                        : [
+                            Colors.white.withOpacity(0.92),
+                            const Color(0xFFFFFFFF).withOpacity(0.99), // Бликовый перелив
+                            const Color(0xFFF3F6FD).withOpacity(0.80),
+                          ],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isDark
+                        ? Colors.white.withOpacity(0.25)
+                        : Colors.white.withOpacity(0.95),
+                    width: 1.5,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: isDark
+                          ? Colors.black.withOpacity(0.55)
+                          : const Color(0xFF9EAEC7).withOpacity(0.30),
+                      blurRadius: 12,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+                child: child,
+              );
+            },
             child: Column(
               children: [
                 Row(
@@ -1452,7 +1469,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   highlightColor: highlightColor,
                 ),
 
-                // ДОПОЛНИТЕЛЬНЫЕ СУТКИ ОТДЫХА (С КРЕСТИКОМ СЛЕВА ОТ ОКОШКА ВВОДА)
+                // ДОПОЛНИТЕЛЬНЫЕ СУТКИ ОТДЫХА (КРЕСТИК СЛЕВА ОТ ПОЛЯ)
                 _buildCardWrapper(
                   isDark: isDark,
                   child: Column(
@@ -1548,7 +1565,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   ),
                 ),
 
-                // РИСК ДЛЯ ЖИЗНИ (С КРЕСТИКОМ СЛЕВА ОТ ОКОШКА ВВОДА)
+                // РИСК ДЛЯ ЖИЗНИ (КРЕСТИК СЛЕВА ОТ ПОЛЯ)
                 _buildCardWrapper(
                   isDark: isDark,
                   child: Column(
