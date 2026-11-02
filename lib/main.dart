@@ -519,7 +519,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Надбавка положена контрактникам, проходящим службу в подразделениях: ВКС (летный состав), ВМФ (экипажи боевых кораблей/судов), РВСН и ГУ ГШ:[span_2](start_span)[span_2](end_span)',
+                'Надбавка положена контрактникам, проходящим службу в подразделениях: ВКС (летный состав), ВМФ (экипажи боевых кораблей/судов), РВСН и ГУ ГШ:',
                 style: TextStyle(fontSize: 13, height: 1.4),
               ),
               SizedBox(height: 10),
@@ -595,7 +595,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
       sb.writeln('• Боевое дежурство ($desc): +${combatDutyAmount.toStringAsFixed(2)} руб.');
     }
     if (rkAmount > 0) sb.writeln('• Районный коэф. (коэф. $selectedDistrictVal): +${rkAmount.toStringAsFixed(2)} руб.');
-    if (northernAmount > 0) sb.writeln('• Северная надбавка (${(selectedNorthernVal * 100).toInt()}%): +${northernAmount.toStringAsFixed(2)} руб.');
+    if (northernAmount > 0) sb.writeln('• Северная надбавка (${(selectedNorthernVal * 100).toInt()}\%): +${northernAmount.toStringAsFixed(2)} руб.');
     if (premiumAmount > 0) sb.writeln('• Премия ($selectedPremium): +${premiumAmount.toStringAsFixed(2)} руб.');
     if (specialUnitsAmount > 0) sb.writeln('• Подразделения ($selectedSpecialUnits): +${specialUnitsAmount.toStringAsFixed(2)} руб.');
     if (otherAchievementsAmount > 0) sb.writeln('• Прочие достижения ($selectedOtherAchievements): +${otherAchievementsAmount.toStringAsFixed(2)} руб.');
@@ -603,8 +603,8 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     if (matHelpAmount > 0) sb.writeln('• Материальная помощь (1 ОДС): +${matHelpAmount.toStringAsFixed(2)} руб.');
     if (comp844Amount > 0) sb.writeln('• Дополнительные сутки отдыха (пр. № 492, $days844 дн.): +${comp844Amount.toStringAsFixed(2)} руб.');
     if (riskAmount > 0) sb.writeln('• Риск для жизни (пр. № 727, ПП РФ № 1122, $riskDays дн.): +${riskAmount.toStringAsFixed(2)} руб.');
-    if (driverAmount > 0) sb.writeln('• Должность водителя (30%): +${driverAmount.toStringAsFixed(2)} руб.');
     if (flightAmount > 0) sb.writeln('• Летный состав ($selectedFlight): +${flightAmount.toStringAsFixed(2)} руб.');
+    if (driverAmount > 0) sb.writeln('• Должность водителя (30%): +${driverAmount.toStringAsFixed(2)} руб.');
     if (medalsAmount > 0) sb.writeln('• Знаки отличия МО РФ ($selectedMedals): +${medalsAmount.toStringAsFixed(2)} руб.');
     if (zgtAmount > 0) sb.writeln('• Служба в подразделениях ЗГТ ($selectedZgt): +${zgtAmount.toStringAsFixed(2)} руб.');
     if (cipherAmount > 0) sb.writeln('• Работа с шифрами ($selectedCipher): +${cipherAmount.toStringAsFixed(2)} руб.');
@@ -1040,7 +1040,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   highlightColor: highlightColor,
                 ),
 
-                // РАСШИРЕННЫЙ СПОСОБ ДЛЯ ДОПУСКА К СВЕДЕНИЯМ (НАЗВАНИЕ СВЕРХУ, СУММА НИЖЕ)
+                // БЛОК ДОПУСКА К СВЕДЕНИЯМ (НАЗВАНИЕ НАВЕРХУ ЦЕЛИКОМ)
                 _buildCardWrapper(
                   isDark: isDark,
                   child: Column(
@@ -1105,7 +1105,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   ),
                 ),
 
-                // РАСШИРЕННЫЙ СПОСОБ ДЛЯ ОУС + РУКОВОДСТВО
+                // БЛОК ОУС + РУКОВОДСТВО
                 _buildCardWrapper(
                   isDark: isDark,
                   child: Column(
@@ -1452,7 +1452,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   highlightColor: highlightColor,
                 ),
 
-                // ДОПОЛНИТЕЛЬНЫЕ СУТКИ ОТДЫХА (ДНИ КРАСНЫМ)
+                // ДОПОЛНИТЕЛЬНЫЕ СУТКИ ОТДЫХА (С КНОПКОЙ БЫСТРОЙ ОЧИСТКИ ДНЕЙ)
                 _buildCardWrapper(
                   isDark: isDark,
                   child: Column(
@@ -1485,6 +1485,16 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                                 contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                                 hintText: '0',
+                                suffixIcon: _days844Controller.text.isNotEmpty && _days844Controller.text != '0'
+                                    ? IconButton(
+                                        icon: const Icon(Icons.close, size: 16),
+                                        onPressed: () {
+                                          _days844Controller.clear();
+                                          setState(() => days844 = 0);
+                                          StorageService.set('dd_days844', 0);
+                                        },
+                                      )
+                                    : null,
                               ),
                               onChanged: (val) {
                                 final newVal = int.tryParse(val) ?? 0;
@@ -1510,7 +1520,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                                 TextSpan(
                                   text: '$extraRestDays дн.',
                                   style: const TextStyle(
-                                    color: Colors.red, // Дни красным
+                                    color: Colors.red,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -1527,7 +1537,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   ),
                 ),
 
-                // РИСК ДЛЯ ЖИЗНИ (ПРОЦЕНТ НАДБАВКИ КРАСНЫМ)
+                // РИСК ДЛЯ ЖИЗНИ (С КНОПКОЙ БЫСТРОЙ ОЧИСТКИ ДНЕЙ)
                 _buildCardWrapper(
                   isDark: isDark,
                   child: Column(
@@ -1559,6 +1569,17 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                                 isDense: true,
                                 contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                hintText: '0',
+                                suffixIcon: _riskDaysController.text.isNotEmpty && _riskDaysController.text != '0'
+                                    ? IconButton(
+                                        icon: const Icon(Icons.close, size: 16),
+                                        onPressed: () {
+                                          _riskDaysController.clear();
+                                          setState(() => riskDays = 0);
+                                          StorageService.set('dd_risk_days', 0);
+                                        },
+                                      )
+                                    : null,
                               ),
                               onChanged: (val) {
                                 final newVal = int.tryParse(val) ?? 0;
@@ -1584,7 +1605,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                                 TextSpan(
                                   text: '${(riskPercent * 100).toInt()}%',
                                   style: const TextStyle(
-                                    color: Colors.red, // Процент красным
+                                    color: Colors.red,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -1671,7 +1692,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   ),
                 ),
 
-                // ПЕРЕНЕСЕННЫЕ ПУНКТЫ В КОНЕЦ СПИСКА (ВКЛЮЧАЯ ВОДИТЕЛЯ СРАЗУ ПОСЛЕ ЛЕТНОГО СОСТАВА)
+                // ПУНКТЫ В КОНЕЦ СПИСКА (ВОДИТЕЛЬ СРАЗУ ПОСЛЕ ЛЕТНОГО СОСТАВА)
                 _buildUnifiedCardDropdown(
                   title: 'Летный состав:',
                   highlightAmount: flightAmount > 0 ? '+${flightAmount.toStringAsFixed(1)} руб.' : '0.0 руб.',
