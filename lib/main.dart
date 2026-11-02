@@ -1040,7 +1040,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   highlightColor: highlightColor,
                 ),
 
-                // БЛОК ДОПУСКА К СВЕДЕНИЯМ (НАЗВАНИЕ НАВЕРХУ ЦЕЛИКОМ)
+                // ДОПУСК К СВЕДЕНИЯМ
                 _buildCardWrapper(
                   isDark: isDark,
                   child: Column(
@@ -1105,7 +1105,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   ),
                 ),
 
-                // БЛОК ОУС + РУКОВОДСТВО
+                // ОУС + РУКОВОДСТВО
                 _buildCardWrapper(
                   isDark: isDark,
                   child: Column(
@@ -1452,7 +1452,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   highlightColor: highlightColor,
                 ),
 
-                // ДОПОЛНИТЕЛЬНЫЕ СУТКИ ОТДЫХА (С КНОПКОЙ БЫСТРОЙ ОЧИСТКИ ДНЕЙ)
+                // ДОПОЛНИТЕЛЬНЫЕ СУТКИ ОТДЫХА (С КРЕСТИКОМ СЛЕВА ОТ ОКОШКА ВВОДА)
                 _buildCardWrapper(
                   isDark: isDark,
                   child: Column(
@@ -1474,27 +1474,38 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                                 style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w500)),
                           ),
                           const SizedBox(width: 10),
+                          if (days844 > 0)
+                            Padding(
+                              padding: const EdgeInsets.only(right: 6),
+                              child: InkWell(
+                                onTap: () {
+                                  _days844Controller.clear();
+                                  setState(() => days844 = 0);
+                                  StorageService.set('dd_days844', 0);
+                                },
+                                borderRadius: BorderRadius.circular(12),
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.withOpacity(0.2),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(Icons.close, size: 16, color: Colors.grey),
+                                ),
+                              ),
+                            ),
                           Expanded(
                             flex: 1,
                             child: TextField(
                               controller: _days844Controller,
                               keyboardType: TextInputType.number,
+                              textAlign: TextAlign.center,
                               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                               decoration: InputDecoration(
                                 isDense: true,
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
                                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                                 hintText: '0',
-                                suffixIcon: _days844Controller.text.isNotEmpty && _days844Controller.text != '0'
-                                    ? IconButton(
-                                        icon: const Icon(Icons.close, size: 16),
-                                        onPressed: () {
-                                          _days844Controller.clear();
-                                          setState(() => days844 = 0);
-                                          StorageService.set('dd_days844', 0);
-                                        },
-                                      )
-                                    : null,
                               ),
                               onChanged: (val) {
                                 final newVal = int.tryParse(val) ?? 0;
@@ -1537,7 +1548,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   ),
                 ),
 
-                // РИСК ДЛЯ ЖИЗНИ (С КНОПКОЙ БЫСТРОЙ ОЧИСТКИ ДНЕЙ)
+                // РИСК ДЛЯ ЖИЗНИ (С КРЕСТИКОМ СЛЕВА ОТ ОКОШКА ВВОДА)
                 _buildCardWrapper(
                   isDark: isDark,
                   child: Column(
@@ -1559,27 +1570,38 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                                 style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w500)),
                           ),
                           const SizedBox(width: 10),
+                          if (riskDays > 0)
+                            Padding(
+                              padding: const EdgeInsets.only(right: 6),
+                              child: InkWell(
+                                onTap: () {
+                                  _riskDaysController.clear();
+                                  setState(() => riskDays = 0);
+                                  StorageService.set('dd_risk_days', 0);
+                                },
+                                borderRadius: BorderRadius.circular(12),
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.withOpacity(0.2),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(Icons.close, size: 16, color: Colors.grey),
+                                ),
+                              ),
+                            ),
                           Expanded(
                             flex: 1,
                             child: TextField(
                               controller: _riskDaysController,
                               keyboardType: TextInputType.number,
+                              textAlign: TextAlign.center,
                               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                               decoration: InputDecoration(
                                 isDense: true,
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
                                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                                 hintText: '0',
-                                suffixIcon: _riskDaysController.text.isNotEmpty && _riskDaysController.text != '0'
-                                    ? IconButton(
-                                        icon: const Icon(Icons.close, size: 16),
-                                        onPressed: () {
-                                          _riskDaysController.clear();
-                                          setState(() => riskDays = 0);
-                                          StorageService.set('dd_risk_days', 0);
-                                        },
-                                      )
-                                    : null,
                               ),
                               onChanged: (val) {
                                 final newVal = int.tryParse(val) ?? 0;
