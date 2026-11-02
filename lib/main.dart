@@ -469,7 +469,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
       combatDutyPercent = 0.0;
       selectedDistrictVal = 1.0;
       selectedNorthernVal = 0.0;
-      selectedPremium = '0%';
+      selectedPremium = '0%S';
       selectedSpecialUnits = 'нет (0%)';
       selectedOtherAchievements = '0%';
       hasContractBonus = false;
@@ -584,7 +584,6 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     if (secrecyAmount > 0) sb.writeln('• Гос. тайна ($selectedSecrecy): +${secrecyAmount.toStringAsFixed(2)} руб.');
     if (ouvsAmount > 0) sb.writeln('• НАДБАВКА ЗА ОУС + Руководство ($selectedOuvs): +${ouvsAmount.toStringAsFixed(2)} руб.');
     if (classAmount > 0) sb.writeln('• Классная квалификация ($selectedClass): +${classAmount.toStringAsFixed(2)} руб.');
-    if (flightAmount > 0) sb.writeln('• Летный состав ($selectedFlight): +${flightAmount.toStringAsFixed(2)} руб.');
     if (combatDutyAmount > 0) {
       String desc = combatDutyPercent == 0.30
           ? '5 и более суток в месяц (30% от ОВД)'
@@ -594,23 +593,24 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
       sb.writeln('• Боевое дежурство ($desc): +${combatDutyAmount.toStringAsFixed(2)} руб.');
     }
     if (rkAmount > 0) sb.writeln('• Районный коэф. (коэф. $selectedDistrictVal): +${rkAmount.toStringAsFixed(2)} руб.');
-    if (northernAmount > 0) sb.writeln('• Северная надбавка (${(selectedNorthernVal * 100).toInt()}%): +${northernAmount.toStringAsFixed(2)} руб.');
+    if (northernAmount > 0) sb.writeln('• Северная надбавка (${(selectedNorthernVal * 100).toInt()}\%): +${northernAmount.toStringAsFixed(2)} руб.');
     if (premiumAmount > 0) sb.writeln('• Премия ($selectedPremium): +${premiumAmount.toStringAsFixed(2)} руб.');
     if (specialUnitsAmount > 0) sb.writeln('• Подразделения ($selectedSpecialUnits): +${specialUnitsAmount.toStringAsFixed(2)} руб.');
     if (otherAchievementsAmount > 0) sb.writeln('• Прочие достижения ($selectedOtherAchievements): +${otherAchievementsAmount.toStringAsFixed(2)} руб.');
     if (contractAmount > 0) sb.writeln('• Контракт 1-4 т.р. (50% от ОВД): +${contractAmount.toStringAsFixed(2)} руб.');
-    if (driverAmount > 0) sb.writeln('• Должность водителя (30%): +${driverAmount.toStringAsFixed(2)} руб.');
-    if (medalsAmount > 0) sb.writeln('• Знаки отличия МО РФ ($selectedMedals): +${medalsAmount.toStringAsFixed(2)} руб.');
-    if (zgtAmount > 0) sb.writeln('• Служба в подразделениях ЗГТ ($selectedZgt): +${zgtAmount.toStringAsFixed(2)} руб.');
-    if (cipherAmount > 0) sb.writeln('• Работа с шифрами ($selectedCipher): +${cipherAmount.toStringAsFixed(2)} руб.');
     if (matHelpAmount > 0) sb.writeln('• Материальная помощь (1 ОДС): +${matHelpAmount.toStringAsFixed(2)} руб.');
     if (comp844Amount > 0) sb.writeln('• Дополнительные сутки отдыха (пр. № 492, $days844 дн.): +${comp844Amount.toStringAsFixed(2)} руб.');
     if (riskAmount > 0) sb.writeln('• Риск для жизни (пр. № 727, ПП РФ № 1122, $riskDays дн.): +${riskAmount.toStringAsFixed(2)} руб.');
+    if (driverAmount > 0) sb.writeln('• Должность водителя (30%): +${driverAmount.toStringAsFixed(2)} руб.');
+    if (flightAmount > 0) sb.writeln('• Летный состав ($selectedFlight): +${flightAmount.toStringAsFixed(2)} руб.');
+    if (medalsAmount > 0) sb.writeln('• Знаки отличия МО РФ ($selectedMedals): +${medalsAmount.toStringAsFixed(2)} руб.');
+    if (zgtAmount > 0) sb.writeln('• Служба в подразделениях ЗГТ ($selectedZgt): +${zgtAmount.toStringAsFixed(2)} руб.');
+    if (cipherAmount > 0) sb.writeln('• Работа с шифрами ($selectedCipher): +${cipherAmount.toStringAsFixed(2)} руб.');
+    if (alimonyAmount > 0) sb.writeln('• Алименты ($selectedAlimony): -${alimonyAmount.toStringAsFixed(2)} руб.');
 
     sb.writeln('--------------------------------');
     sb.writeln('💵 ИТОГО НАЧИСЛЕНО: ${totalGross.toStringAsFixed(2)} руб.');
     sb.writeln('• НДФЛ (13%): -${ndfl.toStringAsFixed(2)} руб.');
-    if (alimonyAmount > 0) sb.writeln('• Алименты ($selectedAlimony): -${alimonyAmount.toStringAsFixed(2)} руб.');
     sb.writeln('📉 ВСЕГО УДЕРЖАНО: ${totalHold.toStringAsFixed(2)} руб.');
     sb.writeln('--------------------------------');
     sb.writeln('💰 НА РУКИ: ${netPay.toStringAsFixed(2)} руб.');
@@ -695,6 +695,9 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
   Widget build(BuildContext context) {
     bool isDark = Theme.of(context).brightness == Brightness.dark;
     Color highlightColor = isDark ? const Color(0xFFFFD54F) : const Color(0xFF1A237E);
+
+    // Изменение цвета "Удержано" на красный в темной теме
+    Color heldTextColor = isDark ? const Color(0xFFEF5350) : Colors.red.shade700;
 
     double indexCoeff = salaryPeriods[selectedPeriod] ?? 1.0;
 
@@ -893,7 +896,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
       ),
       body: Column(
         children: [
-          // СТЕКЛЯННЫЙ HEADER ИТОГОВ
+          // ЗАКРЕПЛЕННЫЙ HEADER ИТОГОВ
           Container(
             margin: const EdgeInsets.fromLTRB(12, 10, 12, 6),
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
@@ -942,7 +945,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                         style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: isDark ? Colors.grey.shade400 : Colors.red.shade700)),
+                            color: heldTextColor)), // Красный цвет для удержано в темной теме
                   ],
                 ),
                 const SizedBox(height: 6),
@@ -1365,6 +1368,202 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   highlightColor: highlightColor,
                 ),
 
+                _buildCardWrapper(
+                  isDark: isDark,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Дополнительные сутки отдыха. Перечень мероприятий в приказе №492 от 10.10.1998г. МО РФ.',
+                        style: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? const Color(0xFF82B1FF) : const Color(0xFF1A237E)),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          const Expanded(
+                            flex: 3,
+                            child: Text('Дней мероприятий (без ограничения времени):',
+                                style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w500)),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            flex: 1,
+                            child: TextField(
+                              controller: _days844Controller,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                              decoration: InputDecoration(
+                                isDense: true,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                hintText: '0',
+                              ),
+                              onChanged: (val) {
+                                final newVal = int.tryParse(val) ?? 0;
+                                setState(() => days844 = newVal);
+                                StorageService.set('dd_days844', newVal);
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Положено суток: $extraRestDays дн.',
+                            style: TextStyle(
+                                fontSize: 12,
+                                color: isDark ? Colors.grey.shade300 : Colors.blueGrey,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          _buildGreenBoxAmount(
+                            '${comp844Amount.toStringAsFixed(2)} руб.',
+                            isDark,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                // РИСК ДЛЯ ЖИЗНИ С ПОЯСНЕНИЕМ ПП РФ № 1122
+                _buildCardWrapper(
+                  isDark: isDark,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Риск для жизни — Приказ МО РФ № 727, Постановление Правительства РФ от 24 декабря 2011 г. N 1122 (2% в день, но не более 100% от ОВД).',
+                        style: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? const Color(0xFF82B1FF) : const Color(0xFF1A237E)),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          const Expanded(
+                            flex: 3,
+                            child: Text('Дней участия с риском для жизни:',
+                                style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w500)),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            flex: 1,
+                            child: TextField(
+                              controller: _riskDaysController,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                              decoration: InputDecoration(
+                                isDense: true,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                              ),
+                              onChanged: (val) {
+                                final newVal = int.tryParse(val) ?? 0;
+                                setState(() => riskDays = newVal);
+                                StorageService.set('dd_risk_days', newVal);
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Надбавка: ${(riskPercent * 100).toInt()}% от ОВД',
+                            style: TextStyle(
+                                fontSize: 12,
+                                color: isDark ? Colors.grey.shade300 : Colors.blueGrey,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          _buildGreenBoxAmount(
+                            '${riskAmount.toStringAsFixed(2)} руб.',
+                            isDark,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                // БОЕВОЕ ДЕЖУРСТВО
+                _buildCardWrapper(
+                  isDark: isDark,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Боевое дежурство (от ОВД):',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              color: isDark ? const Color(0xFF82B1FF) : const Color(0xFF1A237E),
+                            ),
+                          ),
+                          _buildGreenBoxAmount(
+                            combatDutyAmount > 0 ? '+${combatDutyAmount.toStringAsFixed(1)} руб.' : '0.0 руб.',
+                            isDark,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      _buildRadioOptionTile(
+                        title: '5 и более суток в месяц — 30%',
+                        amount: ovd * 0.30,
+                        isSelected: combatDutyPercent == 0.30,
+                        onTap: () {
+                          _playClickFeedback();
+                          final nextVal = combatDutyPercent == 0.30 ? 0.0 : 0.30;
+                          setState(() => combatDutyPercent = nextVal);
+                          StorageService.set('dd_combat_duty', nextVal);
+                        },
+                        isDark: isDark,
+                        highlightColor: highlightColor,
+                      ),
+                      const SizedBox(height: 4),
+                      _buildRadioOptionTile(
+                        title: 'от 3 до 4 суток в месяц — 15%',
+                        amount: ovd * 0.15,
+                        isSelected: combatDutyPercent == 0.15,
+                        onTap: () {
+                          _playClickFeedback();
+                          final nextVal = combatDutyPercent == 0.15 ? 0.0 : 0.15;
+                          setState(() => combatDutyPercent = nextVal);
+                          StorageService.set('dd_combat_duty', nextVal);
+                        },
+                        isDark: isDark,
+                        highlightColor: highlightColor,
+                      ),
+                      const SizedBox(height: 4),
+                      _buildRadioOptionTile(
+                        title: 'от 1 до 2 суток в месяц — 5%',
+                        amount: ovd * 0.05,
+                        isSelected: combatDutyPercent == 0.05,
+                        onTap: () {
+                          _playClickFeedback();
+                          final nextVal = combatDutyPercent == 0.05 ? 0.0 : 0.05;
+                          setState(() => combatDutyPercent = nextVal);
+                          StorageService.set('dd_combat_duty', nextVal);
+                        },
+                        isDark: isDark,
+                        highlightColor: highlightColor,
+                      ),
+                    ],
+                  ),
+                ),
+
+                // ПЕРЕНЕСЕННЫЕ ПУНКТЫ В КОНЕЦ СПИСКА
                 _buildUnifiedCardDropdown(
                   title: 'Летный состав:',
                   highlightAmount: flightAmount > 0 ? '+${flightAmount.toStringAsFixed(1)} руб.' : '0.0 руб.',
@@ -1500,201 +1699,6 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   highlightColor: highlightColor,
                 ),
 
-                // ДОПОЛНИТЕЛЬНЫЕ СУТКИ ОТДЫХА
-                _buildCardWrapper(
-                  isDark: isDark,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Дополнительные сутки отдыха. Перечень мероприятий в приказе №492 от 10.10.1998г. МО РФ.',
-                        style: TextStyle(
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.bold,
-                            color: isDark ? const Color(0xFF82B1FF) : const Color(0xFF1A237E)),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          const Expanded(
-                            flex: 3,
-                            child: Text('Дней мероприятий (без ограничения времени):',
-                                style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w500)),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            flex: 1,
-                            child: TextField(
-                              controller: _days844Controller,
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                              decoration: InputDecoration(
-                                isDense: true,
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                                hintText: '0',
-                              ),
-                              onChanged: (val) {
-                                final newVal = int.tryParse(val) ?? 0;
-                                setState(() => days844 = newVal);
-                                StorageService.set('dd_days844', newVal);
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Положено суток: $extraRestDays дн.',
-                            style: TextStyle(
-                                fontSize: 12,
-                                color: isDark ? Colors.grey.shade300 : Colors.blueGrey,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          _buildGreenBoxAmount(
-                            '${comp844Amount.toStringAsFixed(2)} руб.',
-                            isDark,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-
-                // 1. РИСК ДЛЯ ЖИЗНИ С ПОЯСНЕНИЕМ ПП РФ № 1122
-                _buildCardWrapper(
-                  isDark: isDark,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Риск для жизни — Приказ МО РФ № 727, Постановление Правительства РФ от 24 декабря 2011 г. N 1122 (2% в день, но не более 100% от ОВД).',
-                        style: TextStyle(
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.bold,
-                            color: isDark ? const Color(0xFF82B1FF) : const Color(0xFF1A237E)),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          const Expanded(
-                            flex: 3,
-                            child: Text('Дней участия с риском для жизни:',
-                                style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w500)),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            flex: 1,
-                            child: TextField(
-                              controller: _riskDaysController,
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                              decoration: InputDecoration(
-                                isDense: true,
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                              ),
-                              onChanged: (val) {
-                                final newVal = int.tryParse(val) ?? 0;
-                                setState(() => riskDays = newVal);
-                                StorageService.set('dd_risk_days', newVal);
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Надбавка: ${(riskPercent * 100).toInt()}% от ОВД',
-                            style: TextStyle(
-                                fontSize: 12,
-                                color: isDark ? Colors.grey.shade300 : Colors.blueGrey,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          _buildGreenBoxAmount(
-                            '${riskAmount.toStringAsFixed(2)} руб.',
-                            isDark,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-
-                // БОЕВОЕ ДЕЖУРСТВО
-                _buildCardWrapper(
-                  isDark: isDark,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Боевое дежурство (от ОВД):',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13,
-                              color: isDark ? const Color(0xFF82B1FF) : const Color(0xFF1A237E),
-                            ),
-                          ),
-                          _buildGreenBoxAmount(
-                            combatDutyAmount > 0 ? '+${combatDutyAmount.toStringAsFixed(1)} руб.' : '0.0 руб.',
-                            isDark,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      _buildRadioOptionTile(
-                        title: '5 и более суток в месяц — 30%',
-                        amount: ovd * 0.30,
-                        isSelected: combatDutyPercent == 0.30,
-                        onTap: () {
-                          _playClickFeedback();
-                          final nextVal = combatDutyPercent == 0.30 ? 0.0 : 0.30;
-                          setState(() => combatDutyPercent = nextVal);
-                          StorageService.set('dd_combat_duty', nextVal);
-                        },
-                        isDark: isDark,
-                        highlightColor: highlightColor,
-                      ),
-                      const SizedBox(height: 4),
-                      _buildRadioOptionTile(
-                        title: 'от 3 до 4 суток в месяц — 15%',
-                        amount: ovd * 0.15,
-                        isSelected: combatDutyPercent == 0.15,
-                        onTap: () {
-                          _playClickFeedback();
-                          final nextVal = combatDutyPercent == 0.15 ? 0.0 : 0.15;
-                          setState(() => combatDutyPercent = nextVal);
-                          StorageService.set('dd_combat_duty', nextVal);
-                        },
-                        isDark: isDark,
-                        highlightColor: highlightColor,
-                      ),
-                      const SizedBox(height: 4),
-                      _buildRadioOptionTile(
-                        title: 'от 1 до 2 суток в месяц — 5%',
-                        amount: ovd * 0.05,
-                        isSelected: combatDutyPercent == 0.05,
-                        onTap: () {
-                          _playClickFeedback();
-                          final nextVal = combatDutyPercent == 0.05 ? 0.0 : 0.05;
-                          setState(() => combatDutyPercent = nextVal);
-                          StorageService.set('dd_combat_duty', nextVal);
-                        },
-                        isDark: isDark,
-                        highlightColor: highlightColor,
-                      ),
-                    ],
-                  ),
-                ),
                 const SizedBox(height: 35),
               ],
             ),
