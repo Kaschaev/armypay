@@ -193,7 +193,7 @@ class _MilPayCalculatorAppState extends State<MilPayCalculatorApp> {
       themeMode: _themeMode,
       theme: ThemeData(
         brightness: Brightness.light,
-        scaffoldBackgroundColor: const Color(0xFFE9EDF5),
+        scaffoldBackgroundColor: const Color(0xFFE5ECF6),
         cardColor: Colors.white,
         appBarTheme: const AppBarTheme(
           backgroundColor: Color(0xFF1E284A),
@@ -208,15 +208,15 @@ class _MilPayCalculatorAppState extends State<MilPayCalculatorApp> {
       ),
       darkTheme: ThemeData(
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF0F1524),
-        cardColor: const Color(0xFF172036),
+        scaffoldBackgroundColor: const Color(0xFF090E1A),
+        cardColor: const Color(0xFF131A2D),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF131A2D),
+          backgroundColor: Color(0xFF0D1322),
           foregroundColor: Colors.white,
           elevation: 0,
         ),
         bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          backgroundColor: Color(0xFF131A2D),
+          backgroundColor: Color(0xFF0D1322),
           selectedItemColor: Color(0xFFFFD54F),
           unselectedItemColor: Colors.grey,
         ),
@@ -517,7 +517,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Надбавка положена контрактникам, проходящим службу в подразделениях: ВКС (летный состав), ВМФ (экипажи боевых кораблей/судов), РВСН и ГУ ГШ:',
+                'Надбавка положена контрактникам, проходящим службу в подразделениях: ВКС (летный состав), ВМФ (экипажи боевых кораблей/судов), РВСН и ГУ ГШ:[span_0](start_span)[span_0](end_span)',
                 style: TextStyle(fontSize: 13, height: 1.4),
               ),
               SizedBox(height: 10),
@@ -597,7 +597,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     if (northernAmount > 0) sb.writeln('• Северная надбавка (${(selectedNorthernVal * 100).toInt()}%): +${northernAmount.toStringAsFixed(2)} руб.');
     if (premiumAmount > 0) sb.writeln('• Премия ($selectedPremium): +${premiumAmount.toStringAsFixed(2)} руб.');
     if (specialUnitsAmount > 0) sb.writeln('• Подразделения ($selectedSpecialUnits): +${specialUnitsAmount.toStringAsFixed(2)} руб.');
-    if (otherAchievementsAmount > 0) sb.writeln('• Особые достижения ($selectedOtherAchievements): +${otherAchievementsAmount.toStringAsFixed(2)} руб.');
+    if (otherAchievementsAmount > 0) sb.writeln('• Прочие достижения ($selectedOtherAchievements): +${otherAchievementsAmount.toStringAsFixed(2)} руб.');
     if (contractAmount > 0) sb.writeln('• Контракт 1-4 т.р. (50% от ОВД): +${contractAmount.toStringAsFixed(2)} руб.');
     if (driverAmount > 0) sb.writeln('• Должность водителя (30%): +${driverAmount.toStringAsFixed(2)} руб.');
     if (medalsAmount > 0) sb.writeln('• Знаки отличия МО РФ ($selectedMedals): +${medalsAmount.toStringAsFixed(2)} руб.');
@@ -605,7 +605,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     if (cipherAmount > 0) sb.writeln('• Работа с шифрами ($selectedCipher): +${cipherAmount.toStringAsFixed(2)} руб.');
     if (matHelpAmount > 0) sb.writeln('• Материальная помощь (1 ОДС): +${matHelpAmount.toStringAsFixed(2)} руб.');
     if (comp844Amount > 0) sb.writeln('• Дополнительные сутки отдыха (пр. № 492, $days844 дн.): +${comp844Amount.toStringAsFixed(2)} руб.');
-    if (riskAmount > 0) sb.writeln('• Риск для жизни (пр. № 727 / № 844, $riskDays дн.): +${riskAmount.toStringAsFixed(2)} руб.');
+    if (riskAmount > 0) sb.writeln('• Риск для жизни (пр. № 727, ПП РФ № 1122, $riskDays дн.): +${riskAmount.toStringAsFixed(2)} руб.');
 
     sb.writeln('--------------------------------');
     sb.writeln('💵 ИТОГО НАЧИСЛЕНО: ${totalGross.toStringAsFixed(2)} руб.');
@@ -658,7 +658,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Расчет скопирован в буфер обмена!'),
-                  duration: Duration(seconds: 3),
+                  duration: Duration(seconds: 2),
                 ),
               );
             },
@@ -787,7 +787,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     double riskPercent = (riskDays * 0.02).clamp(0.0, 1.0);
     double riskAmount = ovd * riskPercent;
 
-    // Итого начислено: боевое дежурство прибавляется строго 1 раз
+    // Итого начислено: combatDutyAmount прибавляется строго 1 раз
     double totalGross = baseRkSn +
         rkAmount +
         northernAmount +
@@ -869,7 +869,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
       ),
       body: Column(
         children: [
-          // ЗАКРЕПЛЕННЫЙ HEADER ИТОГОВ С ЭФФЕКТОМ СТЕКЛА
+          // 3. ЗАКРЕПЛЕННЫЙ HEADER ИТОГОВ (СУММЫ В ЗЕЛЕНОМ ПРЯМОУГОЛЬНИКЕ СО СТЕКЛОМ)
           Container(
             margin: const EdgeInsets.fromLTRB(12, 10, 12, 6),
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
@@ -887,20 +887,20 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                         const Color(0xFFF3F6FD).withOpacity(0.80),
                       ],
               ),
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: isDark
-                    ? Colors.white.withOpacity(0.18)
-                    : Colors.white.withOpacity(0.90),
-                width: 1.2,
+                    ? Colors.white.withOpacity(0.20)
+                    : Colors.white.withOpacity(0.95),
+                width: 1.5, // 2. Утолщенная рамка стекла
               ),
               boxShadow: [
                 BoxShadow(
                   color: isDark
-                      ? Colors.black.withOpacity(0.5)
-                      : const Color(0xFF9EAEC7).withOpacity(0.25),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
+                      ? Colors.black.withOpacity(0.55)
+                      : const Color(0xFF9EAEC7).withOpacity(0.30),
+                  blurRadius: 12,
+                  offset: const Offset(0, 5),
                 ),
               ],
             ),
@@ -928,18 +928,33 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                       ? Colors.white.withOpacity(0.12)
                       : Colors.black.withOpacity(0.08),
                 ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('На руки:',
-                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-                    Text('${netPay.toStringAsFixed(2)} ₽',
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: highlightColor)),
-                  ],
+                const SizedBox(height: 10),
+                // 3. ПРЯМОУГОЛЬНИК С ЗЕЛЕНОЙ РАМКОЙ ДЛЯ СУММЫ "НА РУКИ"
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? const Color(0xFF132A1F).withOpacity(0.65)
+                        : const Color(0xFFE8F8F0).withOpacity(0.85),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: const Color(0xFF2E7D32), // Зеленая рамка
+                      width: 2.0,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('На руки:',
+                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                      Text('${netPay.toStringAsFixed(2)} ₽',
+                          style: TextStyle(
+                              fontSize: 19,
+                              fontWeight: FontWeight.bold,
+                              color: isDark ? const Color(0xFF66BB6A) : const Color(0xFF1B5E20))),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -1311,7 +1326,6 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   highlightColor: highlightColor,
                 ),
 
-                // ВАРИАНТ 2А: Лаконичная и чистая формулировка
                 _buildUnifiedCardCheckbox(
                   title: 'Контракт 1-4 т.р. (50% от ОВД):',
                   highlightAmount: '${(ovd * 0.50).toStringAsFixed(1)} руб.',
@@ -1543,14 +1557,14 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   ),
                 ),
 
-                // РИСК ДЛЯ ЖИЗНИ
+                // 1. РИСК ДЛЯ ЖИЗНИ С ПОЯСНЕНИЕМ ПП РФ № 1122
                 _buildCardWrapper(
                   isDark: isDark,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Риск для жизни (приказ МО РФ № 727) (2% в день но не более 100%) перечень мероприятий в приказе №844 МО РФ.',
+                        'Риск для жизни — Приказ МО РФ № 727, Постановление Правительства РФ от 24 декабря 2011 г. N 1122 (2% в день, но не более 100% от ОВД).',
                         style: TextStyle(
                             fontSize: 12.5,
                             fontWeight: FontWeight.bold,
@@ -1692,7 +1706,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
   }
 
   // =============================================================
-  // ХЕЛПЕРЫ СТЕКЛЯННОГО ДИЗАЙНА КАРТОЧЕК (Glassmorphism)
+  // ХЕЛПЕРЫ СТЕКЛЯННОГО ДИЗАЙНА КАРТОЧЕК (СИЛЬНЫЙ ЭФФЕКТ СТЕКЛА + ТОЛСТЫЕ РАМКИ)
   // =============================================================
   Widget _buildCardWrapper({required Widget child, required bool isDark}) {
     return Container(
@@ -1704,28 +1718,28 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
           end: Alignment.bottomRight,
           colors: isDark
               ? [
-                  const Color(0xFF1B243B).withOpacity(0.78),
-                  const Color(0xFF12192B).withOpacity(0.65),
+                  const Color(0xFF1E294B).withOpacity(0.85),
+                  const Color(0xFF10172D).withOpacity(0.72),
                 ]
               : [
-                  Colors.white.withOpacity(0.92),
-                  const Color(0xFFF6F8FD).withOpacity(0.75),
+                  Colors.white.withOpacity(0.95),
+                  const Color(0xFFEEF3FC).withOpacity(0.82),
                 ],
         ),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: isDark
-              ? Colors.white.withOpacity(0.12)
-              : Colors.white.withOpacity(0.85),
-          width: 1.1,
+              ? Colors.white.withOpacity(0.22) // Толще рамка для стекла
+              : Colors.white.withOpacity(0.95),
+          width: 1.5, // Утолщенная рамка
         ),
         boxShadow: [
           BoxShadow(
             color: isDark
-                ? Colors.black.withOpacity(0.35)
-                : const Color(0xFF9EAECA).withOpacity(0.16),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
+                ? Colors.black.withOpacity(0.45)
+                : const Color(0xFF91A3C4).withOpacity(0.22),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -1743,26 +1757,26 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
           end: Alignment.bottomRight,
           colors: isDark
               ? [
-                  const Color(0xFF222D4A).withOpacity(0.85),
-                  const Color(0xFF172036).withOpacity(0.70),
+                  const Color(0xFF263359).withOpacity(0.90),
+                  const Color(0xFF161F38).withOpacity(0.78),
                 ]
               : [
-                  Colors.white.withOpacity(0.95),
-                  const Color(0xFFEDF2FB).withOpacity(0.85),
+                  Colors.white.withOpacity(0.98),
+                  const Color(0xFFE5ECF8).withOpacity(0.90),
                 ],
         ),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: isDark ? const Color(0xFF5C6BC0) : const Color(0xFF1A237E),
-          width: 1.3,
+          color: isDark ? const Color(0xFF7986CB) : const Color(0xFF1A237E),
+          width: 1.6,
         ),
         boxShadow: [
           BoxShadow(
             color: isDark
-                ? const Color(0xFF3F51B5).withOpacity(0.18)
-                : const Color(0xFF1A237E).withOpacity(0.12),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+                ? const Color(0xFF3F51B5).withOpacity(0.22)
+                : const Color(0xFF1A237E).withOpacity(0.15),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -1771,7 +1785,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
           value: selectedPeriod,
           isExpanded: true,
           itemHeight: 40.0,
-          dropdownColor: isDark ? const Color(0xFF141C33) : Colors.white,
+          dropdownColor: isDark ? const Color(0xFF131A2D) : Colors.white,
           icon: const Icon(Icons.arrow_drop_down),
           style: TextStyle(
               color: isDark ? Colors.white : const Color(0xFF1A237E),
@@ -1835,7 +1849,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
               value: effectiveValue,
               isExpanded: true,
               itemHeight: 38.0,
-              dropdownColor: isDark ? const Color(0xFF141C33) : Colors.white,
+              dropdownColor: isDark ? const Color(0xFF131A2D) : Colors.white,
               items: items.map((item) {
                 final bool isSelected = item == effectiveValue;
                 return DropdownMenuItem<String>(
@@ -2100,7 +2114,6 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
       ),
       body: Column(
         children: [
-          // СТЕКЛЯННЫЙ HEADER ПЕНСИИ
           Container(
             margin: const EdgeInsets.fromLTRB(12, 10, 12, 6),
             padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
@@ -2470,7 +2483,7 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
                   ),
                 );
               }).toList(),
-              onChanged: onChanged,
+              onChanged:     onChanged,
             ),
           ),
         ],
