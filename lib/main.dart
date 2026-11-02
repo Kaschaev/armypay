@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -196,38 +195,32 @@ class _MilPayCalculatorAppState extends State<MilPayCalculatorApp> {
         brightness: Brightness.light,
         scaffoldBackgroundColor: const Color(0xFFE5ECF6),
         cardColor: Colors.white,
-        textTheme: GoogleFonts.montserratTextTheme(ThemeData.light().textTheme),
-        appBarTheme: AppBarTheme(
-          backgroundColor: const Color(0xFF1E284A),
+        fontFamily: 'sans-serif',
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF1E284A),
           foregroundColor: Colors.white,
           elevation: 0,
-          titleTextStyle: GoogleFonts.montserrat(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
         ),
-        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
           backgroundColor: Colors.white,
-          selectedItemColor: const Color(0xFF1A237E),
+          selectedItemColor: Color(0xFF1A237E),
           unselectedItemColor: Colors.grey,
-          selectedLabelStyle: GoogleFonts.montserrat(fontSize: 12, fontWeight: FontWeight.w600),
-          unselectedLabelStyle: GoogleFonts.montserrat(fontSize: 12),
         ),
       ),
       darkTheme: ThemeData(
         brightness: Brightness.dark,
         scaffoldBackgroundColor: const Color(0xFF090E1A),
         cardColor: const Color(0xFF131A2D),
-        textTheme: GoogleFonts.montserratTextTheme(ThemeData.dark().textTheme),
-        appBarTheme: AppBarTheme(
-          backgroundColor: const Color(0xFF0D1322),
+        fontFamily: 'sans-serif',
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF0D1322),
           foregroundColor: Colors.white,
           elevation: 0,
-          titleTextStyle: GoogleFonts.montserrat(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
         ),
-        bottomNavigationBarTheme: BottomNavigationBarThemeData(
-          backgroundColor: const Color(0xFF0D1322),
-          selectedItemColor: const Color(0xFFFFD54F),
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          backgroundColor: Color(0xFF0D1322),
+          selectedItemColor: Color(0xFFFFD54F),
           unselectedItemColor: Colors.grey,
-          selectedLabelStyle: GoogleFonts.montserrat(fontSize: 12, fontWeight: FontWeight.w600),
-          unselectedLabelStyle: GoogleFonts.montserrat(fontSize: 12),
         ),
       ),
       home: MainNavigationHolder(
@@ -526,7 +519,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Надбавка положена контрактникам, проходящим службу в подразделениях: ВКС (летный состав), ВМФ (экипажи боевых кораблей/судов), РВСН и ГУ ГШ:',
+                'Надбавка положена контрактникам, проходящим службу в подразделениях: ВКС (летный состав), ВМФ (экипажи боевых кораблей/судов), РВСН и ГУ ГШ:[span_2](start_span)[span_2](end_span)',
                 style: TextStyle(fontSize: 13, height: 1.4),
               ),
               SizedBox(height: 10),
@@ -593,7 +586,6 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     if (secrecyAmount > 0) sb.writeln('• Гос. тайна ($selectedSecrecy): +${secrecyAmount.toStringAsFixed(2)} руб.');
     if (ouvsAmount > 0) sb.writeln('• НАДБАВКА ЗА ОУС + Руководство ($selectedOuvs): +${ouvsAmount.toStringAsFixed(2)} руб.');
     if (classAmount > 0) sb.writeln('• Классная квалификация ($selectedClass): +${classAmount.toStringAsFixed(2)} руб.');
-    if (flightAmount > 0) sb.writeln('• Летный состав ($selectedFlight): +${flightAmount.toStringAsFixed(2)} руб.');
     if (combatDutyAmount > 0) {
       String desc = combatDutyPercent == 0.30
           ? '5 и более суток в месяц (30% от ОВД)'
@@ -608,13 +600,14 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     if (specialUnitsAmount > 0) sb.writeln('• Подразделения ($selectedSpecialUnits): +${specialUnitsAmount.toStringAsFixed(2)} руб.');
     if (otherAchievementsAmount > 0) sb.writeln('• Прочие достижения ($selectedOtherAchievements): +${otherAchievementsAmount.toStringAsFixed(2)} руб.');
     if (contractAmount > 0) sb.writeln('• Контракт 1-4 т.р. (50% от ОВД): +${contractAmount.toStringAsFixed(2)} руб.');
-    if (driverAmount > 0) sb.writeln('• Должность водителя (30%): +${driverAmount.toStringAsFixed(2)} руб.');
-    if (medalsAmount > 0) sb.writeln('• Знаки отличия МО РФ ($selectedMedals): +${medalsAmount.toStringAsFixed(2)} руб.');
-    if (zgtAmount > 0) sb.writeln('• Служба в подразделениях ЗГТ ($selectedZgt): +${zgtAmount.toStringAsFixed(2)} руб.');
-    if (cipherAmount > 0) sb.writeln('• Работа с шифрами ($selectedCipher): +${cipherAmount.toStringAsFixed(2)} руб.');
     if (matHelpAmount > 0) sb.writeln('• Материальная помощь (1 ОДС): +${matHelpAmount.toStringAsFixed(2)} руб.');
     if (comp844Amount > 0) sb.writeln('• Дополнительные сутки отдыха (пр. № 492, $days844 дн.): +${comp844Amount.toStringAsFixed(2)} руб.');
     if (riskAmount > 0) sb.writeln('• Риск для жизни (пр. № 727, ПП РФ № 1122, $riskDays дн.): +${riskAmount.toStringAsFixed(2)} руб.');
+    if (driverAmount > 0) sb.writeln('• Должность водителя (30%): +${driverAmount.toStringAsFixed(2)} руб.');
+    if (flightAmount > 0) sb.writeln('• Летный состав ($selectedFlight): +${flightAmount.toStringAsFixed(2)} руб.');
+    if (medalsAmount > 0) sb.writeln('• Знаки отличия МО РФ ($selectedMedals): +${medalsAmount.toStringAsFixed(2)} руб.');
+    if (zgtAmount > 0) sb.writeln('• Служба в подразделениях ЗГТ ($selectedZgt): +${zgtAmount.toStringAsFixed(2)} руб.');
+    if (cipherAmount > 0) sb.writeln('• Работа с шифрами ($selectedCipher): +${cipherAmount.toStringAsFixed(2)} руб.');
     if (alimonyAmount > 0) sb.writeln('• Алименты ($selectedAlimony): -${alimonyAmount.toStringAsFixed(2)} руб.');
 
     sb.writeln('--------------------------------');
@@ -1047,7 +1040,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   highlightColor: highlightColor,
                 ),
 
-                // 1. ИСПРАВЛЕННЫЙ ЗАГОЛОВОК ДОПУСКА К СВЕДЕНИЯМ
+                // РАСШИРЕННЫЙ СПОСОБ ДЛЯ ДОПУСКА К СВЕДЕНИЯМ (НАЗВАНИЕ СВЕРХУ, СУММА НИЖЕ)
                 _buildCardWrapper(
                   isDark: isDark,
                   child: Column(
@@ -1055,6 +1048,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
                             child: Text(
@@ -1062,7 +1056,6 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                               style: TextStyle(
                                   fontSize: 12.5,
                                   color: isDark ? Colors.grey.shade300 : Colors.black87),
-                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -1072,7 +1065,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: 6),
                       DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
                           value: ['нет - 0%', 'секретно - 10%', 'сов. секретно - 20%', 'особая важность - 25%'].contains(selectedSecrecy)
@@ -1112,7 +1105,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   ),
                 ),
 
-                // 1. ИСПРАВЛЕННЫЙ ЗАГОЛОВОК ОУС + РУКОВОДСТВО
+                // РАСШИРЕННЫЙ СПОСОБ ДЛЯ ОУС + РУКОВОДСТВО
                 _buildCardWrapper(
                   isDark: isDark,
                   child: Column(
@@ -1120,6 +1113,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
                             child: Text(
@@ -1127,7 +1121,6 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                               style: TextStyle(
                                   fontSize: 12.5,
                                   color: isDark ? Colors.grey.shade300 : Colors.black87),
-                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -1137,7 +1130,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: 6),
                       DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
                           value: ouvsOptions.contains(selectedOuvs) ? selectedOuvs : '0%',
@@ -1383,7 +1376,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                               : 'нет (0%)',
                           isExpanded: true,
                           itemHeight: 38.0,
-                          dropdownColor: isDark ? const Color(0xFF141C33) : Colors.white,
+                          dropdownColor: isDark ? const Color(0xFF131A2D) : Colors.white,
                           items: [
                             'нет (0%)',
                             '100% от ОВД - офицерам',
@@ -1459,7 +1452,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   highlightColor: highlightColor,
                 ),
 
-                // ДОПОЛНИТЕЛЬНЫЕ СУТКИ ОТДЫХА (С КРАСНЫМ КОЛИЧЕСТВОМ ДНЕЙ)
+                // ДОПОЛНИТЕЛЬНЫЕ СУТКИ ОТДЫХА (ДНИ КРАСНЫМ)
                 _buildCardWrapper(
                   isDark: isDark,
                   child: Column(
@@ -1512,13 +1505,12 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                               style: TextStyle(
                                   fontSize: 12,
                                   color: isDark ? Colors.grey.shade300 : Colors.blueGrey,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: GoogleFonts.montserrat().fontFamily),
+                                  fontWeight: FontWeight.bold),
                               children: [
                                 TextSpan(
                                   text: '$extraRestDays дн.',
                                   style: const TextStyle(
-                                    color: Colors.red, // Красный цвет для дней
+                                    color: Colors.red, // Дни красным
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -1535,7 +1527,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   ),
                 ),
 
-                // РИСК ДЛЯ ЖИЗНИ (С КРАСНЫМ ПРОЦЕНТОМ НАДБАВКИ)
+                // РИСК ДЛЯ ЖИЗНИ (ПРОЦЕНТ НАДБАВКИ КРАСНЫМ)
                 _buildCardWrapper(
                   isDark: isDark,
                   child: Column(
@@ -1587,13 +1579,12 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                               style: TextStyle(
                                   fontSize: 12,
                                   color: isDark ? Colors.grey.shade300 : Colors.blueGrey,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: GoogleFonts.montserrat().fontFamily),
+                                  fontWeight: FontWeight.bold),
                               children: [
                                 TextSpan(
                                   text: '${(riskPercent * 100).toInt()}%',
                                   style: const TextStyle(
-                                    color: Colors.red, // Красный цвет для % надбавки
+                                    color: Colors.red, // Процент красным
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
