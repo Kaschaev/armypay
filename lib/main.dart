@@ -517,7 +517,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Надбавка положена контрактникам, проходящим службу в подразделениях: ВКС (летный состав), ВМФ (экипажи боевых кораблей/судов), РВСН и ГУ ГШ:[span_0](start_span)[span_0](end_span)',
+                'Надбавка положена контрактникам, проходящим службу в подразделениях: ВКС (летный состав), ВМФ (экипажи боевых кораблей/судов), РВСН и ГУ ГШ:',
                 style: TextStyle(fontSize: 13, height: 1.4),
               ),
               SizedBox(height: 10),
@@ -667,6 +667,30 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
       ),
     );
   }
+  Widget _buildGreenBoxAmount(String text, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: isDark
+            ? const Color(0xFF132A1F).withOpacity(0.70)
+            : const Color(0xFFE8F8F0).withOpacity(0.90),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: const Color(0xFF2E7D32),
+          width: 1.5,
+        ),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 12.5,
+          fontWeight: FontWeight.bold,
+          color: isDark ? const Color(0xFF66BB6A) : const Color(0xFF1B5E20),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     bool isDark = Theme.of(context).brightness == Brightness.dark;
@@ -869,7 +893,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
       ),
       body: Column(
         children: [
-          // 3. ЗАКРЕПЛЕННЫЙ HEADER ИТОГОВ (СУММЫ В ЗЕЛЕНОМ ПРЯМОУГОЛЬНИКЕ СО СТЕКЛОМ)
+          // СТЕКЛЯННЫЙ HEADER ИТОГОВ
           Container(
             margin: const EdgeInsets.fromLTRB(12, 10, 12, 6),
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
@@ -892,7 +916,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                 color: isDark
                     ? Colors.white.withOpacity(0.20)
                     : Colors.white.withOpacity(0.95),
-                width: 1.5, // 2. Утолщенная рамка стекла
+                width: 1.5,
               ),
               boxShadow: [
                 BoxShadow(
@@ -929,7 +953,6 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                       : Colors.black.withOpacity(0.08),
                 ),
                 const SizedBox(height: 10),
-                // 3. ПРЯМОУГОЛЬНИК С ЗЕЛЕНОЙ РАМКОЙ ДЛЯ СУММЫ "НА РУКИ"
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
@@ -939,7 +962,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                         : const Color(0xFFE8F8F0).withOpacity(0.85),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: const Color(0xFF2E7D32), // Зеленая рамка
+                      color: const Color(0xFF2E7D32),
                       width: 2.0,
                     ),
                   ),
@@ -1073,13 +1096,9 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                                 fontSize: 12.5,
                                 color: isDark ? Colors.grey.shade300 : Colors.black87),
                           ),
-                          Text(
+                          _buildGreenBoxAmount(
                             rkAmount > 0 ? '+${rkAmount.toStringAsFixed(2)} руб.' : '0.0 руб.',
-                            style: TextStyle(
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.bold,
-                              color: highlightColor,
-                            ),
+                            isDark,
                           ),
                         ],
                       ),
@@ -1139,13 +1158,9 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                                 fontSize: 12.5,
                                 color: isDark ? Colors.grey.shade300 : Colors.black87),
                           ),
-                          Text(
+                          _buildGreenBoxAmount(
                             northernAmount > 0 ? '+${northernAmount.toStringAsFixed(2)} руб.' : '0.0 руб.',
-                            style: TextStyle(
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.bold,
-                              color: highlightColor,
-                            ),
+                            isDark,
                           ),
                         ],
                       ),
@@ -1241,13 +1256,9 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          Text(
+                          _buildGreenBoxAmount(
                             specialUnitsAmount > 0 ? '+${specialUnitsAmount.toStringAsFixed(1)} руб.' : '0.0 руб.',
-                            style: TextStyle(
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.bold,
-                              color: highlightColor,
-                            ),
+                            isDark,
                           ),
                         ],
                       ),
@@ -1543,13 +1554,9 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                                 color: isDark ? Colors.grey.shade300 : Colors.blueGrey,
                                 fontWeight: FontWeight.bold),
                           ),
-                          Text(
+                          _buildGreenBoxAmount(
                             '${comp844Amount.toStringAsFixed(2)} руб.',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: highlightColor,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            isDark,
                           ),
                         ],
                       ),
@@ -1610,13 +1617,9 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                                 color: isDark ? Colors.grey.shade300 : Colors.blueGrey,
                                 fontWeight: FontWeight.bold),
                           ),
-                          Text(
+                          _buildGreenBoxAmount(
                             '${riskAmount.toStringAsFixed(2)} руб.',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: highlightColor,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            isDark,
                           ),
                         ],
                       ),
@@ -1641,13 +1644,9 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                               color: isDark ? const Color(0xFF82B1FF) : const Color(0xFF1A237E),
                             ),
                           ),
-                          Text(
+                          _buildGreenBoxAmount(
                             combatDutyAmount > 0 ? '+${combatDutyAmount.toStringAsFixed(1)} руб.' : '0.0 руб.',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13,
-                              color: highlightColor,
-                            ),
+                            isDark,
                           ),
                         ],
                       ),
@@ -1706,7 +1705,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
   }
 
   // =============================================================
-  // ХЕЛПЕРЫ СТЕКЛЯННОГО ДИЗАЙНА КАРТОЧЕК (СИЛЬНЫЙ ЭФФЕКТ СТЕКЛА + ТОЛСТЫЕ РАМКИ)
+  // ХЕЛПЕРЫ СТЕКЛЯННОГО ДИЗАЙНА КАРТОЧЕК
   // =============================================================
   Widget _buildCardWrapper({required Widget child, required bool isDark}) {
     return Container(
@@ -1729,9 +1728,9 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: isDark
-              ? Colors.white.withOpacity(0.22) // Толще рамка для стекла
+              ? Colors.white.withOpacity(0.22)
               : Colors.white.withOpacity(0.95),
-          width: 1.5, // Утолщенная рамка
+          width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
@@ -1833,14 +1832,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                 ),
               ),
               const SizedBox(width: 8),
-              Text(
-                highlightAmount,
-                style: TextStyle(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.bold,
-                  color: highlightColor,
-                ),
-              ),
+              _buildGreenBoxAmount(highlightAmount, isDark),
             ],
           ),
           const SizedBox(height: 2),
@@ -1903,14 +1895,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
               ),
             ),
             const SizedBox(width: 8),
-            Text(
-              highlightAmount,
-              style: TextStyle(
-                fontSize: 12.5,
-                fontWeight: FontWeight.bold,
-                color: highlightColor,
-              ),
-            ),
+            _buildGreenBoxAmount(highlightAmount, isDark),
           ],
         ),
         value: value,
@@ -1966,14 +1951,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                 ),
               ),
             ),
-            Text(
-              '+${amount.toStringAsFixed(1)} руб.',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: highlightColor,
-              ),
-            ),
+            _buildGreenBoxAmount('+${amount.toStringAsFixed(1)} руб.', isDark),
           ],
         ),
       ),
@@ -2023,6 +2001,30 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
     serviceYears = (StorageService.get('pension_years', 20) as num).toInt();
     selectedDistrictVal = (StorageService.get('pension_district', 1.0) as num).toDouble();
     isVbd = StorageService.get('pension_vbd', false) as bool;
+  }
+
+  Widget _buildGreenBoxAmount(String text, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: isDark
+            ? const Color(0xFF132A1F).withOpacity(0.70)
+            : const Color(0xFFE8F8F0).withOpacity(0.90),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: const Color(0xFF2E7D32),
+          width: 1.5,
+        ),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 12.5,
+          fontWeight: FontWeight.bold,
+          color: isDark ? const Color(0xFF66BB6A) : const Color(0xFF1B5E20),
+        ),
+      ),
+    );
   }
 
   void _sharePensionSummary(double totalPension, double baseOds, double nvlPercent, double pensionPercent) {
@@ -2131,20 +2133,20 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
                         const Color(0xFFF3F6FD).withOpacity(0.80),
                       ],
               ),
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: isDark
-                    ? Colors.white.withOpacity(0.18)
-                    : Colors.white.withOpacity(0.90),
-                width: 1.2,
+                    ? Colors.white.withOpacity(0.20)
+                    : Colors.white.withOpacity(0.95),
+                width: 1.5,
               ),
               boxShadow: [
                 BoxShadow(
                   color: isDark
-                      ? Colors.black.withOpacity(0.5)
-                      : const Color(0xFF9EAEC7).withOpacity(0.25),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
+                      ? Colors.black.withOpacity(0.55)
+                      : const Color(0xFF9EAEC7).withOpacity(0.30),
+                  blurRadius: 12,
+                  offset: const Offset(0, 5),
                 ),
               ],
             ),
@@ -2483,7 +2485,7 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
                   ),
                 );
               }).toList(),
-              onChanged:     onChanged,
+              onChanged: onChanged,
             ),
           ),
         ],
