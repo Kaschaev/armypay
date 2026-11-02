@@ -193,12 +193,12 @@ class _MilPayCalculatorAppState extends State<MilPayCalculatorApp> {
       themeMode: _themeMode,
       theme: ThemeData(
         brightness: Brightness.light,
-        scaffoldBackgroundColor: const Color(0xFFF0F3F8),
+        scaffoldBackgroundColor: const Color(0xFFE9EDF5),
         cardColor: Colors.white,
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF1A237E),
+          backgroundColor: Color(0xFF1E284A),
           foregroundColor: Colors.white,
-          elevation: 2,
+          elevation: 0,
         ),
         bottomNavigationBarTheme: const BottomNavigationBarThemeData(
           backgroundColor: Colors.white,
@@ -208,15 +208,15 @@ class _MilPayCalculatorAppState extends State<MilPayCalculatorApp> {
       ),
       darkTheme: ThemeData(
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF111726),
-        cardColor: const Color(0xFF1C2438),
+        scaffoldBackgroundColor: const Color(0xFF0F1524),
+        cardColor: const Color(0xFF172036),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF151D30),
+          backgroundColor: Color(0xFF131A2D),
           foregroundColor: Colors.white,
-          elevation: 2,
+          elevation: 0,
         ),
         bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          backgroundColor: Color(0xFF151D30),
+          backgroundColor: Color(0xFF131A2D),
           selectedItemColor: Color(0xFFFFD54F),
           unselectedItemColor: Colors.grey,
         ),
@@ -357,7 +357,6 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
     1.0, 1.15, 1.2, 1.25, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 2.0
   ];
 
-  // Чистое объявление списка без сложных вложенных дженериков
   final northernOptions = [
     {'val': 0.0, 'label': '0 %'},
     {'val': 0.10, 'label': '10 %'},
@@ -870,21 +869,38 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
       ),
       body: Column(
         children: [
-          // ЗАКРЕПЛЕННЫЙ HEADER ИТОГОВ
+          // ЗАКРЕПЛЕННЫЙ HEADER ИТОГОВ С ЭФФЕКТОМ СТЕКЛА
           Container(
             margin: const EdgeInsets.fromLTRB(12, 10, 12, 6),
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF1C2438) : Colors.white,
-              borderRadius: BorderRadius.circular(12),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: isDark
+                    ? [
+                        const Color(0xFF1E284A).withOpacity(0.85),
+                        const Color(0xFF141C33).withOpacity(0.70),
+                      ]
+                    : [
+                        Colors.white.withOpacity(0.92),
+                        const Color(0xFFF3F6FD).withOpacity(0.80),
+                      ],
+              ),
+              borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                color: isDark ? Colors.white12 : const Color(0xFFD6DBE4),
+                color: isDark
+                    ? Colors.white.withOpacity(0.18)
+                    : Colors.white.withOpacity(0.90),
+                width: 1.2,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(isDark ? 0.3 : 0.04),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
+                  color: isDark
+                      ? Colors.black.withOpacity(0.5)
+                      : const Color(0xFF9EAEC7).withOpacity(0.25),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
                 ),
               ],
             ),
@@ -906,7 +922,12 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                   ],
                 ),
                 const SizedBox(height: 6),
-                Divider(height: 1, color: isDark ? Colors.white12 : Colors.grey.shade200),
+                Divider(
+                  height: 1,
+                  color: isDark
+                      ? Colors.white.withOpacity(0.12)
+                      : Colors.black.withOpacity(0.08),
+                ),
                 const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1053,7 +1074,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                           value: districtOptions.contains(selectedDistrictVal) ? selectedDistrictVal : 1.0,
                           isExpanded: true,
                           itemHeight: 38.0,
-                          dropdownColor: isDark ? const Color(0xFF1C2438) : Colors.white,
+                          dropdownColor: isDark ? const Color(0xFF141C33) : Colors.white,
                           items: districtOptions.map((k) {
                             double sum = baseRkSn * (k - 1.0);
                             String labelText = k == 1.0 || k == 2.0 ? k.toStringAsFixed(0) : k.toString();
@@ -1121,7 +1142,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                               : 0.0,
                           isExpanded: true,
                           itemHeight: 38.0,
-                          dropdownColor: isDark ? const Color(0xFF1C2438) : Colors.white,
+                          dropdownColor: isDark ? const Color(0xFF141C33) : Colors.white,
                           items: northernOptions.map((opt) {
                             double p = opt['val'] as double;
                             double sum = baseRkSn * p;
@@ -1198,7 +1219,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                                   borderRadius: BorderRadius.circular(12),
                                   child: const Padding(
                                     padding: EdgeInsets.all(2.0),
-                                    child: Icon(Icons.info_outline, size: 17, color: Color(0xFF3949AB)),
+                                    child: Icon(Icons.info_outline, size: 17, color: Color(0xFF5C6BC0)),
                                   ),
                                 ),
                               ],
@@ -1228,7 +1249,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
                               : 'нет (0%)',
                           isExpanded: true,
                           itemHeight: 38.0,
-                          dropdownColor: isDark ? const Color(0xFF1C2438) : Colors.white,
+                          dropdownColor: isDark ? const Color(0xFF141C33) : Colors.white,
                           items: [
                             'нет (0%)',
                             '100% от ОВД - офицерам',
@@ -1671,18 +1692,42 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
   }
 
   // =============================================================
-  // ХЕЛПЕРЫ ДИЗАЙНА КАРТОЧЕК
+  // ХЕЛПЕРЫ СТЕКЛЯННОГО ДИЗАЙНА КАРТОЧЕК (Glassmorphism)
   // =============================================================
   Widget _buildCardWrapper({required Widget child, required bool isDark}) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1C2438) : Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: isDark ? Colors.white10 : const Color(0xFFD6DBE4),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isDark
+              ? [
+                  const Color(0xFF1B243B).withOpacity(0.78),
+                  const Color(0xFF12192B).withOpacity(0.65),
+                ]
+              : [
+                  Colors.white.withOpacity(0.92),
+                  const Color(0xFFF6F8FD).withOpacity(0.75),
+                ],
         ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withOpacity(0.12)
+              : Colors.white.withOpacity(0.85),
+          width: 1.1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: isDark
+                ? Colors.black.withOpacity(0.35)
+                : const Color(0xFF9EAECA).withOpacity(0.16),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: child,
     );
@@ -1693,16 +1738,40 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1C2438) : Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: isDark ? const Color(0xFF5C6BC0) : const Color(0xFF1A237E), width: 1.2),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isDark
+              ? [
+                  const Color(0xFF222D4A).withOpacity(0.85),
+                  const Color(0xFF172036).withOpacity(0.70),
+                ]
+              : [
+                  Colors.white.withOpacity(0.95),
+                  const Color(0xFFEDF2FB).withOpacity(0.85),
+                ],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDark ? const Color(0xFF5C6BC0) : const Color(0xFF1A237E),
+          width: 1.3,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: isDark
+                ? const Color(0xFF3F51B5).withOpacity(0.18)
+                : const Color(0xFF1A237E).withOpacity(0.12),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: selectedPeriod,
           isExpanded: true,
           itemHeight: 40.0,
-          dropdownColor: isDark ? const Color(0xFF1C2438) : Colors.white,
+          dropdownColor: isDark ? const Color(0xFF141C33) : Colors.white,
           icon: const Icon(Icons.arrow_drop_down),
           style: TextStyle(
               color: isDark ? Colors.white : const Color(0xFF1A237E),
@@ -1766,7 +1835,7 @@ class _SalaryCalculatorScreenState extends State<SalaryCalculatorScreen> {
               value: effectiveValue,
               isExpanded: true,
               itemHeight: 38.0,
-              dropdownColor: isDark ? const Color(0xFF1C2438) : Colors.white,
+              dropdownColor: isDark ? const Color(0xFF141C33) : Colors.white,
               items: items.map((item) {
                 final bool isSelected = item == effectiveValue;
                 return DropdownMenuItem<String>(
@@ -2031,20 +2100,38 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
       ),
       body: Column(
         children: [
+          // СТЕКЛЯННЫЙ HEADER ПЕНСИИ
           Container(
             margin: const EdgeInsets.fromLTRB(12, 10, 12, 6),
             padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF1C2438) : Colors.white,
-              borderRadius: BorderRadius.circular(12),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: isDark
+                    ? [
+                        const Color(0xFF1E284A).withOpacity(0.85),
+                        const Color(0xFF141C33).withOpacity(0.70),
+                      ]
+                    : [
+                        Colors.white.withOpacity(0.92),
+                        const Color(0xFFF3F6FD).withOpacity(0.80),
+                      ],
+              ),
+              borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                color: isDark ? Colors.white12 : const Color(0xFFD6DBE4),
+                color: isDark
+                    ? Colors.white.withOpacity(0.18)
+                    : Colors.white.withOpacity(0.90),
+                width: 1.2,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(isDark ? 0.3 : 0.04),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
+                  color: isDark
+                      ? Colors.black.withOpacity(0.5)
+                      : const Color(0xFF9EAEC7).withOpacity(0.25),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
                 ),
               ],
             ),
@@ -2099,9 +2186,26 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
                   margin: const EdgeInsets.only(bottom: 8),
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF1C2438) : Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: isDark ? Colors.white10 : const Color(0xFFD6DBE4)),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: isDark
+                          ? [
+                              const Color(0xFF1B243B).withOpacity(0.78),
+                              const Color(0xFF12192B).withOpacity(0.65),
+                            ]
+                          : [
+                              Colors.white.withOpacity(0.92),
+                              const Color(0xFFF6F8FD).withOpacity(0.75),
+                            ],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isDark
+                          ? Colors.white.withOpacity(0.12)
+                          : Colors.white.withOpacity(0.85),
+                      width: 1.1,
+                    ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -2135,9 +2239,26 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
                   margin: const EdgeInsets.only(bottom: 8),
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF1C2438) : Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: isDark ? Colors.white10 : const Color(0xFFD6DBE4)),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: isDark
+                          ? [
+                              const Color(0xFF1B243B).withOpacity(0.78),
+                              const Color(0xFF12192B).withOpacity(0.65),
+                            ]
+                          : [
+                              Colors.white.withOpacity(0.92),
+                              const Color(0xFFF6F8FD).withOpacity(0.75),
+                            ],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isDark
+                          ? Colors.white.withOpacity(0.12)
+                          : Colors.white.withOpacity(0.85),
+                      width: 1.1,
+                    ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -2159,7 +2280,7 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
                           value: pensionDistrictOptions.contains(selectedDistrictVal) ? selectedDistrictVal : 1.0,
                           isExpanded: true,
                           itemHeight: 38.0,
-                          dropdownColor: isDark ? const Color(0xFF1C2438) : Colors.white,
+                          dropdownColor: isDark ? const Color(0xFF141C33) : Colors.white,
                           items: pensionDistrictOptions.map((k) {
                             String labelText = k == 1.0 || k == 2.0 ? k.toStringAsFixed(0) : k.toString();
                             final bool isSelected = k == selectedDistrictVal;
@@ -2196,9 +2317,26 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
                   margin: const EdgeInsets.only(bottom: 8),
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF1C2438) : Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: isDark ? Colors.white10 : const Color(0xFFD6DBE4)),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: isDark
+                          ? [
+                              const Color(0xFF1B243B).withOpacity(0.78),
+                              const Color(0xFF12192B).withOpacity(0.65),
+                            ]
+                          : [
+                              Colors.white.withOpacity(0.92),
+                              const Color(0xFFF6F8FD).withOpacity(0.75),
+                            ],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isDark
+                          ? Colors.white.withOpacity(0.12)
+                          : Colors.white.withOpacity(0.85),
+                      width: 1.1,
+                    ),
                   ),
                   child: CheckboxListTile(
                     contentPadding: EdgeInsets.zero,
@@ -2219,9 +2357,23 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
                   margin: const EdgeInsets.only(bottom: 8),
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF182234) : const Color(0xFFE8EEF8),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: isDark ? Colors.white10 : const Color(0xFFD6DBE4)),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: isDark
+                          ? [
+                              const Color(0xFF151D33).withOpacity(0.9),
+                              const Color(0xFF10172A).withOpacity(0.8),
+                            ]
+                          : [
+                              const Color(0xFFE8EEF8).withOpacity(0.9),
+                              const Color(0xFFDFE7F5).withOpacity(0.8),
+                            ],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isDark ? Colors.white10 : const Color(0xFFD6DBE4),
+                    ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -2261,9 +2413,26 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1C2438) : Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: isDark ? Colors.white10 : const Color(0xFFD6DBE4)),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isDark
+              ? [
+                  const Color(0xFF1B243B).withOpacity(0.78),
+                  const Color(0xFF12192B).withOpacity(0.65),
+                ]
+              : [
+                  Colors.white.withOpacity(0.92),
+                  const Color(0xFFF6F8FD).withOpacity(0.75),
+                ],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withOpacity(0.12)
+              : Colors.white.withOpacity(0.85),
+          width: 1.1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2280,7 +2449,7 @@ class _PensionCalculatorScreenState extends State<PensionCalculatorScreen> {
               value: effectiveValue,
               isExpanded: true,
               itemHeight: 38.0,
-              dropdownColor: isDark ? const Color(0xFF1C2438) : Colors.white,
+              dropdownColor: isDark ? const Color(0xFF141C33) : Colors.white,
               items: items.map((item) {
                 final bool isSelected = item == effectiveValue;
                 return DropdownMenuItem(
